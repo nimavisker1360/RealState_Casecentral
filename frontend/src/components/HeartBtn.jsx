@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaHeart } from "react-icons/fa6";
+import PropTypes from "prop-types";
 import useAuthCheck from "../hooks/useAuthCheck";
 import { useMutation } from "react-query";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -19,14 +20,14 @@ const HeartBtn = ({ id }) => {
 
   useEffect(() => {
     setHeartColor(() => checkFavourites(id, favourites));
-  }, [favourites]);
+  }, [favourites, id]);
 
   const { mutate } = useMutation({
     mutationFn: () => toFav(id, user?.email, token),
     onSuccess: () => {
       setUserDetails((prev) => ({
         ...prev,
-        favourites: updateFavourites(id, prev.favourites)
+        favourites: updateFavourites(id, prev.favourites),
       }));
     },
   });
@@ -49,6 +50,10 @@ const HeartBtn = ({ id }) => {
       className="cursor-pointer drop-shadow-sm"
     />
   );
+};
+
+HeartBtn.propTypes = {
+  id: PropTypes.string.isRequired,
 };
 
 export default HeartBtn;

@@ -1,7 +1,8 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Modal, Button } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { useMutation } from "react-query";
+import PropTypes from "prop-types";
 import UserDetailContext from "../context/UserDetailContext";
 import { bookVisit } from "../utils/api";
 import { toast } from "react-toastify";
@@ -36,7 +37,7 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
     onError: ({ response }) => toast.error(response.data.message),
     onSettled: () => setOpened(false),
   });
-  // console.log(token)
+   console.log(token)
   return (
     <Modal
       opened={opened}
@@ -52,6 +53,13 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
       </div>
     </Modal>
   );
+};
+
+BookingModal.propTypes = {
+  opened: PropTypes.bool.isRequired,
+  setOpened: PropTypes.func.isRequired,
+  email: PropTypes.string.isRequired,
+  propertyId: PropTypes.string.isRequired,
 };
 
 export default BookingModal;
