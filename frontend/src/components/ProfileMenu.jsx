@@ -28,7 +28,7 @@ const ProfileMenu = ({ user, logout }) => {
               onClick={() => navigate("/admin", { replace: true })}
               color="green"
             >
-              پنل مدیریت
+              Yönetim Paneli
             </Menu.Item>
             <Divider my="xs" />
           </>

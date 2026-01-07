@@ -8,6 +8,7 @@ import {
   getAllFav,
   checkAdmin,
   setAdmin,
+  getAllUsersBookings,
 } from "../controllers/userCntrl.js";
 import jwtCheck from "../config/authOConfig.js";
 
@@ -29,5 +30,6 @@ router.post("/toFav/:rid",jwtCheck, toFav);
 router.post("/allFav",jwtCheck, getAllFav);
 router.post("/checkAdmin", jwtCheck, checkAdmin);
 router.post("/setAdmin", setAdmin);
+router.get("/admin/allBookings", jwtCheck, getAllUsersBookings);
 
 export { router as userRoute }; 

@@ -186,3 +186,19 @@ export const checkAdmin = async (email, token) => {
     return { isAdmin: false };
   }
 };
+
+// Get all bookings for admin panel
+export const getAdminAllBookings = async (token) => {
+  if (!token) return { totalBookings: 0, bookings: [] };
+  try {
+    const res = await api.get(`/user/admin/allBookings`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (e) {
+    console.error("Error fetching all bookings:", e);
+    return { totalBookings: 0, bookings: [] };
+  }
+};

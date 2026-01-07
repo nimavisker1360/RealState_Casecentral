@@ -198,3 +198,90 @@ export const setAdmin = asyncHandler(async (req, res) => {
     throw new Error(err.message);
   }
 });
+
+// Get all bookings from all users (admin only)
+export const getAllUsersBookings = asyncHandler(async (req, res) => {
+  try {
+    // Get all users with their bookings
+    const users = await prisma.user.findMany({
+      where: {
+        bookedVisits: {
+          isEmpty: false,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        bookedVisits: true,
+      },
+    });
+
+    // Get all residency IDs from bookings
+    const allBookingIds = users.flatMap((user) =>
+      user.bookedVisits.map((booking) => booking.id)
+    );
+
+    // Get residency details for all bookings
+    const residencies = await prisma.residency.findMany({
+      where: {
+        id: {
+          in: allBookingIds,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        address: true,
+        city: true,
+        country: true,
+        image: true,
+        price: true,
+      },
+    });
+
+    // Create a map for quick residency lookup
+    const residencyMap = {};
+    residencies.forEach((res) => {
+      residencyMap[res.id] = res;
+    });
+
+    // Combine user bookings with residency details
+    const allBookings = [];
+    users.forEach((user) => {
+      user.bookedVisits.forEach((booking) => {
+        const residency = residencyMap[booking.id];
+        allBookings.push({
+          bookingId: `${user.id}-${booking.id}`,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+          },
+          property: residency || {
+            id: booking.id,
+            title: "Property Not Found",
+          },
+          date: booking.date,
+        });
+      });
+    });
+
+    // Sort by date (newest first)
+    allBookings.sort((a, b) => {
+      const dateA = a.date.split("/").reverse().join("");
+      const dateB = b.date.split("/").reverse().join("");
+      return dateB.localeCompare(dateA);
+    });
+
+    res.status(200).json({
+      totalBookings: allBookings.length,
+      bookings: allBookings,
+    });
+  } catch (err) {
+    console.error("Error fetching all bookings:", err);
+    throw new Error(err.message);
+  }
+});
