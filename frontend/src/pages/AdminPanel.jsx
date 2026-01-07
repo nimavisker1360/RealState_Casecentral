@@ -61,6 +61,7 @@ const AdminPanel = () => {
       parkings: 0,
       bathrooms: 0,
     },
+    propertyType: "sale",
     userEmail: user?.email,
   });
 
@@ -108,6 +109,7 @@ const AdminPanel = () => {
         parkings: 0,
         bathrooms: 0,
       },
+      propertyType: "sale",
       userEmail: user?.email,
     });
     setActive(0);

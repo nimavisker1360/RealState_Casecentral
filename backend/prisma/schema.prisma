@@ -28,6 +28,7 @@ model Residency {
     image String
     images String[]
     facilities Json
+    propertyType String @default("sale") // "sale" or "rent"
     userEmail String
     owner User @relation("Owner",fields: [userEmail],references: [email])
 

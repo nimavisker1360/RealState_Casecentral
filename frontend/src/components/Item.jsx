@@ -2,6 +2,8 @@ import {
   MdOutlineBed,
   MdOutlineBathtub,
   MdOutlineGarage,
+  MdSell,
+  MdHome,
 } from "react-icons/md";
 import { CgRuler } from "react-icons/cg";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,13 +12,28 @@ import PropTypes from "prop-types";
 
 const Item = ({ property }) => {
   const navigate = useNavigate();
+  const isForSale = property.propertyType === "sale" || !property.propertyType;
+  
   return (
     <div
-      className="rounded-2xl p-5 bg-white"
+      className="rounded-2xl p-5 bg-white cursor-pointer hover:shadow-lg transition-shadow"
       onClick={() => navigate(`../listing/${property.id}`)}
     >
       <div className="pb-2 relative">
         <img src={property.image} alt={property.title} className="rounded-xl" />
+        {/* Property Type Badge */}
+        <div className="absolute top-4 left-4">
+          <span
+            className={`flexCenter gap-x-1 px-3 py-1 rounded-full text-xs font-semibold ${
+              isForSale
+                ? "bg-green-500 text-white"
+                : "bg-blue-500 text-white"
+            }`}
+          >
+            {isForSale ? <MdSell size={14} /> : <MdHome size={14} />}
+            {isForSale ? "Satılık" : "Kiralık"}
+          </span>
+        </div>
         {/* like btn */}
         <div className="absolute top-4 right-6">
           <HeartBtn id={property?.id} />
@@ -41,7 +58,10 @@ const Item = ({ property }) => {
       </div>
       <p className="pt-2 mb-4 line-clamp-2">{property.description}</p>
       <div className="flexBetween">
-        <div className="bold-20">${property.price}.00</div>
+        <div className="bold-20">
+          ${property.price.toLocaleString()}
+          {!isForSale && <span className="text-sm font-normal text-gray-500">/ay</span>}
+        </div>
         <Link to={`/`}>
           <button className="btn-secondary rounded-xl !px-5 !py-[7px] shadow-sm">
             View details
@@ -60,6 +80,7 @@ Item.propTypes = {
     city: PropTypes.string,
     description: PropTypes.string,
     price: PropTypes.number,
+    propertyType: PropTypes.string,
     facilities: PropTypes.shape({
       bedrooms: PropTypes.number,
       bathrooms: PropTypes.number,

@@ -12,6 +12,7 @@ export const createResidency = asyncHandler(async (req, res) => {
     image,
     images,
     facilities,
+    propertyType,
     userEmail,
   } = req.body.data;
 
@@ -21,6 +22,7 @@ export const createResidency = asyncHandler(async (req, res) => {
   console.log("Address:", address);
   console.log("City:", city);
   console.log("Price:", price);
+  console.log("Property Type:", propertyType);
   console.log("Owner Email:", userEmail);
   console.log("Images count:", images?.length || 1);
 
@@ -36,6 +38,7 @@ export const createResidency = asyncHandler(async (req, res) => {
         image,
         images: images || [image],
         facilities,
+        propertyType: propertyType || "sale",
         owner: {
           connect: {
             email: userEmail,

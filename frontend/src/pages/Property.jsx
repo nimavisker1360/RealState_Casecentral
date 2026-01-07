@@ -14,6 +14,8 @@ import {
   MdOutlineBed,
   MdOutlineBathtub,
   MdOutlineGarage,
+  MdSell,
+  MdHome,
 } from "react-icons/md";
 import { FaLocationDot } from "react-icons/fa6";
 import { CgRuler } from "react-icons/cg";
@@ -161,10 +163,26 @@ const Property = () => {
       <div className="xl:flexBetween gap-8">
         {/* left side */}
         <div className="flex-1 rounded-2xl bg-white p-2">
-          <h5 className="bold-16 my-1 text-secondary">{data?.city}</h5>
+          <div className="flexBetween mb-2">
+            <h5 className="bold-16 text-secondary">{data?.city}</h5>
+            {/* Property Type Badge */}
+            <span
+              className={`flexCenter gap-x-1 px-3 py-1 rounded-full text-sm font-semibold ${
+                data?.propertyType === "rent"
+                  ? "bg-blue-500 text-white"
+                  : "bg-green-500 text-white"
+              }`}
+            >
+              {data?.propertyType === "rent" ? <MdHome size={16} /> : <MdSell size={16} />}
+              {data?.propertyType === "rent" ? "Kiralık" : "Satılık"}
+            </span>
+          </div>
           <div className="flexBetween">
             <h4 className="medium-18">{data?.title}</h4>
-            <div className="bold-20">${data?.price}.00</div>
+            <div className="bold-20">
+              ${data?.price?.toLocaleString()}
+              {data?.propertyType === "rent" && <span className="text-sm font-normal text-gray-500">/ay</span>}
+            </div>
           </div>
           {/* info */}
           <div className="flex gap-x-4 py-2">

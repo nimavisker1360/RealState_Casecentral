@@ -5,10 +5,13 @@ import {
   NumberInput,
   TextInput,
   Textarea,
+  SegmentedControl,
+  Text,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { validateString } from "../utils/common";
 import PropTypes from "prop-types";
+import { MdSell, MdHome } from "react-icons/md";
 
 const BasicDetails = ({
   prevStep,
@@ -21,6 +24,7 @@ const BasicDetails = ({
       title: propertyDetails.title,
       description: propertyDetails.description,
       price: propertyDetails.price,
+      propertyType: propertyDetails.propertyType || "sale",
     },
     validate: {
       title: (value) => validateString(value),
@@ -29,11 +33,17 @@ const BasicDetails = ({
     },
   });
 
-  const { title, description, price } = form.values;
+  const { title, description, price, propertyType } = form.values;
   const handleSubmit = () => {
     const { hasErrors } = form.validate();
     if (!hasErrors) {
-      setPropertyDetails((prev) => ({ ...prev, title, description, price }));
+      setPropertyDetails((prev) => ({
+        ...prev,
+        title,
+        description,
+        price,
+        propertyType,
+      }));
       nextStep();
     }
   };
@@ -46,6 +56,39 @@ const BasicDetails = ({
           handleSubmit();
         }}
       >
+        {/* Property Type Selector */}
+        <div className="mb-4">
+          <Text size="sm" fw={500} mb={4}>
+            Mülk Türü <span className="text-red-500">*</span>
+          </Text>
+          <SegmentedControl
+            fullWidth
+            color={propertyType === "sale" ? "green" : "blue"}
+            value={propertyType}
+            onChange={(value) => form.setFieldValue("propertyType", value)}
+            data={[
+              {
+                label: (
+                  <div className="flex items-center justify-center gap-2 py-1">
+                    <MdSell size={18} />
+                    <span>Satılık</span>
+                  </div>
+                ),
+                value: "sale",
+              },
+              {
+                label: (
+                  <div className="flex items-center justify-center gap-2 py-1">
+                    <MdHome size={18} />
+                    <span>Kiralık</span>
+                  </div>
+                ),
+                value: "rent",
+              },
+            ]}
+          />
+        </div>
+
         <TextInput
           withAsterisk
           label="Title"
@@ -60,7 +103,7 @@ const BasicDetails = ({
         />
         <NumberInput
           withAsterisk
-          label="Price"
+          label={propertyType === "sale" ? "Fiyat ($)" : "Aylık Kira ($)"}
           placeholder="999"
           min={0}
           {...form.getInputProps("price")}
