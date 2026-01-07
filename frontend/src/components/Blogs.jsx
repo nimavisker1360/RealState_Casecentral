@@ -1,4 +1,4 @@
-import React from "react";
+
 import { BLOGS } from "../constant/data";
 
 const Blogs = () => {

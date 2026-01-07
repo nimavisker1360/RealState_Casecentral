@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Button,
@@ -9,6 +8,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { validateString } from "../utils/common";
+import PropTypes from "prop-types";
 
 const BasicDetails = ({
   prevStep,
@@ -16,7 +16,6 @@ const BasicDetails = ({
   propertyDetails,
   setPropertyDetails,
 }) => {
-  
   const form = useForm({
     initialValues: {
       title: propertyDetails.title,
@@ -41,10 +40,12 @@ const BasicDetails = ({
 
   return (
     <Box maw={"50%"} mx="auto" my={"md"}>
-      <form onSubmit={(e)=> {
-        e.preventDefault();
-        handleSubmit();
-      }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         <TextInput
           withAsterisk
           label="Title"
@@ -74,6 +75,13 @@ const BasicDetails = ({
       </form>
     </Box>
   );
+};
+
+BasicDetails.propTypes = {
+  prevStep: PropTypes.func.isRequired,
+  nextStep: PropTypes.func.isRequired,
+  propertyDetails: PropTypes.object.isRequired,
+  setPropertyDetails: PropTypes.func.isRequired,
 };
 
 export default BasicDetails;

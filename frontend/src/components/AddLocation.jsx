@@ -1,9 +1,9 @@
-import React, { useState } from "react";
 import { useForm } from "@mantine/form";
 import { Button, Group, Select, TextInput } from "@mantine/core";
 import useCountries from "../hooks/useCountries";
 import Map from "./Map";
 import { validateString } from "../utils/common";
+import PropTypes from "prop-types";
 
 const AddLocation = ({ propertyDetails, setPropertyDetails, nextStep }) => {
   const { getAll } = useCountries();
@@ -26,12 +26,13 @@ const AddLocation = ({ propertyDetails, setPropertyDetails, nextStep }) => {
     const { hasErrors } = form.validate();
     if (!hasErrors) {
       setPropertyDetails((prev) => ({ ...prev, country, city, address }));
-      nextStep()
+      nextStep();
     }
   };
 
   return (
-    <form onSubmit={(e) => {
+    <form
+      onSubmit={(e) => {
         e.preventDefault();
         handleSubmit();
       }}
@@ -69,12 +70,16 @@ const AddLocation = ({ propertyDetails, setPropertyDetails, nextStep }) => {
         </div>
       </div>
       <Group position="center" mt="xl">
-        <Button type="submit">
-          Next step
-        </Button>
+        <Button type="submit">Next step</Button>
       </Group>
     </form>
   );
+};
+
+AddLocation.propTypes = {
+  propertyDetails: PropTypes.object,
+  setPropertyDetails: PropTypes.func.isRequired,
+  nextStep: PropTypes.func.isRequired,
 };
 
 export default AddLocation;

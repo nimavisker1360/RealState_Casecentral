@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Container, Modal, Stepper } from "@mantine/core";
 import AddLocation from "./AddLocation";
 import { useAuth0 } from "@auth0/auth0-react";
 import UploadImage from "./UploadImage";
 import BasicDetails from "./BasicDetails";
 import Facilities from "./Facilities";
+import PropTypes from "prop-types";
 
 const AddPropertyModal = ({ opened, setOpened }) => {
   const [active, setActive] = useState(0);
@@ -54,28 +55,28 @@ const AddPropertyModal = ({ opened, setOpened }) => {
             />
           </Stepper.Step>
           <Stepper.Step label="Images" description="Upload">
-            <UploadImage 
-            prevStep={prevStep}
-            nextStep={nextStep}
-            propertyDetails={propertyDetails}
-            setPropertyDetails={setPropertyDetails}
+            <UploadImage
+              prevStep={prevStep}
+              nextStep={nextStep}
+              propertyDetails={propertyDetails}
+              setPropertyDetails={setPropertyDetails}
             />
           </Stepper.Step>
           <Stepper.Step label="Basics" description="Details">
-            <BasicDetails 
-            prevStep={prevStep}
-            nextStep={nextStep}
-            propertyDetails={propertyDetails}
-            setPropertyDetails={setPropertyDetails}
+            <BasicDetails
+              prevStep={prevStep}
+              nextStep={nextStep}
+              propertyDetails={propertyDetails}
+              setPropertyDetails={setPropertyDetails}
             />
           </Stepper.Step>
           <Stepper.Step>
-            <Facilities 
-            prevStep={prevStep}
-            propertyDetails={propertyDetails}
-            setPropertyDetails={setPropertyDetails}
-            setOpened={setOpened}
-            setActiveStep={setActive}
+            <Facilities
+              prevStep={prevStep}
+              propertyDetails={propertyDetails}
+              setPropertyDetails={setPropertyDetails}
+              setOpened={setOpened}
+              setActiveStep={setActive}
             />
           </Stepper.Step>
           <Stepper.Completed>
@@ -85,6 +86,11 @@ const AddPropertyModal = ({ opened, setOpened }) => {
       </Container>
     </Modal>
   );
+};
+
+AddPropertyModal.propTypes = {
+  opened: PropTypes.bool.isRequired,
+  setOpened: PropTypes.func.isRequired,
 };
 
 export default AddPropertyModal;

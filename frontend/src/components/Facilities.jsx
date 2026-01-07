@@ -1,12 +1,13 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Box, Button, Group, NumberInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import React, { useContext } from "react";
+import { useContext } from "react";
 import UserDetailContext from "../context/UserDetailContext";
 import useProperties from "../hooks/useProperties";
 import { useMutation } from "react-query";
 import { toast } from "react-toastify";
 import { createResidency } from "../utils/api";
+import PropTypes from "prop-types";
 
 const Facilities = ({
   prevStep,
@@ -22,7 +23,8 @@ const Facilities = ({
       bathrooms: propertyDetails.facilities.bathrooms,
     },
     validate: {
-      bedrooms: (value) => (value < 1 ? "Must have at least one bedroom" : null),
+      bedrooms: (value) =>
+        value < 1 ? "Must have at least one bedroom" : null,
       bathrooms: (value) =>
         value < 1 ? "Must have at least one bathroom" : null,
     },
@@ -119,6 +121,14 @@ const Facilities = ({
       </form>
     </Box>
   );
+};
+
+Facilities.propTypes = {
+  prevStep: PropTypes.func.isRequired,
+  propertyDetails: PropTypes.object.isRequired,
+  setPropertyDetails: PropTypes.func.isRequired,
+  setOpened: PropTypes.func.isRequired,
+  setActiveStep: PropTypes.func.isRequired,
 };
 
 export default Facilities;

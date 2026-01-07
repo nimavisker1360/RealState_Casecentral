@@ -16,6 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         redirect_uri: "http://localhost:5173",
         scope: "openid profile email",
       }}
+      cacheLocation="localstorage"
     >
       <MantineProvider>
         <App />
