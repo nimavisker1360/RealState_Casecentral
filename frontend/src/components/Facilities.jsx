@@ -59,10 +59,14 @@ const Facilities = ({
         token,
         user?.email // Pass userEmail obtained from Auth0
       ),
-    onError: ({ response }) =>
-      toast.error(response.data.message, { position: "bottom-right" }),
-    onSettled: () => {
-      toast.success("Added Successfully", { position: "bottom-right" });
+    onError: (error) => {
+      const message = error?.response?.data?.message || "Error adding property";
+      toast.error(message, { position: "bottom-right" });
+    },
+    onSuccess: () => {
+      toast.success("Property added successfully!", {
+        position: "bottom-right",
+      });
       setPropertyDetails({
         title: "",
         description: "",
@@ -76,7 +80,7 @@ const Facilities = ({
           parkings: 0,
           bathrooms: 0,
         },
-        userEmail: user?.email, // Ensure userEmail is included in propertyDetails
+        userEmail: user?.email,
       });
       setOpened(false);
       setActiveStep(0);
