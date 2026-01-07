@@ -15,6 +15,8 @@ const Facilities = ({
   setPropertyDetails,
   setOpened,
   setActiveStep,
+  onSuccess,
+  isPageMode = false,
 }) => {
   const form = useForm({
     initialValues: {
@@ -83,8 +85,16 @@ const Facilities = ({
         },
         userEmail: user?.email,
       });
-      setOpened(false);
-      setActiveStep(0);
+
+      if (isPageMode) {
+        // For page mode (admin panel)
+        setActiveStep(4); // Go to completed step
+        if (onSuccess) onSuccess();
+      } else {
+        // For modal mode
+        setOpened(false);
+        setActiveStep(0);
+      }
       refetchProperties();
     },
   });
@@ -134,6 +144,8 @@ Facilities.propTypes = {
   setPropertyDetails: PropTypes.func.isRequired,
   setOpened: PropTypes.func.isRequired,
   setActiveStep: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func,
+  isPageMode: PropTypes.bool,
 };
 
 export default Facilities;

@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Listing from "./pages/Listing";
 import AddProperty from "./pages/AddProperty";
+import AdminPanel from "./pages/AdminPanel";
 import { QueryClient, QueryClientProvider } from "react-query"
 import { ToastContainer } from "react-toastify";
 import { ReactQueryDevtools } from 'react-query/devtools';
@@ -34,6 +35,7 @@ export default function App() {
                     <Route path=":propertyId" element={<Property />} />
                   </Route>
                   <Route path="/addproperty" element={<AddProperty />} />
+                  <Route path="/admin" element={<AdminPanel />} />
                   <Route path="/bookings" element={<Bookings />} />
                   <Route path="/favourites" element={<Favourites />} />
                 </Route>

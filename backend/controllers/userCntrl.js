@@ -155,3 +155,46 @@ export const getAllFav = asyncHandler(async (req, res) => {
     throw new Error(err.message);
   }
 });
+
+// check if user is admin
+export const checkAdmin = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+      select: { isAdmin: true },
+    });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ isAdmin: false, message: "User not found" });
+    }
+
+    res.status(200).json({ isAdmin: user.isAdmin || false });
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+// set user as admin (for initial setup)
+export const setAdmin = asyncHandler(async (req, res) => {
+  const { email, adminSecret } = req.body;
+
+  // Simple secret check - in production, use a more secure method
+  if (adminSecret !== process.env.ADMIN_SECRET) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { email: email },
+      data: { isAdmin: true },
+    });
+
+    res.status(200).json({ message: "User is now admin", user });
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});

@@ -1,21 +1,23 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 // icons
 import { MdHomeWork } from "react-icons/md";
 import { RiCheckboxMultipleBlankFill } from "react-icons/ri";
 import { MdPermContactCalendar } from "react-icons/md";
 import { MdAddHome } from "react-icons/md";
-import AddPropertyModal from "./AddPropertyModal";
-import { useState } from "react";
+import useAdmin from "../hooks/useAdmin";
 import useAuthCheck from "../hooks/useAuthCheck";
 
 const Navbar = ({ containerStyles }) => {
-  const [modalOpened, setModalOpened] = useState(false);
+  const { isAdmin, loading } = useAdmin();
   const { validateLogin } = useAuthCheck();
+  const navigate = useNavigate();
+
   const handleAddPropertyClick = () => {
     if (validateLogin()) {
-      setModalOpened(true);
+      navigate("/admin");
     }
   };
+
   return (
     <nav className={`${containerStyles}`}>
       <NavLink
@@ -38,23 +40,25 @@ const Navbar = ({ containerStyles }) => {
         }
       >
         <RiCheckboxMultipleBlankFill />
-        <div>listing</div>
+        <div>Listing</div>
       </NavLink>
       <NavLink
         to={"mailto:inquiries.codeatusman@gmail.com"}
         className="flexCenter gap-x-1 rounded-full px-2 py-1"
       >
         <MdPermContactCalendar />
-        <div>contact</div>
+        <div>Contact</div>
       </NavLink>
-      <div
-        onClick={handleAddPropertyClick}
-        className="cursor-pointer flexCenter gap-x-1 rounded-full px-2 py-1"
-      >
-        <MdAddHome />
-        <div>add property</div>
-      </div>
-      <AddPropertyModal opened={modalOpened} setOpened={setModalOpened} />
+      {/* Only show Add Property for admins */}
+      {!loading && isAdmin && (
+        <div
+          onClick={handleAddPropertyClick}
+          className="cursor-pointer flexCenter gap-x-1 rounded-full px-2 py-1 hover:bg-secondary hover:text-white transition-colors"
+        >
+          <MdAddHome />
+          <div>Add Property</div>
+        </div>
+      )}
     </nav>
   );
 };

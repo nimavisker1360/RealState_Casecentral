@@ -167,3 +167,22 @@ export const createResidency = async (data, token, userEmail) => {
   );
   return response.data;
 };
+
+export const checkAdmin = async (email, token) => {
+  if (!token || !email) return { isAdmin: false };
+  try {
+    const res = await api.post(
+      `/user/checkAdmin`,
+      { email },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (e) {
+    console.error("Error checking admin status:", e);
+    return { isAdmin: false };
+  }
+};

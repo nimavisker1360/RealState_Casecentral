@@ -1,15 +1,39 @@
-import { Avatar, Menu } from "@mantine/core";
+import { Avatar, Menu, Divider } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import useAdmin from "../hooks/useAdmin";
+import { MdDashboard } from "react-icons/md";
 
 const ProfileMenu = ({ user, logout }) => {
   const navigate = useNavigate();
+  const { isAdmin, loading } = useAdmin();
+
   return (
     <Menu>
       <Menu.Target>
-        <Avatar src={user?.picture} alt="user image" radius={"xl"} />
+        <Avatar
+          src={user?.picture}
+          alt="user image"
+          radius={"xl"}
+          className="cursor-pointer"
+        />
       </Menu.Target>
       <Menu.Dropdown>
+        {/* Admin Section - Only visible for admins */}
+        {!loading && isAdmin && (
+          <>
+            <Menu.Label>Admin</Menu.Label>
+            <Menu.Item
+              leftSection={<MdDashboard size={16} />}
+              onClick={() => navigate("/admin", { replace: true })}
+              color="green"
+            >
+              پنل مدیریت
+            </Menu.Item>
+            <Divider my="xs" />
+          </>
+        )}
+
         <Menu.Label>Application</Menu.Label>
         <Menu.Item onClick={() => navigate("./favourites", { replace: true })}>
           Favourites
