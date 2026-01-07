@@ -61,6 +61,56 @@
   
 }
 
+/* Property Image Slider Styles */
+.property-main-slider {
+  position: relative;
+}
+
+.property-main-slider .swiper-button-next,
+.property-main-slider .swiper-button-prev {
+  background-color: rgba(0, 0, 0, 0.4);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.property-main-slider .swiper-button-next:hover,
+.property-main-slider .swiper-button-prev:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.property-main-slider .swiper-button-next::after,
+.property-main-slider .swiper-button-prev::after {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.property-main-slider .swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  opacity: 1;
+}
+
+.property-main-slider .swiper-pagination-bullet-active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+.property-thumbs-slider .swiper-slide {
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.property-thumbs-slider .swiper-slide-thumb-active {
+  opacity: 1;
+}
+
+.property-thumbs-slider .swiper-slide-thumb-active img {
+  border-color: #8ac243 !important;
+}
+
 @layer utilities {
 
   .btn-white  { 

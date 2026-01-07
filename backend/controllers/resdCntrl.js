@@ -10,6 +10,7 @@ export const createResidency = asyncHandler(async (req, res) => {
     city,
     country,
     image,
+    images,
     facilities,
     userEmail,
   } = req.body.data;
@@ -21,6 +22,7 @@ export const createResidency = asyncHandler(async (req, res) => {
   console.log("City:", city);
   console.log("Price:", price);
   console.log("Owner Email:", userEmail);
+  console.log("Images count:", images?.length || 1);
 
   try {
     const residency = await prisma.residency.create({
@@ -32,6 +34,7 @@ export const createResidency = asyncHandler(async (req, res) => {
         city,
         country,
         image,
+        images: images || [image],
         facilities,
         owner: {
           connect: {
@@ -93,7 +96,7 @@ export const getResidency = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
     const residency = await prisma.residency.findUnique({
-      where: {id},
+      where: { id },
     });
     res.send(residency);
   } catch (err) {

@@ -19,6 +19,15 @@ import { FaLocationDot } from "react-icons/fa6";
 import { CgRuler } from "react-icons/cg";
 import HeartBtn from "../components/HeartBtn";
 
+// Swiper imports
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Thumbs, FreeMode } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/thumbs";
+import "swiper/css/free-mode";
+
 const Property = () => {
   const { pathname } = useLocation();
   // console.log(pathname);
@@ -29,8 +38,21 @@ const Property = () => {
   );
   // console.log(data)
   const [modalOpened, setModalOpened] = useState(false);
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const { validateLogin } = useAuthCheck();
   const { user } = useAuth0();
+
+  // Get all images - support both 'images' array and single 'image'
+  const getPropertyImages = () => {
+    if (data?.images && data.images.length > 0) {
+      return data.images;
+    }
+    if (data?.image) {
+      return [data.image];
+    }
+    return [];
+  };
+  const propertyImages = getPropertyImages();
 
   const {
     userDetails: { token, bookings },
@@ -73,15 +95,66 @@ const Property = () => {
 
   return (
     <section className="max-padd-container my-[99px]">
-      <div className="pb-2 relative">
-        <img
-          src={data?.image}
-          alt={data?.title}
-          className="rounded-xl max-h-[27rem] self-center w-full object-cover"
-        />
-        {/* like btn */}
-        <div className="absolute top-8 right-8">
-          <HeartBtn id={id} />
+      {/* Image Slider */}
+      <div className="pb-4 relative">
+        <div className="space-y-3">
+          {/* Main Slider */}
+          <Swiper
+            modules={[Navigation, Pagination, Thumbs]}
+            navigation={propertyImages.length > 1}
+            pagination={propertyImages.length > 1 ? { clickable: true } : false}
+            thumbs={{
+              swiper:
+                thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
+            }}
+            className="property-main-slider rounded-xl overflow-hidden"
+            style={{
+              "--swiper-navigation-color": "#fff",
+              "--swiper-pagination-color": "#fff",
+            }}
+          >
+            {propertyImages.map((img, index) => (
+              <SwiperSlide key={index}>
+                <img
+                  src={img}
+                  alt={`${data?.title} - ${index + 1}`}
+                  className="w-full h-[27rem] object-cover"
+                />
+              </SwiperSlide>
+            ))}
+            {/* like btn */}
+            <div className="absolute top-8 right-8 z-10">
+              <HeartBtn id={id} />
+            </div>
+          </Swiper>
+
+          {/* Thumbnails - only show if more than 1 image */}
+          {propertyImages.length > 1 && (
+            <Swiper
+              onSwiper={setThumbsSwiper}
+              modules={[FreeMode, Thumbs]}
+              spaceBetween={10}
+              slidesPerView={4}
+              freeMode={true}
+              watchSlidesProgress={true}
+              className="property-thumbs-slider"
+              breakpoints={{
+                320: { slidesPerView: 3 },
+                640: { slidesPerView: 4 },
+                1024: { slidesPerView: 5 },
+              }}
+            >
+              {propertyImages.map((img, index) => (
+                <SwiperSlide key={index} className="cursor-pointer">
+                  <img
+                    src={img}
+                    alt={`thumb-${index + 1}`}
+                    className="w-full h-20 object-cover rounded-lg border-2 border-transparent hover:border-secondary transition-all"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          )}
         </div>
       </div>
       {/* container */}
