@@ -202,3 +202,39 @@ export const getAdminAllBookings = async (token) => {
     return { totalBookings: 0, bookings: [] };
   }
 };
+
+// Update residency (admin)
+export const updateResidency = async (id, data, token) => {
+  try {
+    const response = await api.put(
+      `/residency/update/${id}`,
+      { data },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating residency:", error);
+    toast.error("Mülk güncellenirken bir hata oluştu");
+    throw error;
+  }
+};
+
+// Delete residency (admin)
+export const deleteResidency = async (id, token) => {
+  try {
+    const response = await api.delete(`/residency/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting residency:", error);
+    toast.error("Mülk silinirken bir hata oluştu");
+    throw error;
+  }
+};

@@ -12,6 +12,8 @@ import {
   Avatar,
   Table,
   Loader,
+  ActionIcon,
+  Modal,
 } from "@mantine/core";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -19,9 +21,12 @@ import AddLocation from "../components/AddLocation";
 import UploadImage from "../components/UploadImage";
 import BasicDetails from "../components/BasicDetails";
 import Facilities from "../components/Facilities";
+import EditPropertyModal from "../components/EditPropertyModal";
 import useAdmin from "../hooks/useAdmin";
+import useProperties from "../hooks/useProperties";
 import UserDetailContext from "../context/UserDetailContext";
-import { getAdminAllBookings } from "../utils/api";
+import { getAdminAllBookings, deleteResidency } from "../utils/api";
+import { toast } from "react-toastify";
 import {
   MdDashboard,
   MdAddHome,
@@ -30,6 +35,8 @@ import {
   MdCalendarToday,
   MdHome,
   MdRefresh,
+  MdEdit,
+  MdDelete,
 } from "react-icons/md";
 
 const AdminPanel = () => {
@@ -46,6 +53,14 @@ const AdminPanel = () => {
   const [bookings, setBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
   const [totalBookings, setTotalBookings] = useState(0);
+
+  // Properties state
+  const { data: properties, isLoading: propertiesLoading, refetch: refetchProperties } = useProperties();
+  const [editModalOpened, setEditModalOpened] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [deleteModalOpened, setDeleteModalOpened] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [propertyDetails, setPropertyDetails] = useState({
     title: "",
@@ -85,6 +100,35 @@ const AdminPanel = () => {
       fetchBookings();
     }
   }, [token, isAdmin, fetchBookings]);
+
+  // Handle edit property
+  const handleEditProperty = (property) => {
+    setSelectedProperty(property);
+    setEditModalOpened(true);
+  };
+
+  // Handle delete property
+  const handleDeleteClick = (property) => {
+    setPropertyToDelete(property);
+    setDeleteModalOpened(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!propertyToDelete || !token) return;
+    
+    setDeleteLoading(true);
+    try {
+      await deleteResidency(propertyToDelete.id, token);
+      toast.success("Delete operation completed successfully!", { position: "bottom-right" });
+      setDeleteModalOpened(false);
+      setPropertyToDelete(null);
+      refetchProperties();
+    } catch (error) {
+      console.error("Delete error:", error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   const nextStep = () => {
     setActive((current) => (current < 4 ? current + 1 : current));
@@ -227,8 +271,10 @@ const AdminPanel = () => {
             shadow="sm"
             p="lg"
             radius="md"
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate("/listing")}
+            className={`cursor-pointer hover:shadow-md transition-shadow ${
+              activeTab === "propertyList" ? "border-2 border-blue-500" : ""
+            }`}
+            onClick={() => setActiveTab("propertyList")}
           >
             <Group>
               <div className="bg-blue-100 text-blue-600 p-3 rounded-full">
@@ -237,7 +283,7 @@ const AdminPanel = () => {
               <div>
                 <Text fw={600}>Mülk Listesi</Text>
                 <Text size="sm" color="dimmed">
-                  Tüm kayıtlı mülkleri görüntüle
+                  {properties?.length || 0} kayıtlı mülk
                 </Text>
               </div>
             </Group>
@@ -389,6 +435,168 @@ const AdminPanel = () => {
           </Paper>
         )}
 
+        {/* Property List Section */}
+        {activeTab === "propertyList" && (
+          <Paper shadow="sm" p="xl" radius="md" className="mb-6">
+            <div className="flexBetween mb-6">
+              <div>
+                <Title
+                  order={3}
+                  className="flex items-center gap-2 text-gray-800"
+                >
+                  <MdList className="text-blue-500" />
+                  Mülk Listesi
+                </Title>
+                <Text size="sm" color="dimmed" className="mt-1">
+                  Tüm kayıtlı mülkleri görüntüle, düzenle veya sil
+                </Text>
+              </div>
+              <Button
+                variant="light"
+                color="blue"
+                leftSection={<MdRefresh size={18} />}
+                onClick={() => refetchProperties()}
+                loading={propertiesLoading}
+              >
+                Yenile
+              </Button>
+            </div>
+
+            <Divider className="mb-6" />
+
+            {propertiesLoading ? (
+              <div className="flexCenter py-12">
+                <Loader color="blue" />
+              </div>
+            ) : !properties || properties.length === 0 ? (
+              <div className="text-center py-12">
+                <MdHome size={64} className="text-gray-300 mx-auto mb-4" />
+                <Text color="dimmed">
+                  Henüz kayıtlı mülk bulunmamaktadır
+                </Text>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table striped highlightOnHover>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Mülk</Table.Th>
+                      <Table.Th>Konum</Table.Th>
+                      <Table.Th>Fiyat</Table.Th>
+                      <Table.Th>Tür</Table.Th>
+                      <Table.Th>Olanaklar</Table.Th>
+                      <Table.Th>İşlemler</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {properties.map((property) => (
+                      <Table.Tr key={property.id}>
+                        <Table.Td>
+                          <div className="flex items-center gap-3">
+                            {property.image && (
+                              <img
+                                src={property.image}
+                                alt={property.title}
+                                className="w-14 h-14 rounded-lg object-cover"
+                              />
+                            )}
+                            <div>
+                              <Text size="sm" fw={500} lineClamp={1} maw={200}>
+                                {property.title}
+                              </Text>
+                              <Text size="xs" color="dimmed" lineClamp={1} maw={200}>
+                                {property.address}
+                              </Text>
+                            </div>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <div className="flex items-center gap-1">
+                            <MdHome size={16} className="text-gray-400" />
+                            <Text size="sm">
+                              {property.city}, {property.country}
+                            </Text>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm" fw={600} color="green">
+                            ${property.price?.toLocaleString()}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            color={property.propertyType === "sale" ? "green" : "blue"}
+                            variant="light"
+                          >
+                            {property.propertyType === "sale" ? "Satılık" : "Kiralık"}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="xs" color="dimmed">
+                            {property.facilities?.bedrooms || 0} Yatak •{" "}
+                            {property.facilities?.bathrooms || 0} Banyo •{" "}
+                            {property.facilities?.parkings || 0} Otopark
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Group gap="xs">
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              size="lg"
+                              onClick={() => handleEditProperty(property)}
+                              title="Düzenle"
+                            >
+                              <MdEdit size={18} />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="light"
+                              color="red"
+                              size="lg"
+                              onClick={() => handleDeleteClick(property)}
+                              title="Sil"
+                            >
+                              <MdDelete size={18} />
+                            </ActionIcon>
+                            <Button
+                              variant="subtle"
+                              size="xs"
+                              onClick={() => navigate(`/listing/${property.id}`)}
+                            >
+                              Görüntüle
+                            </Button>
+                          </Group>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </div>
+            )}
+
+            {/* Properties Summary */}
+            {properties && properties.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <Text size="sm" color="dimmed">
+                    Toplam: {properties.length} mülk
+                  </Text>
+                  <div className="flex gap-4">
+                    <Text size="sm" color="dimmed">
+                      Satılık:{" "}
+                      {properties.filter((p) => p.propertyType === "sale").length}
+                    </Text>
+                    <Text size="sm" color="dimmed">
+                      Kiralık:{" "}
+                      {properties.filter((p) => p.propertyType === "rent").length}
+                    </Text>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Paper>
+        )}
+
         {/* Add Property Form */}
         {activeTab === "addProperty" && (
           <Paper shadow="sm" p="xl" radius="md">
@@ -485,6 +693,74 @@ const AdminPanel = () => {
             </Stepper>
           </Paper>
         )}
+
+        {/* Edit Property Modal */}
+        <EditPropertyModal
+          opened={editModalOpened}
+          setOpened={setEditModalOpened}
+          property={selectedProperty}
+          onSuccess={() => {
+            refetchProperties();
+            setSelectedProperty(null);
+          }}
+        />
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          opened={deleteModalOpened}
+          onClose={() => {
+            setDeleteModalOpened(false);
+            setPropertyToDelete(null);
+          }}
+          title={
+            <Text fw={600} color="red">
+              Mülkü Sil
+            </Text>
+          }
+          centered
+        >
+          <div className="py-4">
+            <Text size="sm" color="dimmed" mb="md">
+              Bu mülkü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+            </Text>
+            {propertyToDelete && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
+                {propertyToDelete.image && (
+                  <img
+                    src={propertyToDelete.image}
+                    alt={propertyToDelete.title}
+                    className="w-16 h-16 rounded-lg object-cover"
+                  />
+                )}
+                <div>
+                  <Text size="sm" fw={500}>
+                    {propertyToDelete.title}
+                  </Text>
+                  <Text size="xs" color="dimmed">
+                    {propertyToDelete.city}, {propertyToDelete.country}
+                  </Text>
+                  <Text size="xs" color="green" fw={500}>
+                    ${propertyToDelete.price?.toLocaleString()}
+                  </Text>
+                </div>
+              </div>
+            )}
+            <Group justify="flex-end" mt="xl">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setDeleteModalOpened(false);
+                  setPropertyToDelete(null);
+                }}
+              >
+                İptal
+              </Button>
+              <Button color="red" onClick={confirmDelete} loading={deleteLoading}>
+                Sil
+              </Button>
+            </Group>
+          </div>
+        </Modal>
       </Container>
     </div>
   );
