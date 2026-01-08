@@ -37,15 +37,15 @@ const About = () => {
     };
 
     return (
-        <section id='about' className='max-padd-container py-16 xl:py-28'>
+        <section id='about' className='max-padd-container py-16 xl:py-28 overflow-x-hidden'>
             {/* Container */}
             <div className='flex flex-col xl:flex-row gap-10'>
                 {/* Left side */}
                 <div className='flex-1 relative'>
-                    <img src={aboutImg} alt="" className='rounded-3xl rounded-tr-[155px] w-[488px]' />
-                    <div className='bg-white absolute bottom-16 left-16 max-w-xs p-4 rounded-lg flexCenter flex-col'>
-                        <span className='relative bottom-8 p-3 shadow-md bg-white h-12 w-12 flex items-center rounded-full'><RiDoubleQuotesL className='text-2xl'/></span>
-                        <p className='text-center relative bottom-3'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Optio, maiores illum!</p>
+                    <img src={aboutImg} alt="" className='rounded-3xl rounded-tr-[80px] sm:rounded-tr-[155px] w-full max-w-[488px]' />
+                    <div className='bg-white absolute bottom-4 sm:bottom-16 left-4 sm:left-16 max-w-[200px] sm:max-w-xs p-3 sm:p-4 rounded-lg flexCenter flex-col'>
+                        <span className='relative bottom-6 sm:bottom-8 p-2 sm:p-3 shadow-md bg-white h-10 w-10 sm:h-12 sm:w-12 flex items-center rounded-full'><RiDoubleQuotesL className='text-xl sm:text-2xl'/></span>
+                        <p className='text-center relative bottom-2 sm:bottom-3 text-xs sm:text-base'>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
                     </div>
                 </div>
                 {/* Right side */}

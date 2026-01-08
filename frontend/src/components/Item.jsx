@@ -42,28 +42,28 @@ const Item = ({ property }) => {
       <h5 className="bold-16 my-1 text-secondary">{property.city}</h5>
       <h4 className="medium-18 line-clamp-1">{property.title}</h4>
       {/* info */}
-      <div className="flex gap-x-2 py-2">
-        <div className="flexCenter gap-x-2 border-r border-slate-900/50 pr-4 font-[500]">
+      <div className="flex flex-wrap gap-2 py-2 text-sm">
+        <div className="flexCenter gap-x-1 border-r border-slate-900/50 pr-2 font-[500]">
           <MdOutlineBed /> {property.facilities.bedrooms}
         </div>
-        <div className="flexCenter gap-x-2 border-r border-slate-900/50 pr-4 font-[500]">
+        <div className="flexCenter gap-x-1 border-r border-slate-900/50 pr-2 font-[500]">
           <MdOutlineBathtub /> {property.facilities.bathrooms}
         </div>
-        <div className="flexCenter gap-x-2 border-r border-slate-900/50 pr-4 font-[500]">
+        <div className="flexCenter gap-x-1 border-r border-slate-900/50 pr-2 font-[500]">
           <MdOutlineGarage /> {property.facilities.parkings}
         </div>
-        <div className="flexCenter gap-x-2 border-r border-slate-900/50 pr-4 font-[500]">
+        <div className="flexCenter gap-x-1 font-[500]">
           <CgRuler /> 400
         </div>
       </div>
       <p className="pt-2 mb-4 line-clamp-2">{property.description}</p>
-      <div className="flexBetween">
-        <div className="bold-20">
+      <div className="flexBetween flex-wrap gap-2">
+        <div className="bold-18 sm:bold-20">
           ${property.price.toLocaleString()}
           {!isForSale && <span className="text-sm font-normal text-gray-500">/ay</span>}
         </div>
         <Link to={`/`}>
-          <button className="btn-secondary rounded-xl !px-5 !py-[7px] shadow-sm">
+          <button className="btn-secondary rounded-xl !px-4 sm:!px-5 !py-[7px] shadow-sm text-sm sm:text-base">
             View details
           </button>
         </Link>

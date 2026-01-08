@@ -61,8 +61,8 @@ const Listing = () => {
   };
 
   return (
-    <main className="max-padd-container my-[99px]">
-      <div className="max-padd-container py-10 xl:py-22 bg-primary rounded-3xl">
+    <main className="max-padd-container my-[99px] overflow-x-hidden">
+      <div className="py-10 xl:py-22 bg-primary rounded-3xl px-4 sm:px-6 lg:px-12">
         <div className="">
           <Searchbar filter={filter} setFilter={setFilter} />
           

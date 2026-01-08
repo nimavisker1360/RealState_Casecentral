@@ -40,8 +40,8 @@ const Properties = () => {
 
   // console.log(data);
   return (
-    <section className='max-padd-container'>
-      <div className='max-padd-container bg-primary py-16 xl:py-28 rounded-3xl'>
+    <section className='max-padd-container overflow-x-hidden'>
+      <div className='bg-primary py-16 xl:py-28 rounded-3xl px-4 sm:px-6 lg:px-12'>
         <span className='medium-18'>Your Future Home Awaits!</span>
         <h2 className='h2'>Find Your Dream Here</h2>
         <div className="flexBetween mt-8 mb-6">

@@ -96,7 +96,7 @@ const Property = () => {
   }
 
   return (
-    <section className="max-padd-container my-[99px]">
+    <section className="max-padd-container my-[99px] overflow-x-hidden">
       {/* Image Slider */}
       <div className="pb-4 relative">
         <div className="space-y-3">
@@ -185,17 +185,17 @@ const Property = () => {
             </div>
           </div>
           {/* info */}
-          <div className="flex gap-x-4 py-2">
-            <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-4 font-[500]">
+          <div className="flex flex-wrap gap-2 sm:gap-x-4 py-2">
+            <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-2 sm:pr-4 font-[500] text-sm sm:text-base">
               <MdOutlineBed /> {data?.facilities.bedrooms}
             </div>
-            <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-4 font-[500]">
+            <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-2 sm:pr-4 font-[500] text-sm sm:text-base">
               <MdOutlineBathtub /> {data?.facilities.bathrooms}
             </div>
-            <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-4 font-[500]">
+            <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-2 sm:pr-4 font-[500] text-sm sm:text-base">
               <MdOutlineGarage /> {data?.facilities.parkings}
             </div>
-            <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-4 font-[500]">
+            <div className="flexCenter gap-x-2 font-[500] text-sm sm:text-base">
               <CgRuler /> 400
             </div>
           </div>

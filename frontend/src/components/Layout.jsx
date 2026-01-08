@@ -53,13 +53,13 @@ const Layout = () => {
   }, [isAuthenticated, user, getIdTokenClaims, mutate, setUserDetails]);
 
   return (
-    <>
-      <div>
+    <div className="overflow-x-hidden min-h-screen flex flex-col">
+      <div className="flex-1">
         <Header />
         <Outlet />
       </div>
       <Footer />
-    </>
+    </div>
   );
 };
 

@@ -3,8 +3,8 @@ import { BLOGS } from "../constant/data";
 
 const Blogs = () => {
   return (
-    <section className="max-padd-container">
-      <div className="max-padd-container py-16 xl:py-28 rounded-3xl">
+    <section className="max-padd-container overflow-x-hidden">
+      <div className="py-16 xl:py-28 rounded-3xl">
         <span className="medium-18">Stay Updated with the Latest News!</span>
         <h2 className="h2">Our Expert Blogs</h2>
         {/* container */}

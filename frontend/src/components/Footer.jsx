@@ -4,36 +4,35 @@ import PropTypes from "prop-types";
 
 const Footer = () => {
   return (
-    <footer className="max-padd-container mb-4">
-      <div className="max-padd-container bg-primary rounded-tr-3xl rounded-tl-3xl pt-12 xl:pt-20 pb-8">
-        <h3 className="h3">Explore real estate opportunities with us?</h3>
-        <p>
+    <footer className="max-padd-container mb-4 overflow-x-hidden">
+      <div className="bg-primary rounded-tr-3xl rounded-tl-3xl pt-8 sm:pt-12 xl:pt-20 pb-8 px-4 sm:px-6 lg:px-12">
+        <h3 className="h3 text-xl sm:text-2xl md:text-3xl">Explore real estate opportunities with us?</h3>
+        <p className="text-sm sm:text-base">
           Lorem ipsum dolor, sit amet consectetur adipisicing elit. Magni,
           ducimus iste?
         </p>
-        <hr className="my-8 bg-slate-900/30 h-[2px]" />
+        <hr className="my-6 sm:my-8 bg-slate-900/30 h-[2px]" />
         {/* container */}
         <div
-          className="flex justify-between flex-wrap gap-2
-                "
+          className="flex justify-between flex-wrap gap-6 sm:gap-2"
         >
-          <div className="max-w-sm">
+          <div className="max-w-full sm:max-w-sm w-full sm:w-auto">
             <Link to={"/"} className="flex items-center gap-x-2">
-              <span className="font-[900] text-[24px]">
+              <span className="font-[900] text-[20px] sm:text-[24px]">
                 Casa<span className="font-[600] medium-20">Central</span>
               </span>
             </Link>
-            <p className="py-4">
+            <p className="py-4 text-sm sm:text-base">
               Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nulla
               recusandae voluptatibus excepturi nostrum cum delectus repellat?
             </p>
-            <div className="flexBetween pl-6 h-[3.3rem] bg-white w-full max-w-[366px] rounded-full ring-1 ring-slate-500/5">
+            <div className="flex items-center pl-3 sm:pl-6 h-[3rem] sm:h-[3.3rem] bg-white w-full max-w-full sm:max-w-[366px] rounded-full ring-1 ring-slate-500/5">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="bg-transparent border-none outline-none"
+                className="bg-transparent border-none outline-none flex-1 min-w-0 text-sm sm:text-base"
               />
-              <button className="btn-secondary rounded-full relative right-[0.33rem]">
+              <button className="btn-secondary rounded-full relative right-[0.2rem] sm:right-[0.33rem] text-xs sm:text-base !px-3 sm:!px-7 whitespace-nowrap">
                 Subscribe
               </button>
             </div>
@@ -79,7 +78,7 @@ const Footer = () => {
         </div>
       </div>
       {/* copyrights */}
-      <p className="text-white bg-tertiary medium-14 py-2 px-8 rounded-b-3xl flexBetween ">
+      <p className="text-white bg-tertiary medium-14 py-2 px-4 sm:px-8 rounded-b-3xl flexBetween text-xs sm:text-sm">
         <span>2024 CasaCentral</span>
         <span>All rights reserved</span>
       </p>
