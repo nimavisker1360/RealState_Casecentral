@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { toast } from "react-toastify";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
+  baseURL: import.meta.env.VITE_API_URL || "https://casecentral-yt-backend.vercel.app//api",
 });
 
 export const getAllProperties = async () => {
@@ -155,7 +155,7 @@ export const createResidency = async (data, token, userEmail) => {
   // Ensure userEmail is included in the data object
   const requestData = { ...data, userEmail };
   console.log("Sending residency data:", requestData);
-  
+
   const response = await api.post(
     `/residency/create`,
     { data: requestData }, // Wrap in data object as backend expects req.body.data
@@ -370,15 +370,11 @@ export const getUserProfile = async (email, token) => {
 export const updateUserProfile = async (profileData, token) => {
   if (!token) throw new Error("No token provided");
   try {
-    const response = await api.put(
-      `/user/profile`,
-      profileData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await api.put(`/user/profile`, profileData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error updating profile:", error);
