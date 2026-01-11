@@ -199,6 +199,103 @@ export const setAdmin = asyncHandler(async (req, res) => {
   }
 });
 
+// Get user profile
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        phone: true,
+        address: true,
+        profileComplete: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+// Update user profile
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  const { email, name, image, phone, address } = req.body;
+
+  try {
+    // Check if profile is complete (has name, image, phone, and address)
+    const profileComplete = !!(name && image && phone && address);
+
+    const updatedUser = await prisma.user.update({
+      where: { email: email },
+      data: {
+        name,
+        image,
+        phone,
+        address,
+        profileComplete,
+      },
+    });
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        image: updatedUser.image,
+        phone: updatedUser.phone,
+        address: updatedUser.address,
+        profileComplete: updatedUser.profileComplete,
+      },
+    });
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+// Get all users (admin only)
+export const getAllUsers = asyncHandler(async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        phone: true,
+        address: true,
+        profileComplete: true,
+        isAdmin: true,
+        bookedVisits: true,
+        favResidenciesID: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      totalUsers: users.length,
+      users: users,
+    });
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
 // Get all bookings from all users (admin only)
 export const getAllUsersBookings = asyncHandler(async (req, res) => {
   try {

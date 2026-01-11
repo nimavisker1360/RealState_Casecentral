@@ -9,6 +9,9 @@ import {
   checkAdmin,
   setAdmin,
   getAllUsersBookings,
+  getUserProfile,
+  updateUserProfile,
+  getAllUsers,
 } from "../controllers/userCntrl.js";
 import jwtCheck from "../config/authOConfig.js";
 
@@ -31,5 +34,12 @@ router.post("/allFav",jwtCheck, getAllFav);
 router.post("/checkAdmin", jwtCheck, checkAdmin);
 router.post("/setAdmin", setAdmin);
 router.get("/admin/allBookings", jwtCheck, getAllUsersBookings);
+
+// Profile routes
+router.post("/profile", jwtCheck, getUserProfile);
+router.put("/profile", jwtCheck, updateUserProfile);
+
+// Admin routes
+router.get("/admin/allUsers", jwtCheck, getAllUsers);
 
 export { router as userRoute }; 

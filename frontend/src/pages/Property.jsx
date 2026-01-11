@@ -17,9 +17,41 @@ import {
   MdSell,
   MdHome,
 } from "react-icons/md";
-import { FaLocationDot } from "react-icons/fa6";
+import { FaLocationDot, FaRegClock, FaCalendarPlus } from "react-icons/fa6";
 import { CgRuler } from "react-icons/cg";
 import HeartBtn from "../components/HeartBtn";
+
+// Format date helper function
+const formatDate = (dateString, showFullDate = false) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  
+  if (showFullDate) {
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+  
+  const now = new Date();
+  const diffTime = Math.abs(now - date);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -205,6 +237,31 @@ const Property = () => {
             <div>
               {data?.address} {data?.city} {data?.country}
             </div>
+          </div>
+          {/* Date Information */}
+          <div className="flex flex-wrap gap-4 my-4 p-4 bg-primary rounded-xl">
+            {data?.createdAt && (
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-8 h-8 bg-secondary/10 rounded-lg flexCenter">
+                  <FaCalendarPlus className="text-secondary" />
+                </div>
+                <div>
+                  <p className="text-gray-30 text-xs">Listed on</p>
+                  <p className="font-medium text-tertiary">{formatDate(data.createdAt, true)}</p>
+                </div>
+              </div>
+            )}
+            {data?.updatedAt && data?.updatedAt !== data?.createdAt && (
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-8 h-8 bg-blue-500/10 rounded-lg flexCenter">
+                  <FaRegClock className="text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-gray-30 text-xs">Last updated</p>
+                  <p className="font-medium text-tertiary">{formatDate(data.updatedAt, true)}</p>
+                </div>
+              </div>
+            )}
           </div>
           <div>
             {bookings?.map((booking) => booking.id).includes(id) ? (

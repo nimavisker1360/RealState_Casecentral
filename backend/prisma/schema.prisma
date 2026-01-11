@@ -10,12 +10,17 @@ model User {
     name String?
     email String @unique
     image String?
+    phone String?
+    address String?
+    profileComplete Boolean @default(false)
     isAdmin Boolean @default(false)
     bookedVisits Json[]
     favResidenciesID String[] @db.ObjectId
   
     ownedResidencies Residency[] @relation("Owner") 
   
+    createdAt DateTime? @default(now())
+    updatedAt DateTime? @updatedAt
 }
 model Residency {
     id String @id @default(auto()) @map("_id") @db.ObjectId
@@ -36,4 +41,26 @@ model Residency {
     updatedAt DateTime @updatedAt
 
     @@unique(fields: [address,userEmail])
+}
+
+model Consultant {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    name String
+    title String
+    specialty String
+    experience String
+    languages String[]
+    rating Float @default(5.0)
+    reviews Int @default(0)
+    deals Int @default(0)
+    phone String
+    whatsapp String
+    email String @unique
+    linkedin String?
+    image String
+    bio String
+    available Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }

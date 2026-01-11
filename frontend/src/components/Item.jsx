@@ -6,9 +6,31 @@ import {
   MdHome,
 } from "react-icons/md";
 import { CgRuler } from "react-icons/cg";
+import { FaRegClock } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import HeartBtn from "./HeartBtn";
 import PropTypes from "prop-types";
+
+// Format date helper function
+const formatDate = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now - date);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 const Item = ({ property }) => {
   const navigate = useNavigate();
@@ -39,7 +61,16 @@ const Item = ({ property }) => {
           <HeartBtn id={property?.id} />
         </div>
       </div>
-      <h5 className="bold-16 my-1 text-secondary">{property.city}</h5>
+      {/* City and Date Row */}
+      <div className="flexBetween my-1">
+        <h5 className="bold-16 text-secondary">{property.city}</h5>
+        {property.updatedAt && (
+          <span className="flexCenter gap-x-1 text-xs text-gray-30">
+            <FaRegClock size={11} />
+            {formatDate(property.updatedAt)}
+          </span>
+        )}
+      </div>
       <h4 className="medium-18 line-clamp-1">{property.title}</h4>
       {/* info */}
       <div className="flex flex-wrap gap-2 py-2 text-sm">
@@ -81,6 +112,8 @@ Item.propTypes = {
     description: PropTypes.string,
     price: PropTypes.number,
     propertyType: PropTypes.string,
+    updatedAt: PropTypes.string,
+    createdAt: PropTypes.string,
     facilities: PropTypes.shape({
       bedrooms: PropTypes.number,
       bathrooms: PropTypes.number,

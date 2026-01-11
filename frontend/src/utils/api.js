@@ -238,3 +238,167 @@ export const deleteResidency = async (id, token) => {
     throw error;
   }
 };
+
+// ============ CONSULTANT API FUNCTIONS ============
+
+// Get all consultants
+export const getAllConsultants = async () => {
+  try {
+    const response = await api.get("/consultant/all", {
+      timeout: 10 * 1000,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching consultants:", error);
+    toast.error("Danışmanlar yüklenirken bir hata oluştu");
+    throw error;
+  }
+};
+
+// Get single consultant
+export const getConsultant = async (id) => {
+  try {
+    const response = await api.get(`/consultant/${id}`, {
+      timeout: 10 * 1000,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching consultant:", error);
+    throw error;
+  }
+};
+
+// Create consultant (admin)
+export const createConsultant = async (data, token) => {
+  try {
+    const response = await api.post(
+      `/consultant/create`,
+      { data },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating consultant:", error);
+    toast.error("Danışman eklenirken bir hata oluştu");
+    throw error;
+  }
+};
+
+// Update consultant (admin)
+export const updateConsultant = async (id, data, token) => {
+  try {
+    const response = await api.put(
+      `/consultant/update/${id}`,
+      { data },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating consultant:", error);
+    toast.error("Danışman güncellenirken bir hata oluştu");
+    throw error;
+  }
+};
+
+// Delete consultant (admin)
+export const deleteConsultant = async (id, token) => {
+  try {
+    const response = await api.delete(`/consultant/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting consultant:", error);
+    toast.error("Danışman silinirken bir hata oluştu");
+    throw error;
+  }
+};
+
+// Toggle consultant availability (admin)
+export const toggleConsultantAvailability = async (id, token) => {
+  try {
+    const response = await api.patch(
+      `/consultant/toggle/${id}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling consultant availability:", error);
+    toast.error("Danışman durumu değiştirilirken bir hata oluştu");
+    throw error;
+  }
+};
+
+// ============ USER PROFILE API FUNCTIONS ============
+
+// Get user profile
+export const getUserProfile = async (email, token) => {
+  if (!token || !email) return null;
+  try {
+    const response = await api.post(
+      `/user/profile`,
+      { email },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return null;
+  }
+};
+
+// Update user profile
+export const updateUserProfile = async (profileData, token) => {
+  if (!token) throw new Error("No token provided");
+  try {
+    const response = await api.put(
+      `/user/profile`,
+      profileData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    toast.error("Profil güncellenirken bir hata oluştu");
+    throw error;
+  }
+};
+
+// Get all users (admin only)
+export const getAllUsers = async (token) => {
+  if (!token) return { totalUsers: 0, users: [] };
+  try {
+    const response = await api.get(`/user/admin/allUsers`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    return { totalUsers: 0, users: [] };
+  }
+};

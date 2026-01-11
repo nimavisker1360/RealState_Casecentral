@@ -3,6 +3,8 @@ import Home from "./pages/Home";
 import Listing from "./pages/Listing";
 import AddProperty from "./pages/AddProperty";
 import AdminPanel from "./pages/AdminPanel";
+import Consultants from "./pages/Consultants";
+import TodayProperties from "./pages/TodayProperties";
 import { QueryClient, QueryClientProvider } from "react-query"
 import { ToastContainer } from "react-toastify";
 import { ReactQueryDevtools } from 'react-query/devtools';
@@ -38,6 +40,8 @@ export default function App() {
                   <Route path="/admin" element={<AdminPanel />} />
                   <Route path="/bookings" element={<Bookings />} />
                   <Route path="/favourites" element={<Favourites />} />
+                  <Route path="/consultants" element={<Consultants />} />
+                  <Route path="/today" element={<TodayProperties />} />
                 </Route>
               </Routes>
             </Suspense>

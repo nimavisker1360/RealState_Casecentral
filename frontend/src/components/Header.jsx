@@ -5,25 +5,21 @@ import userIcon from "../assets/user.svg";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProfileMenu from "./ProfileMenu";
+import LoginModal from "./LoginModal";
 
 const Header = () => {
   const [active, setActive] = useState(false);
   const [menuOpened, setMenuOpened] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const toggleMenu = () => setMenuOpened(!menuOpened);
-  const { loginWithRedirect, isAuthenticated, user, logout, isLoading, error } =
+  const { isAuthenticated, user, logout, isLoading, error } =
     useAuth0();
 
   // Debug Auth0 status
   console.log("🔍 Auth0 Status:", { isAuthenticated, isLoading, error, user });
 
-  const handleLogin = async () => {
-    try {
-      console.log("🔐 Login button clicked, redirecting to Auth0...");
-      await loginWithRedirect();
-    } catch (error) {
-      console.error("❌ Login error:", error);
-      alert("Login Error: " + error.message);
-    }
+  const handleLogin = () => {
+    setLoginModalOpen(true);
   };
 
   useEffect(() => {
@@ -108,6 +104,12 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={loginModalOpen} 
+        onClose={() => setLoginModalOpen(false)} 
+      />
     </header>
   );
 };

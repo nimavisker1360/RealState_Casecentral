@@ -1,4 +1,5 @@
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
 // icons
 import { MdHomeWork, MdSell, MdHome } from "react-icons/md";
 import { RiCheckboxMultipleBlankFill } from "react-icons/ri";
@@ -47,7 +48,7 @@ const Navbar = ({ containerStyles }) => {
         <RiCheckboxMultipleBlankFill />
         <div>Listing</div>
       </NavLink>
-      
+
       {/* Sale Filter Button */}
       <NavLink
         to={"/listing?type=sale"}
@@ -60,7 +61,7 @@ const Navbar = ({ containerStyles }) => {
         <MdSell />
         <div>Satılık</div>
       </NavLink>
-      
+
       {/* Rent Filter Button */}
       <NavLink
         to={"/listing?type=rent"}
@@ -73,7 +74,7 @@ const Navbar = ({ containerStyles }) => {
         <MdHome />
         <div>Kiralık</div>
       </NavLink>
-      
+
       <NavLink
         to={"mailto:inquiries.codeatusman@gmail.com"}
         className="flexCenter gap-x-1 rounded-full px-2 py-1"
@@ -93,6 +94,10 @@ const Navbar = ({ containerStyles }) => {
       )}
     </nav>
   );
+};
+
+Navbar.propTypes = {
+  containerStyles: PropTypes.string,
 };
 
 export default Navbar;

@@ -1,0 +1,171 @@
+import asyncHandler from "express-async-handler";
+import { prisma } from "../config/prismaConfig.js";
+
+// Get all consultants
+export const getAllConsultants = asyncHandler(async (req, res) => {
+  try {
+    const consultants = await prisma.consultant.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    res.status(200).json(consultants);
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+// Get single consultant
+export const getConsultant = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const consultant = await prisma.consultant.findUnique({
+      where: { id },
+    });
+    if (!consultant) {
+      return res.status(404).json({ message: "Consultant not found" });
+    }
+    res.status(200).json(consultant);
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+// Create consultant (admin only)
+export const createConsultant = asyncHandler(async (req, res) => {
+  const { data } = req.body;
+  console.log("Creating consultant with data:", data);
+
+  try {
+    // Check if consultant with email already exists
+    const existingConsultant = await prisma.consultant.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingConsultant) {
+      return res.status(400).json({ message: "Consultant with this email already exists" });
+    }
+
+    const consultant = await prisma.consultant.create({
+      data: {
+        name: data.name,
+        title: data.title,
+        specialty: data.specialty,
+        experience: data.experience,
+        languages: data.languages || [],
+        rating: data.rating || 5.0,
+        reviews: data.reviews || 0,
+        deals: data.deals || 0,
+        phone: data.phone,
+        whatsapp: data.whatsapp,
+        email: data.email,
+        linkedin: data.linkedin || "",
+        image: data.image,
+        bio: data.bio,
+        available: data.available !== undefined ? data.available : true,
+      },
+    });
+
+    res.status(201).json({
+      message: "Consultant created successfully",
+      consultant,
+    });
+  } catch (err) {
+    console.error("Error creating consultant:", err);
+    throw new Error(err.message);
+  }
+});
+
+// Update consultant (admin only)
+export const updateConsultant = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { data } = req.body;
+
+  try {
+    const existingConsultant = await prisma.consultant.findUnique({
+      where: { id },
+    });
+
+    if (!existingConsultant) {
+      return res.status(404).json({ message: "Consultant not found" });
+    }
+
+    const updatedConsultant = await prisma.consultant.update({
+      where: { id },
+      data: {
+        name: data.name,
+        title: data.title,
+        specialty: data.specialty,
+        experience: data.experience,
+        languages: data.languages,
+        rating: data.rating,
+        reviews: data.reviews,
+        deals: data.deals,
+        phone: data.phone,
+        whatsapp: data.whatsapp,
+        email: data.email,
+        linkedin: data.linkedin,
+        image: data.image,
+        bio: data.bio,
+        available: data.available,
+      },
+    });
+
+    res.status(200).json({
+      message: "Consultant updated successfully",
+      consultant: updatedConsultant,
+    });
+  } catch (err) {
+    console.error("Error updating consultant:", err);
+    throw new Error(err.message);
+  }
+});
+
+// Delete consultant (admin only)
+export const deleteConsultant = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const existingConsultant = await prisma.consultant.findUnique({
+      where: { id },
+    });
+
+    if (!existingConsultant) {
+      return res.status(404).json({ message: "Consultant not found" });
+    }
+
+    await prisma.consultant.delete({
+      where: { id },
+    });
+
+    res.status(200).json({ message: "Consultant deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting consultant:", err);
+    throw new Error(err.message);
+  }
+});
+
+// Toggle consultant availability (admin only)
+export const toggleAvailability = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const consultant = await prisma.consultant.findUnique({
+      where: { id },
+    });
+
+    if (!consultant) {
+      return res.status(404).json({ message: "Consultant not found" });
+    }
+
+    const updatedConsultant = await prisma.consultant.update({
+      where: { id },
+      data: { available: !consultant.available },
+    });
+
+    res.status(200).json({
+      message: `Consultant is now ${updatedConsultant.available ? "available" : "unavailable"}`,
+      consultant: updatedConsultant,
+    });
+  } catch (err) {
+    throw new Error(err.message);
+  }
+});

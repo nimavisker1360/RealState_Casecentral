@@ -14,6 +14,12 @@ import {
   Loader,
   ActionIcon,
   Modal,
+  TextInput,
+  Textarea,
+  NumberInput,
+  Switch,
+  MultiSelect,
+  Select,
 } from "@mantine/core";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -24,8 +30,9 @@ import Facilities from "../components/Facilities";
 import EditPropertyModal from "../components/EditPropertyModal";
 import useAdmin from "../hooks/useAdmin";
 import useProperties from "../hooks/useProperties";
+import useConsultants from "../hooks/useConsultants";
 import UserDetailContext from "../context/UserDetailContext";
-import { getAdminAllBookings, deleteResidency } from "../utils/api";
+import { getAdminAllBookings, deleteResidency, createConsultant, updateConsultant, deleteConsultant, toggleConsultantAvailability, getAllUsers, removeBooking } from "../utils/api";
 import { toast } from "react-toastify";
 import {
   MdDashboard,
@@ -37,7 +44,15 @@ import {
   MdRefresh,
   MdEdit,
   MdDelete,
+  MdPeople,
+  MdPersonAdd,
+  MdPhone,
+  MdEmail,
+  MdOutlineCloudUpload,
+  MdClose,
 } from "react-icons/md";
+import { FaWhatsapp, FaStar } from "react-icons/fa6";
+import { useRef } from "react";
 
 const AdminPanel = () => {
   const [active, setActive] = useState(0);
@@ -61,6 +76,87 @@ const AdminPanel = () => {
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Consultants state
+  const { data: consultants, isLoading: consultantsLoading, refetch: refetchConsultants } = useConsultants();
+  const [consultantModalOpened, setConsultantModalOpened] = useState(false);
+  const [editConsultantModalOpened, setEditConsultantModalOpened] = useState(false);
+  const [selectedConsultant, setSelectedConsultant] = useState(null);
+  const [deleteConsultantModalOpened, setDeleteConsultantModalOpened] = useState(false);
+  const [consultantToDelete, setConsultantToDelete] = useState(null);
+  const [consultantLoading, setConsultantLoading] = useState(false);
+
+  // Users state
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [consultantForm, setConsultantForm] = useState({
+    name: "",
+    title: "",
+    specialty: "",
+    experience: "",
+    languages: [],
+    rating: 5.0,
+    reviews: 0,
+    deals: 0,
+    phone: "",
+    whatsapp: "",
+    email: "",
+    linkedin: "",
+    image: "",
+    bio: "",
+    available: true,
+  });
+
+  const languageOptions = [
+    { value: "English", label: "English" },
+    { value: "Turkish", label: "Turkish" },
+    { value: "Arabic", label: "Arabic" },
+    { value: "German", label: "German" },
+    { value: "French", label: "French" },
+    { value: "Russian", label: "Russian" },
+    { value: "Mandarin", label: "Mandarin" },
+    { value: "Spanish", label: "Spanish" },
+    { value: "Persian", label: "Persian" },
+  ];
+
+  // Cloudinary widget for consultant image upload
+  const cloudinaryRef = useRef();
+  const consultantWidgetRef = useRef();
+  const [imageUploading, setImageUploading] = useState(false);
+
+  useEffect(() => {
+    cloudinaryRef.current = window.cloudinary;
+    consultantWidgetRef.current = cloudinaryRef.current?.createUploadWidget(
+      {
+        cloudName: "ducct0j1f",
+        uploadPreset: "auvy3sl6",
+        maxFiles: 1,
+        multiple: false,
+        cropping: true,
+        croppingAspectRatio: 1,
+        croppingShowDimensions: true,
+      },
+      (err, result) => {
+        if (result.event === "success") {
+          setConsultantForm((prev) => ({ ...prev, image: result.info.secure_url }));
+          setImageUploading(false);
+        }
+        if (result.event === "close") {
+          setImageUploading(false);
+        }
+      }
+    );
+  }, []);
+
+  const openConsultantImageUpload = () => {
+    setImageUploading(true);
+    consultantWidgetRef.current?.open();
+  };
+
+  const removeConsultantImage = () => {
+    setConsultantForm((prev) => ({ ...prev, image: "" }));
+  };
 
   const [propertyDetails, setPropertyDetails] = useState({
     title: "",
@@ -101,6 +197,43 @@ const AdminPanel = () => {
     }
   }, [token, isAdmin, fetchBookings]);
 
+  // Fetch all users
+  const fetchUsers = useCallback(async () => {
+    if (!token) return;
+    setUsersLoading(true);
+    try {
+      const data = await getAllUsers(token);
+      setUsers(data.users || []);
+      setTotalUsers(data.totalUsers || 0);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setUsersLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token && isAdmin) {
+      fetchUsers();
+    }
+  }, [token, isAdmin, fetchUsers]);
+
+  // Handle delete booking (admin)
+  const handleDeleteBooking = async (userEmail, propertyId) => {
+    if (!token || !userEmail || !propertyId) return;
+    
+    try {
+      await removeBooking(propertyId, userEmail, token);
+      toast.success("Rezervasyon başarıyla silindi!", { position: "bottom-right" });
+      // Refresh users list to update bookings
+      fetchUsers();
+      fetchBookings();
+    } catch (error) {
+      console.error("Delete booking error:", error);
+      toast.error("Rezervasyon silinirken hata oluştu", { position: "bottom-right" });
+    }
+  };
+
   // Handle edit property
   const handleEditProperty = (property) => {
     setSelectedProperty(property);
@@ -127,6 +260,120 @@ const AdminPanel = () => {
       console.error("Delete error:", error);
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  // Consultant functions
+  const resetConsultantForm = () => {
+    setConsultantForm({
+      name: "",
+      title: "",
+      specialty: "",
+      experience: "",
+      languages: [],
+      rating: 5.0,
+      reviews: 0,
+      deals: 0,
+      phone: "",
+      whatsapp: "",
+      email: "",
+      linkedin: "",
+      image: "",
+      bio: "",
+      available: true,
+    });
+  };
+
+  const handleCreateConsultant = async () => {
+    if (!token) return;
+    if (!consultantForm.name || !consultantForm.email || !consultantForm.phone) {
+      toast.error("Lütfen gerekli alanları doldurun (Ad, Email, Telefon)", { position: "bottom-right" });
+      return;
+    }
+
+    setConsultantLoading(true);
+    try {
+      await createConsultant(consultantForm, token);
+      toast.success("Danışman başarıyla eklendi!", { position: "bottom-right" });
+      setConsultantModalOpened(false);
+      resetConsultantForm();
+      refetchConsultants();
+    } catch (error) {
+      console.error("Create consultant error:", error);
+    } finally {
+      setConsultantLoading(false);
+    }
+  };
+
+  const handleEditConsultant = (consultant) => {
+    setSelectedConsultant(consultant);
+    setConsultantForm({
+      name: consultant.name || "",
+      title: consultant.title || "",
+      specialty: consultant.specialty || "",
+      experience: consultant.experience || "",
+      languages: consultant.languages || [],
+      rating: consultant.rating || 5.0,
+      reviews: consultant.reviews || 0,
+      deals: consultant.deals || 0,
+      phone: consultant.phone || "",
+      whatsapp: consultant.whatsapp || "",
+      email: consultant.email || "",
+      linkedin: consultant.linkedin || "",
+      image: consultant.image || "",
+      bio: consultant.bio || "",
+      available: consultant.available !== undefined ? consultant.available : true,
+    });
+    setEditConsultantModalOpened(true);
+  };
+
+  const handleUpdateConsultant = async () => {
+    if (!selectedConsultant || !token) return;
+
+    setConsultantLoading(true);
+    try {
+      await updateConsultant(selectedConsultant.id, consultantForm, token);
+      toast.success("Danışman başarıyla güncellendi!", { position: "bottom-right" });
+      setEditConsultantModalOpened(false);
+      setSelectedConsultant(null);
+      resetConsultantForm();
+      refetchConsultants();
+    } catch (error) {
+      console.error("Update consultant error:", error);
+    } finally {
+      setConsultantLoading(false);
+    }
+  };
+
+  const handleDeleteConsultantClick = (consultant) => {
+    setConsultantToDelete(consultant);
+    setDeleteConsultantModalOpened(true);
+  };
+
+  const confirmDeleteConsultant = async () => {
+    if (!consultantToDelete || !token) return;
+
+    setConsultantLoading(true);
+    try {
+      await deleteConsultant(consultantToDelete.id, token);
+      toast.success("Danışman başarıyla silindi!", { position: "bottom-right" });
+      setDeleteConsultantModalOpened(false);
+      setConsultantToDelete(null);
+      refetchConsultants();
+    } catch (error) {
+      console.error("Delete consultant error:", error);
+    } finally {
+      setConsultantLoading(false);
+    }
+  };
+
+  const handleToggleAvailability = async (consultant) => {
+    if (!token) return;
+    try {
+      await toggleConsultantAvailability(consultant.id, token);
+      refetchConsultants();
+    } catch (error) {
+      console.error("Toggle availability error:", error);
     }
   };
 
@@ -222,7 +469,7 @@ const AdminPanel = () => {
         </Paper>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Paper
             shadow="sm"
             p="lg"
@@ -250,28 +497,6 @@ const AdminPanel = () => {
             p="lg"
             radius="md"
             className={`cursor-pointer hover:shadow-md transition-shadow ${
-              activeTab === "bookings" ? "border-2 border-orange-500" : ""
-            }`}
-            onClick={() => setActiveTab("bookings")}
-          >
-            <Group>
-              <div className="bg-orange-100 text-orange-600 p-3 rounded-full">
-                <MdEventNote size={24} />
-              </div>
-              <div>
-                <Text fw={600}>Kullanıcı Rezervasyonları</Text>
-                <Text size="sm" color="dimmed">
-                  {totalBookings} aktif rezervasyon
-                </Text>
-              </div>
-            </Group>
-          </Paper>
-
-          <Paper
-            shadow="sm"
-            p="lg"
-            radius="md"
-            className={`cursor-pointer hover:shadow-md transition-shadow ${
               activeTab === "propertyList" ? "border-2 border-blue-500" : ""
             }`}
             onClick={() => setActiveTab("propertyList")}
@@ -288,152 +513,51 @@ const AdminPanel = () => {
               </div>
             </Group>
           </Paper>
-        </div>
 
-        {/* Bookings Section */}
-        {activeTab === "bookings" && (
-          <Paper shadow="sm" p="xl" radius="md" className="mb-6">
-            <div className="flexBetween mb-6">
+          <Paper
+            shadow="sm"
+            p="lg"
+            radius="md"
+            className={`cursor-pointer hover:shadow-md transition-shadow ${
+              activeTab === "consultants" ? "border-2 border-purple-500" : ""
+            }`}
+            onClick={() => setActiveTab("consultants")}
+          >
+            <Group>
+              <div className="bg-purple-100 text-purple-600 p-3 rounded-full">
+                <MdPeople size={24} />
+              </div>
               <div>
-                <Title
-                  order={3}
-                  className="flex items-center gap-2 text-gray-800"
-                >
-                  <MdEventNote className="text-orange-500" />
-                  Kullanıcı Rezervasyonları
-                </Title>
-                <Text size="sm" color="dimmed" className="mt-1">
-                  Kullanıcılar tarafından yapılan tüm rezervasyonların listesi
+                <Text fw={600}>Danışmanlar</Text>
+                <Text size="sm" color="dimmed">
+                  {consultants?.length || 0} kayıtlı danışman
                 </Text>
               </div>
-              <Button
-                variant="light"
-                color="orange"
-                leftSection={<MdRefresh size={18} />}
-                onClick={fetchBookings}
-                loading={bookingsLoading}
-              >
-                Yenile
-              </Button>
-            </div>
-
-            <Divider className="mb-6" />
-
-            {bookingsLoading ? (
-              <div className="flexCenter py-12">
-                <Loader color="orange" />
-              </div>
-            ) : bookings.length === 0 ? (
-              <div className="text-center py-12">
-                <MdEventNote size={64} className="text-gray-300 mx-auto mb-4" />
-                <Text color="dimmed">
-                  Henüz kayıtlı rezervasyon bulunmamaktadır
-                </Text>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table striped highlightOnHover>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Kullanıcı</Table.Th>
-                      <Table.Th>Mülk</Table.Th>
-                      <Table.Th>Konum</Table.Th>
-                      <Table.Th>Ziyaret Tarihi</Table.Th>
-                      <Table.Th>İşlemler</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {bookings.map((booking) => (
-                      <Table.Tr key={booking.bookingId}>
-                        <Table.Td>
-                          <div className="flex items-center gap-3">
-                            <Avatar
-                              src={booking.user.image}
-                              alt={booking.user.name}
-                              radius="xl"
-                              size="sm"
-                            />
-                            <div>
-                              <Text size="sm" fw={500}>
-                                {booking.user.name || "İsimsiz"}
-                              </Text>
-                              <Text size="xs" color="dimmed">
-                                {booking.user.email}
-                              </Text>
-                            </div>
-                          </div>
-                        </Table.Td>
-                        <Table.Td>
-                          <div className="flex items-center gap-3">
-                            {booking.property.image && (
-                              <img
-                                src={booking.property.image}
-                                alt={booking.property.title}
-                                className="w-12 h-12 rounded-lg object-cover"
-                              />
-                            )}
-                            <div>
-                              <Text size="sm" fw={500}>
-                                {booking.property.title}
-                              </Text>
-                              {booking.property.price && (
-                                <Text size="xs" color="dimmed">
-                                  ${booking.property.price.toLocaleString()}
-                                </Text>
-                              )}
-                            </div>
-                          </div>
-                        </Table.Td>
-                        <Table.Td>
-                          <div className="flex items-center gap-1">
-                            <MdHome size={16} className="text-gray-400" />
-                            <Text size="sm">
-                              {booking.property.city},{" "}
-                              {booking.property.country}
-                            </Text>
-                          </div>
-                        </Table.Td>
-                        <Table.Td>
-                          <div className="flex items-center gap-2">
-                            <MdCalendarToday
-                              size={16}
-                              className="text-orange-500"
-                            />
-                            <Badge color="orange" variant="light">
-                              {booking.date}
-                            </Badge>
-                          </div>
-                        </Table.Td>
-                        <Table.Td>
-                          <Button
-                            variant="subtle"
-                            size="xs"
-                            onClick={() =>
-                              navigate(`/listing/${booking.property.id}`)
-                            }
-                          >
-                            Mülkü Görüntüle
-                          </Button>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-              </div>
-            )}
-
-            {/* Bookings Summary */}
-            {bookings.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <Text size="sm" color="dimmed">
-                    Toplam rezervasyon: {totalBookings} rezervasyon
-                  </Text>
-                </div>
-              </div>
-            )}
+            </Group>
           </Paper>
-        )}
+
+          <Paper
+            shadow="sm"
+            p="lg"
+            radius="md"
+            className={`cursor-pointer hover:shadow-md transition-shadow ${
+              activeTab === "users" ? "border-2 border-cyan-500" : ""
+            }`}
+            onClick={() => setActiveTab("users")}
+          >
+            <Group>
+              <div className="bg-cyan-100 text-cyan-600 p-3 rounded-full">
+                <MdPeople size={24} />
+              </div>
+              <div>
+                <Text fw={600}>Kullanıcılar</Text>
+                <Text size="sm" color="dimmed">
+                  {totalUsers} kullanıcı • {totalBookings} rez.
+                </Text>
+              </div>
+            </Group>
+          </Paper>
+        </div>
 
         {/* Property List Section */}
         {activeTab === "propertyList" && (
@@ -589,6 +713,412 @@ const AdminPanel = () => {
                     <Text size="sm" color="dimmed">
                       Kiralık:{" "}
                       {properties.filter((p) => p.propertyType === "rent").length}
+                    </Text>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Paper>
+        )}
+
+        {/* Consultants Section */}
+        {activeTab === "consultants" && (
+          <Paper shadow="sm" p="xl" radius="md" className="mb-6">
+            <div className="flexBetween mb-6">
+              <div>
+                <Title
+                  order={3}
+                  className="flex items-center gap-2 text-gray-800"
+                >
+                  <MdPeople className="text-purple-500" />
+                  Danışman Yönetimi
+                </Title>
+                <Text size="sm" color="dimmed" className="mt-1">
+                  Danışmanları görüntüle, ekle, düzenle veya sil
+                </Text>
+              </div>
+              <Group>
+                <Button
+                  variant="light"
+                  color="purple"
+                  leftSection={<MdRefresh size={18} />}
+                  onClick={() => refetchConsultants()}
+                  loading={consultantsLoading}
+                >
+                  Yenile
+                </Button>
+                <Button
+                  color="grape"
+                  leftSection={<MdPersonAdd size={18} />}
+                  onClick={() => setConsultantModalOpened(true)}
+                >
+                  Yeni Danışman Ekle
+                </Button>
+              </Group>
+            </div>
+
+            <Divider className="mb-6" />
+
+            {consultantsLoading ? (
+              <div className="flexCenter py-12">
+                <Loader color="grape" />
+              </div>
+            ) : !consultants || consultants.length === 0 ? (
+              <div className="text-center py-12">
+                <MdPeople size={64} className="text-gray-300 mx-auto mb-4" />
+                <Text color="dimmed">
+                  Henüz kayıtlı danışman bulunmamaktadır
+                </Text>
+                <Button
+                  color="grape"
+                  className="mt-4"
+                  leftSection={<MdPersonAdd size={18} />}
+                  onClick={() => setConsultantModalOpened(true)}
+                >
+                  İlk Danışmanı Ekle
+                </Button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table striped highlightOnHover>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Danışman</Table.Th>
+                      <Table.Th>Uzmanlık</Table.Th>
+                      <Table.Th>İletişim</Table.Th>
+                      <Table.Th>İstatistik</Table.Th>
+                      <Table.Th>Durum</Table.Th>
+                      <Table.Th>İşlemler</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {consultants.map((consultant) => (
+                      <Table.Tr key={consultant.id}>
+                        <Table.Td>
+                          <div className="flex items-center gap-3">
+                            <Avatar
+                              src={consultant.image}
+                              alt={consultant.name}
+                              radius="xl"
+                              size="lg"
+                            />
+                            <div>
+                              <Text size="sm" fw={600}>
+                                {consultant.name}
+                              </Text>
+                              <Text size="xs" color="dimmed">
+                                {consultant.title}
+                              </Text>
+                              <Text size="xs" color="dimmed">
+                                {consultant.experience} deneyim
+                              </Text>
+                            </div>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <div>
+                            <Text size="sm" fw={500}>
+                              {consultant.specialty}
+                            </Text>
+                            <Text size="xs" color="dimmed">
+                              {consultant.languages?.join(", ")}
+                            </Text>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1">
+                              <MdPhone size={14} className="text-gray-400" />
+                              <Text size="xs">{consultant.phone}</Text>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MdEmail size={14} className="text-gray-400" />
+                              <Text size="xs">{consultant.email}</Text>
+                            </div>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <div className="flex items-center gap-3">
+                            <div className="text-center">
+                              <div className="flex items-center gap-1">
+                                <FaStar className="text-amber-500 text-xs" />
+                                <Text size="sm" fw={600}>{consultant.rating}</Text>
+                              </div>
+                              <Text size="xs" color="dimmed">{consultant.reviews} yorum</Text>
+                            </div>
+                            <div className="text-center">
+                              <Text size="sm" fw={600}>{consultant.deals}+</Text>
+                              <Text size="xs" color="dimmed">satış</Text>
+                            </div>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            color={consultant.available ? "green" : "gray"}
+                            variant="light"
+                            className="cursor-pointer"
+                            onClick={() => handleToggleAvailability(consultant)}
+                          >
+                            {consultant.available ? "Müsait" : "Meşgul"}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Group gap="xs">
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              size="lg"
+                              onClick={() => handleEditConsultant(consultant)}
+                              title="Düzenle"
+                            >
+                              <MdEdit size={18} />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="light"
+                              color="red"
+                              size="lg"
+                              onClick={() => handleDeleteConsultantClick(consultant)}
+                              title="Sil"
+                            >
+                              <MdDelete size={18} />
+                            </ActionIcon>
+                          </Group>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </div>
+            )}
+
+            {/* Consultants Summary */}
+            {consultants && consultants.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <Text size="sm" color="dimmed">
+                    Toplam: {consultants.length} danışman
+                  </Text>
+                  <div className="flex gap-4">
+                    <Text size="sm" color="dimmed">
+                      Müsait:{" "}
+                      {consultants.filter((c) => c.available).length}
+                    </Text>
+                    <Text size="sm" color="dimmed">
+                      Meşgul:{" "}
+                      {consultants.filter((c) => !c.available).length}
+                    </Text>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Paper>
+        )}
+
+        {/* Users Section */}
+        {activeTab === "users" && (
+          <Paper shadow="sm" p="xl" radius="md" className="mb-6">
+            <div className="flexBetween mb-6">
+              <div>
+                <Title
+                  order={3}
+                  className="flex items-center gap-2 text-gray-800"
+                >
+                  <MdPeople className="text-cyan-500" />
+                  Kullanıcılar & Rezervasyonlar
+                </Title>
+                <Text size="sm" color="dimmed" className="mt-1">
+                  Tüm kullanıcılar, bilgileri ve rezervasyonları
+                </Text>
+              </div>
+              <Group>
+                <Button
+                  variant="light"
+                  color="cyan"
+                  leftSection={<MdRefresh size={18} />}
+                  onClick={() => {
+                    fetchUsers();
+                    fetchBookings();
+                  }}
+                  loading={usersLoading}
+                >
+                  Yenile
+                </Button>
+              </Group>
+            </div>
+
+            <Divider className="mb-6" />
+
+            {usersLoading ? (
+              <div className="flexCenter py-12">
+                <Loader color="cyan" />
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-12">
+                <MdPeople size={64} className="text-gray-300 mx-auto mb-4" />
+                <Text color="dimmed">
+                  Henüz kayıtlı kullanıcı bulunmamaktadır
+                </Text>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table striped highlightOnHover>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Kullanıcı</Table.Th>
+                      <Table.Th>İletişim</Table.Th>
+                      <Table.Th>Profil Durumu</Table.Th>
+                      <Table.Th>Rezervasyonlar</Table.Th>
+                      <Table.Th>Favoriler</Table.Th>
+                      <Table.Th>Kayıt Tarihi</Table.Th>
+                      <Table.Th>Rol</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {users.map((u) => (
+                      <Table.Tr key={u.id}>
+                        <Table.Td>
+                          <div className="flex items-center gap-3">
+                            <Avatar
+                              src={u.image}
+                              alt={u.name}
+                              radius="xl"
+                              size="md"
+                            />
+                            <div>
+                              <Text size="sm" fw={500}>
+                                {u.name || "İsimsiz"}
+                              </Text>
+                            </div>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1">
+                              <MdEmail size={14} className="text-gray-400" />
+                              <Text size="xs">{u.email}</Text>
+                            </div>
+                            {u.phone && (
+                              <div className="flex items-center gap-1">
+                                <FaWhatsapp size={14} className="text-green-500" />
+                                <Text size="xs">{u.phone}</Text>
+                              </div>
+                            )}
+                            {u.address && (
+                              <div className="flex items-center gap-1">
+                                <MdHome size={14} className="text-gray-400" />
+                                <Text size="xs" lineClamp={1}>{u.address}</Text>
+                              </div>
+                            )}
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            color={u.profileComplete ? "green" : "orange"}
+                            variant="light"
+                          >
+                            {u.profileComplete ? "Tamamlandı" : "Eksik"}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          {u.bookedVisits?.length > 0 ? (
+                            <div className="space-y-2">
+                              {u.bookedVisits.map((booking, idx) => {
+                                const property = properties?.find(p => p.id === booking.id);
+                                return (
+                                  <div key={idx} className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                                    {property?.image && (
+                                      <img
+                                        src={property.image}
+                                        alt={property.title}
+                                        className="w-10 h-10 rounded object-cover"
+                                      />
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <Text size="xs" fw={500} lineClamp={1}>
+                                        {property?.title || "Mülk bulunamadı"}
+                                      </Text>
+                                      <div className="flex items-center gap-1">
+                                        <MdCalendarToday size={10} className="text-orange-500" />
+                                        <Text size="xs" color="orange">{booking.date}</Text>
+                                      </div>
+                                    </div>
+                                    {property && (
+                                      <ActionIcon
+                                        variant="subtle"
+                                        size="sm"
+                                        onClick={() => navigate(`/listing/${property.id}`)}
+                                        title="Mülkü görüntüle"
+                                      >
+                                        <MdHome size={14} />
+                                      </ActionIcon>
+                                    )}
+                                    <ActionIcon
+                                      variant="light"
+                                      color="red"
+                                      size="sm"
+                                      onClick={() => handleDeleteBooking(u.email, booking.id)}
+                                      title="Rezervasyonu sil"
+                                    >
+                                      <MdDelete size={14} />
+                                    </ActionIcon>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <Text size="xs" color="dimmed">Rezervasyon yok</Text>
+                          )}
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge color="pink" variant="light">
+                            {u.favResidenciesID?.length || 0} favori
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="xs" color="dimmed">
+                            {u.createdAt
+                              ? new Date(u.createdAt).toLocaleDateString("tr-TR", {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                })
+                              : "-"}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            color={u.isAdmin ? "green" : "gray"}
+                            variant="filled"
+                          >
+                            {u.isAdmin ? "Admin" : "Kullanıcı"}
+                          </Badge>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </div>
+            )}
+
+            {/* Users Summary */}
+            {users.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <Text size="sm" color="dimmed">
+                    Toplam: {totalUsers} kullanıcı
+                  </Text>
+                  <div className="flex gap-4 flex-wrap">
+                    <Text size="sm" color="dimmed">
+                      Profil Tamamlayan:{" "}
+                      {users.filter((u) => u.profileComplete).length}
+                    </Text>
+                    <Text size="sm" color="dimmed">
+                      Admin:{" "}
+                      {users.filter((u) => u.isAdmin).length}
+                    </Text>
+                    <Text size="sm" color="dimmed">
+                      Aktif Rezervasyon:{" "}
+                      {users.reduce((acc, u) => acc + (u.bookedVisits?.length || 0), 0)}
                     </Text>
                   </div>
                 </div>
@@ -756,6 +1286,450 @@ const AdminPanel = () => {
                 İptal
               </Button>
               <Button color="red" onClick={confirmDelete} loading={deleteLoading}>
+                Sil
+              </Button>
+            </Group>
+          </div>
+        </Modal>
+
+        {/* Add Consultant Modal */}
+        <Modal
+          opened={consultantModalOpened}
+          onClose={() => {
+            setConsultantModalOpened(false);
+            resetConsultantForm();
+          }}
+          title={
+            <Text fw={600} color="grape">
+              <div className="flex items-center gap-2">
+                <MdPersonAdd />
+                Yeni Danışman Ekle
+              </div>
+            </Text>
+          }
+          size="lg"
+          centered
+        >
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="Ad Soyad"
+                placeholder="Danışman adı"
+                required
+                value={consultantForm.name}
+                onChange={(e) => setConsultantForm({ ...consultantForm, name: e.target.value })}
+              />
+              <TextInput
+                label="Ünvan"
+                placeholder="Örn: Senior Property Advisor"
+                value={consultantForm.title}
+                onChange={(e) => setConsultantForm({ ...consultantForm, title: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="Uzmanlık Alanı"
+                placeholder="Örn: Luxury Villas & Apartments"
+                value={consultantForm.specialty}
+                onChange={(e) => setConsultantForm({ ...consultantForm, specialty: e.target.value })}
+              />
+              <TextInput
+                label="Deneyim"
+                placeholder="Örn: 10 years"
+                value={consultantForm.experience}
+                onChange={(e) => setConsultantForm({ ...consultantForm, experience: e.target.value })}
+              />
+            </div>
+
+            <MultiSelect
+              label="Diller"
+              placeholder="Konuşulan dilleri seçin"
+              data={languageOptions}
+              value={consultantForm.languages}
+              onChange={(value) => setConsultantForm({ ...consultantForm, languages: value })}
+              searchable
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="Email"
+                placeholder="email@example.com"
+                required
+                value={consultantForm.email}
+                onChange={(e) => setConsultantForm({ ...consultantForm, email: e.target.value })}
+              />
+              <TextInput
+                label="Telefon"
+                placeholder="+90 5XX XXX XXXX"
+                required
+                value={consultantForm.phone}
+                onChange={(e) => setConsultantForm({ ...consultantForm, phone: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="WhatsApp"
+                placeholder="+905XXXXXXXXX"
+                value={consultantForm.whatsapp}
+                onChange={(e) => setConsultantForm({ ...consultantForm, whatsapp: e.target.value })}
+              />
+              <TextInput
+                label="LinkedIn URL"
+                placeholder="https://linkedin.com/in/..."
+                value={consultantForm.linkedin}
+                onChange={(e) => setConsultantForm({ ...consultantForm, linkedin: e.target.value })}
+              />
+            </div>
+
+            {/* Profile Image Upload */}
+            <div>
+              <Text size="sm" fw={500} mb={4}>Profil Fotoğrafı</Text>
+              {consultantForm.image ? (
+                <div className="relative inline-block">
+                  <img
+                    src={consultantForm.image}
+                    alt="Profile"
+                    className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  <ActionIcon
+                    variant="filled"
+                    color="red"
+                    size="sm"
+                    radius="xl"
+                    className="absolute top-0 right-0"
+                    onClick={removeConsultantImage}
+                  >
+                    <MdClose size={14} />
+                  </ActionIcon>
+                </div>
+              ) : (
+                <div
+                  onClick={openConsultantImageUpload}
+                  className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-grape-500 hover:bg-gray-50 transition-colors"
+                >
+                  <MdOutlineCloudUpload size={28} className="text-gray-400" />
+                  <span className="text-xs text-gray-400 mt-1">Yükle</span>
+                </div>
+              )}
+              {consultantForm.image && (
+                <Button
+                  variant="subtle"
+                  size="xs"
+                  mt="xs"
+                  onClick={openConsultantImageUpload}
+                  loading={imageUploading}
+                >
+                  Değiştir
+                </Button>
+              )}
+            </div>
+
+            <Textarea
+              label="Biyografi"
+              placeholder="Danışman hakkında kısa açıklama"
+              rows={3}
+              value={consultantForm.bio}
+              onChange={(e) => setConsultantForm({ ...consultantForm, bio: e.target.value })}
+            />
+
+            <div className="grid grid-cols-3 gap-4">
+              <NumberInput
+                label="Puan"
+                placeholder="5.0"
+                min={0}
+                max={5}
+                step={0.1}
+                decimalScale={1}
+                value={consultantForm.rating}
+                onChange={(value) => setConsultantForm({ ...consultantForm, rating: value || 0 })}
+              />
+              <NumberInput
+                label="Yorum Sayısı"
+                placeholder="0"
+                min={0}
+                value={consultantForm.reviews}
+                onChange={(value) => setConsultantForm({ ...consultantForm, reviews: value || 0 })}
+              />
+              <NumberInput
+                label="Satış Sayısı"
+                placeholder="0"
+                min={0}
+                value={consultantForm.deals}
+                onChange={(value) => setConsultantForm({ ...consultantForm, deals: value || 0 })}
+              />
+            </div>
+
+            <Switch
+              label="Müsait"
+              checked={consultantForm.available}
+              onChange={(e) => setConsultantForm({ ...consultantForm, available: e.currentTarget.checked })}
+            />
+
+            <Group justify="flex-end" mt="xl">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setConsultantModalOpened(false);
+                  resetConsultantForm();
+                }}
+              >
+                İptal
+              </Button>
+              <Button color="grape" onClick={handleCreateConsultant} loading={consultantLoading}>
+                Danışman Ekle
+              </Button>
+            </Group>
+          </div>
+        </Modal>
+
+        {/* Edit Consultant Modal */}
+        <Modal
+          opened={editConsultantModalOpened}
+          onClose={() => {
+            setEditConsultantModalOpened(false);
+            setSelectedConsultant(null);
+            resetConsultantForm();
+          }}
+          title={
+            <Text fw={600} color="blue">
+              <div className="flex items-center gap-2">
+                <MdEdit />
+                Danışman Düzenle
+              </div>
+            </Text>
+          }
+          size="lg"
+          centered
+        >
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="Ad Soyad"
+                placeholder="Danışman adı"
+                required
+                value={consultantForm.name}
+                onChange={(e) => setConsultantForm({ ...consultantForm, name: e.target.value })}
+              />
+              <TextInput
+                label="Ünvan"
+                placeholder="Örn: Senior Property Advisor"
+                value={consultantForm.title}
+                onChange={(e) => setConsultantForm({ ...consultantForm, title: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="Uzmanlık Alanı"
+                placeholder="Örn: Luxury Villas & Apartments"
+                value={consultantForm.specialty}
+                onChange={(e) => setConsultantForm({ ...consultantForm, specialty: e.target.value })}
+              />
+              <TextInput
+                label="Deneyim"
+                placeholder="Örn: 10 years"
+                value={consultantForm.experience}
+                onChange={(e) => setConsultantForm({ ...consultantForm, experience: e.target.value })}
+              />
+            </div>
+
+            <MultiSelect
+              label="Diller"
+              placeholder="Konuşulan dilleri seçin"
+              data={languageOptions}
+              value={consultantForm.languages}
+              onChange={(value) => setConsultantForm({ ...consultantForm, languages: value })}
+              searchable
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="Email"
+                placeholder="email@example.com"
+                required
+                value={consultantForm.email}
+                onChange={(e) => setConsultantForm({ ...consultantForm, email: e.target.value })}
+              />
+              <TextInput
+                label="Telefon"
+                placeholder="+90 5XX XXX XXXX"
+                required
+                value={consultantForm.phone}
+                onChange={(e) => setConsultantForm({ ...consultantForm, phone: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <TextInput
+                label="WhatsApp"
+                placeholder="+905XXXXXXXXX"
+                value={consultantForm.whatsapp}
+                onChange={(e) => setConsultantForm({ ...consultantForm, whatsapp: e.target.value })}
+              />
+              <TextInput
+                label="LinkedIn URL"
+                placeholder="https://linkedin.com/in/..."
+                value={consultantForm.linkedin}
+                onChange={(e) => setConsultantForm({ ...consultantForm, linkedin: e.target.value })}
+              />
+            </div>
+
+            {/* Profile Image Upload */}
+            <div>
+              <Text size="sm" fw={500} mb={4}>Profil Fotoğrafı</Text>
+              {consultantForm.image ? (
+                <div className="relative inline-block">
+                  <img
+                    src={consultantForm.image}
+                    alt="Profile"
+                    className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  <ActionIcon
+                    variant="filled"
+                    color="red"
+                    size="sm"
+                    radius="xl"
+                    className="absolute top-0 right-0"
+                    onClick={removeConsultantImage}
+                  >
+                    <MdClose size={14} />
+                  </ActionIcon>
+                </div>
+              ) : (
+                <div
+                  onClick={openConsultantImageUpload}
+                  className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-colors"
+                >
+                  <MdOutlineCloudUpload size={28} className="text-gray-400" />
+                  <span className="text-xs text-gray-400 mt-1">Yükle</span>
+                </div>
+              )}
+              {consultantForm.image && (
+                <Button
+                  variant="subtle"
+                  size="xs"
+                  mt="xs"
+                  onClick={openConsultantImageUpload}
+                  loading={imageUploading}
+                >
+                  Değiştir
+                </Button>
+              )}
+            </div>
+
+            <Textarea
+              label="Biyografi"
+              placeholder="Danışman hakkında kısa açıklama"
+              rows={3}
+              value={consultantForm.bio}
+              onChange={(e) => setConsultantForm({ ...consultantForm, bio: e.target.value })}
+            />
+
+            <div className="grid grid-cols-3 gap-4">
+              <NumberInput
+                label="Puan"
+                placeholder="5.0"
+                min={0}
+                max={5}
+                step={0.1}
+                decimalScale={1}
+                value={consultantForm.rating}
+                onChange={(value) => setConsultantForm({ ...consultantForm, rating: value || 0 })}
+              />
+              <NumberInput
+                label="Yorum Sayısı"
+                placeholder="0"
+                min={0}
+                value={consultantForm.reviews}
+                onChange={(value) => setConsultantForm({ ...consultantForm, reviews: value || 0 })}
+              />
+              <NumberInput
+                label="Satış Sayısı"
+                placeholder="0"
+                min={0}
+                value={consultantForm.deals}
+                onChange={(value) => setConsultantForm({ ...consultantForm, deals: value || 0 })}
+              />
+            </div>
+
+            <Switch
+              label="Müsait"
+              checked={consultantForm.available}
+              onChange={(e) => setConsultantForm({ ...consultantForm, available: e.currentTarget.checked })}
+            />
+
+            <Group justify="flex-end" mt="xl">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setEditConsultantModalOpened(false);
+                  setSelectedConsultant(null);
+                  resetConsultantForm();
+                }}
+              >
+                İptal
+              </Button>
+              <Button color="blue" onClick={handleUpdateConsultant} loading={consultantLoading}>
+                Güncelle
+              </Button>
+            </Group>
+          </div>
+        </Modal>
+
+        {/* Delete Consultant Confirmation Modal */}
+        <Modal
+          opened={deleteConsultantModalOpened}
+          onClose={() => {
+            setDeleteConsultantModalOpened(false);
+            setConsultantToDelete(null);
+          }}
+          title={
+            <Text fw={600} color="red">
+              Danışmanı Sil
+            </Text>
+          }
+          centered
+        >
+          <div className="py-4">
+            <Text size="sm" color="dimmed" mb="md">
+              Bu danışmanı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+            </Text>
+            {consultantToDelete && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
+                {consultantToDelete.image && (
+                  <Avatar
+                    src={consultantToDelete.image}
+                    alt={consultantToDelete.name}
+                    size="lg"
+                    radius="xl"
+                  />
+                )}
+                <div>
+                  <Text size="sm" fw={500}>
+                    {consultantToDelete.name}
+                  </Text>
+                  <Text size="xs" color="dimmed">
+                    {consultantToDelete.title}
+                  </Text>
+                  <Text size="xs" color="dimmed">
+                    {consultantToDelete.email}
+                  </Text>
+                </div>
+              </div>
+            )}
+            <Group justify="flex-end" mt="xl">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setDeleteConsultantModalOpened(false);
+                  setConsultantToDelete(null);
+                }}
+              >
+                İptal
+              </Button>
+              <Button color="red" onClick={confirmDeleteConsultant} loading={consultantLoading}>
                 Sil
               </Button>
             </Group>

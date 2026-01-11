@@ -1,58 +1,103 @@
-import { Avatar, Menu, Divider } from "@mantine/core";
+import { useState, useContext, useEffect } from "react";
+import { Avatar, Menu, Divider, Badge } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import useAdmin from "../hooks/useAdmin";
-import { MdDashboard } from "react-icons/md";
+import UserDetailContext from "../context/UserDetailContext";
+import { getUserProfile } from "../utils/api";
+import { MdDashboard, MdPerson } from "react-icons/md";
+import ProfileModal from "./ProfileModal";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const ProfileMenu = ({ user, logout }) => {
   const navigate = useNavigate();
   const { isAdmin, loading } = useAdmin();
+  const [profileModalOpened, setProfileModalOpened] = useState(false);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const { user: auth0User } = useAuth0();
+  const {
+    userDetails: { token },
+  } = useContext(UserDetailContext);
+
+  // Check if profile is complete
+  useEffect(() => {
+    const checkProfile = async () => {
+      if (auth0User?.email && token) {
+        const profile = await getUserProfile(auth0User.email, token);
+        if (profile) {
+          setProfileComplete(profile.profileComplete || false);
+        }
+      }
+    };
+    checkProfile();
+  }, [auth0User, token]);
 
   return (
-    <Menu>
-      <Menu.Target>
-        <Avatar
-          src={user?.picture}
-          alt="user image"
-          radius={"xl"}
-          className="cursor-pointer"
-        />
-      </Menu.Target>
-      <Menu.Dropdown>
-        {/* Admin Section - Only visible for admins */}
-        {!loading && isAdmin && (
-          <>
-            <Menu.Label>Admin</Menu.Label>
-            <Menu.Item
-              leftSection={<MdDashboard size={16} />}
-              onClick={() => navigate("/admin", { replace: true })}
-              color="green"
-            >
-              Yönetim Paneli
-            </Menu.Item>
-            <Divider my="xs" />
-          </>
-        )}
+    <>
+      <Menu>
+        <Menu.Target>
+          <Avatar
+            src={user?.picture}
+            alt="user image"
+            radius={"xl"}
+            className="cursor-pointer"
+          />
+        </Menu.Target>
+        <Menu.Dropdown>
+          {/* Profile Section */}
+          <Menu.Item
+            leftSection={<MdPerson size={16} />}
+            onClick={() => setProfileModalOpened(true)}
+            rightSection={
+              !profileComplete && (
+                <Badge size="xs" color="orange" variant="light">
+                  Eksik
+                </Badge>
+              )
+            }
+          >
+            Profilim
+          </Menu.Item>
+          <Divider my="xs" />
 
-        <Menu.Label>Application</Menu.Label>
-        <Menu.Item onClick={() => navigate("./favourites", { replace: true })}>
-          Favourites
-        </Menu.Item>
-        <Menu.Item onClick={() => navigate("./bookings", { replace: true })}>
-          Bookings
-        </Menu.Item>
-        <Menu.Label>Go back</Menu.Label>
-        <Menu.Item
-          onClick={() => {
-            localStorage.clear();
-            logout();
-          }}
-          color="red"
-        >
-          Logout
-        </Menu.Item>
-      </Menu.Dropdown>
-    </Menu>
+          {/* Admin Section - Only visible for admins */}
+          {!loading && isAdmin && (
+            <>
+              <Menu.Label>Admin</Menu.Label>
+              <Menu.Item
+                leftSection={<MdDashboard size={16} />}
+                onClick={() => navigate("/admin", { replace: true })}
+                color="green"
+              >
+                Yönetim Paneli
+              </Menu.Item>
+              <Divider my="xs" />
+            </>
+          )}
+
+          <Menu.Label>Application</Menu.Label>
+          <Menu.Item onClick={() => navigate("./favourites", { replace: true })}>
+            Favourites
+          </Menu.Item>
+          <Menu.Item onClick={() => navigate("./bookings", { replace: true })}>
+            Bookings
+          </Menu.Item>
+          <Menu.Label>Go back</Menu.Label>
+          <Menu.Item
+            onClick={() => {
+              localStorage.clear();
+              logout();
+            }}
+            color="red"
+          >
+            Logout
+          </Menu.Item>
+        </Menu.Dropdown>
+      </Menu>
+
+      {/* Profile Modal */}
+      <ProfileModal opened={profileModalOpened} setOpened={setProfileModalOpened} />
+    </>
   );
 };
 

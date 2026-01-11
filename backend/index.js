@@ -5,6 +5,7 @@ import cors from "cors";
 import { prisma } from "./config/prismaConfig.js";
 import { userRoute } from "./routes/userRoute.js";
 import { residencyRoute } from "./routes/residencyRoute.js";
+import { consultantRoute } from "./routes/consultantRoute.js";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use(cors());
 // Routes
 app.use("/api/user", userRoute);
 app.use("/api/residency", residencyRoute);
+app.use("/api/consultant", consultantRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
