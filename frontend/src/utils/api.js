@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { toast } from "react-toastify";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://casecentral-yt-backend.vercel.app//api",
+  baseURL: import.meta.env.VITE_API_URL || "https://casecentral-yt-backend.vercel.app/api",
 });
 
 export const getAllProperties = async () => {
