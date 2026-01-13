@@ -7,11 +7,36 @@ import {
   Textarea,
   SegmentedControl,
   Text,
+  Select,
+  Avatar,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { validateString } from "../utils/common";
 import PropTypes from "prop-types";
-import { MdSell, MdHome } from "react-icons/md";
+import { MdSell, MdHome, MdPerson } from "react-icons/md";
+import {
+  FaBuilding,
+  FaLandmark,
+  FaUmbrellaBeach,
+  FaWarehouse,
+  FaHome,
+  FaBriefcase,
+} from "react-icons/fa";
+import useConsultants from "../hooks/useConsultants";
+
+// Property categories
+const propertyCategories = [
+  { value: "residential", label: "Residential", icon: FaHome },
+  { value: "commercial", label: "Commercial", icon: FaBriefcase },
+  { value: "land", label: "Land", icon: FaLandmark },
+  { value: "building", label: "Building", icon: FaBuilding },
+  { value: "timeshare", label: "Timeshare", icon: FaWarehouse },
+  {
+    value: "tourist-facility",
+    label: "Tourist Facility",
+    icon: FaUmbrellaBeach,
+  },
+];
 
 const BasicDetails = ({
   prevStep,
@@ -19,21 +44,26 @@ const BasicDetails = ({
   propertyDetails,
   setPropertyDetails,
 }) => {
+  const { data: consultants, isLoading: consultantsLoading } = useConsultants();
+
   const form = useForm({
     initialValues: {
       title: propertyDetails.title,
       description: propertyDetails.description,
       price: propertyDetails.price,
       propertyType: propertyDetails.propertyType || "sale",
+      category: propertyDetails.category || "residential",
+      consultantId: propertyDetails.consultantId || "",
     },
     validate: {
       title: (value) => validateString(value),
       description: (value) => validateString(value),
-      price: (value) => (value < 999 ? "Must be minimum 999 dollars" : null),
+      price: (value) => (value < 999 ? "Must be minimum 999 lira" : null),
     },
   });
 
-  const { title, description, price, propertyType } = form.values;
+  const { title, description, price, propertyType, category, consultantId } =
+    form.values;
   const handleSubmit = () => {
     const { hasErrors } = form.validate();
     if (!hasErrors) {
@@ -43,10 +73,21 @@ const BasicDetails = ({
         description,
         price,
         propertyType,
+        category,
+        consultantId: consultantId || null,
       }));
       nextStep();
     }
   };
+
+  // Prepare consultant options for select
+  const consultantOptions =
+    consultants?.map((c) => ({
+      value: c.id,
+      label: c.name,
+      image: c.image,
+      title: c.title,
+    })) || [];
 
   return (
     <Box maw={"50%"} mx="auto" my={"md"}>
@@ -59,7 +100,7 @@ const BasicDetails = ({
         {/* Property Type Selector */}
         <div className="mb-4">
           <Text size="sm" fw={500} mb={4}>
-            Mülk Türü <span className="text-red-500">*</span>
+            Property Type <span className="text-red-500">*</span>
           </Text>
           <SegmentedControl
             fullWidth
@@ -71,7 +112,7 @@ const BasicDetails = ({
                 label: (
                   <div className="flex items-center justify-center gap-2 py-1">
                     <MdSell size={18} />
-                    <span>Satılık</span>
+                    <span>For Sale</span>
                   </div>
                 ),
                 value: "sale",
@@ -80,7 +121,7 @@ const BasicDetails = ({
                 label: (
                   <div className="flex items-center justify-center gap-2 py-1">
                     <MdHome size={18} />
-                    <span>Kiralık</span>
+                    <span>For Rent</span>
                   </div>
                 ),
                 value: "rent",
@@ -88,6 +129,33 @@ const BasicDetails = ({
             ]}
           />
         </div>
+
+        {/* Property Category Selector */}
+        <Select
+          label="Property Category"
+          placeholder="Select property category"
+          description="Choose the type of property"
+          data={propertyCategories.map((cat) => ({
+            value: cat.value,
+            label: cat.label,
+          }))}
+          value={category}
+          onChange={(value) => form.setFieldValue("category", value)}
+          mb="md"
+          withAsterisk
+          renderOption={({ option }) => {
+            const cat = propertyCategories.find(
+              (c) => c.value === option.value
+            );
+            const IconComponent = cat?.icon || FaHome;
+            return (
+              <div className="flex items-center gap-2 py-1">
+                <IconComponent size={16} />
+                <span>{option.label}</span>
+              </div>
+            );
+          }}
+        />
 
         <TextInput
           withAsterisk
@@ -103,10 +171,38 @@ const BasicDetails = ({
         />
         <NumberInput
           withAsterisk
-          label={propertyType === "sale" ? "Fiyat ($)" : "Aylık Kira ($)"}
+          label={propertyType === "sale" ? "Price (₺)" : "Monthly Rent (₺)"}
           placeholder="999"
           min={0}
           {...form.getInputProps("price")}
+        />
+
+        {/* Consultant Selector */}
+        <Select
+          label="Assign Consultant"
+          placeholder="Select a consultant for this property"
+          description="The consultant will be shown as the contact person for this property"
+          data={consultantOptions}
+          value={consultantId}
+          onChange={(value) => form.setFieldValue("consultantId", value)}
+          clearable
+          searchable
+          disabled={consultantsLoading}
+          mt="md"
+          leftSection={<MdPerson size={16} />}
+          renderOption={({ option }) => (
+            <div className="flex items-center gap-2 py-1">
+              <Avatar src={option.image} size="sm" radius="xl" />
+              <div>
+                <Text size="sm" fw={500}>
+                  {option.label}
+                </Text>
+                <Text size="xs" c="dimmed">
+                  {option.title}
+                </Text>
+              </div>
+            </div>
+          )}
         />
 
         <Group position="center" mt="xl">

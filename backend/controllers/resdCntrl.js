@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
-import { prisma } from "../config/prismaConfig.js";
+import { prisma, getMongoDb } from "../config/prismaConfig.js";
+import { ObjectId } from "mongodb";
 
 export const createResidency = asyncHandler(async (req, res) => {
   const {
@@ -13,7 +14,9 @@ export const createResidency = asyncHandler(async (req, res) => {
     images,
     facilities,
     propertyType,
+    category,
     userEmail,
+    consultantId,
   } = req.body.data;
 
   console.log("========================================");
@@ -23,29 +26,51 @@ export const createResidency = asyncHandler(async (req, res) => {
   console.log("City:", city);
   console.log("Price:", price);
   console.log("Property Type:", propertyType);
+  console.log("Category:", category);
   console.log("Owner Email:", userEmail);
+  console.log("Consultant ID:", consultantId || "Not assigned");
   console.log("Images count:", images?.length || 1);
 
   try {
-    const residency = await prisma.residency.create({
-      data: {
-        title,
-        description,
-        price,
-        address,
-        city,
-        country,
-        image,
-        images: images || [image],
-        facilities,
-        propertyType: propertyType || "sale",
-        owner: {
-          connect: {
-            email: userEmail,
-          },
-        },
-      },
-    });
+    // Use MongoDB directly to support all fields including category
+    const db = await getMongoDb();
+
+    // First check if user exists
+    const user = await db.collection("User").findOne({ email: userEmail });
+    if (!user) {
+      console.log("⚠️  User not found:", userEmail);
+      console.log("========================================");
+      return res.status(404).send({
+        message: "User not found. Please register the user first.",
+      });
+    }
+
+    const residencyData = {
+      title,
+      description,
+      price,
+      address,
+      city,
+      country,
+      image,
+      images: images || [image],
+      facilities,
+      propertyType: propertyType || "sale",
+      category: category || "residential",
+      userEmail,
+      consultantId: consultantId || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const result = await db.collection("Residency").insertOne(residencyData);
+
+    // Get the created residency
+    const residency = await db
+      .collection("Residency")
+      .findOne({ _id: result.insertedId });
+    residency.id = residency._id.toString();
+    delete residency._id;
 
     console.log("✅ Residency created successfully!");
     console.log("Residency ID:", residency.id);
@@ -58,21 +83,12 @@ export const createResidency = asyncHandler(async (req, res) => {
   } catch (error) {
     console.log("❌ Error creating residency!");
     console.error("Error details:", error.message);
-    console.error("Error code:", error.code);
 
-    if (error.code === "P2002") {
+    if (error.code === 11000) {
       console.log("⚠️  Duplicate residency detected");
       console.log("========================================");
       return res.status(409).send({
         message: "A residency with this address already exists for this user",
-      });
-    }
-
-    if (error.code === "P2025") {
-      console.log("⚠️  User not found:", userEmail);
-      console.log("========================================");
-      return res.status(404).send({
-        message: "User not found. Please register the user first.",
       });
     }
 
@@ -85,12 +101,26 @@ export const createResidency = asyncHandler(async (req, res) => {
 });
 
 export const getAllResidencies = asyncHandler(async (req, res) => {
-  const residencies = await prisma.residency.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-  res.send(residencies);
+  try {
+    // Use MongoDB directly to get all fields including new ones
+    const db = await getMongoDb();
+    const residencies = await db
+      .collection("Residency")
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // Transform _id to id for consistency
+    const transformed = residencies.map((r) => {
+      r.id = r._id.toString();
+      delete r._id;
+      return r;
+    });
+
+    res.send(transformed);
+  } catch (err) {
+    throw new Error(err.message);
+  }
 });
 
 //get residency by id
@@ -98,9 +128,34 @@ export const getAllResidencies = asyncHandler(async (req, res) => {
 export const getResidency = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
-    const residency = await prisma.residency.findUnique({
-      where: { id },
+    // Use MongoDB directly to get all fields including new ones
+    const db = await getMongoDb();
+    const residency = await db.collection("Residency").findOne({
+      _id: new ObjectId(id),
     });
+
+    if (residency) {
+      // Transform _id to id for consistency
+      residency.id = residency._id.toString();
+      delete residency._id;
+
+      // Fetch consultant if consultantId exists
+      if (residency.consultantId) {
+        try {
+          const consultant = await db.collection("Consultant").findOne({
+            _id: new ObjectId(residency.consultantId),
+          });
+          if (consultant) {
+            consultant.id = consultant._id.toString();
+            delete consultant._id;
+            residency.consultant = consultant;
+          }
+        } catch (e) {
+          console.log("Error fetching consultant:", e.message);
+        }
+      }
+    }
+
     res.send(residency);
   } catch (err) {
     throw new Error(err.message);
@@ -121,6 +176,10 @@ export const updateResidency = asyncHandler(async (req, res) => {
     images,
     facilities,
     propertyType,
+    category,
+    consultantId,
+    interiorFeatures,
+    exteriorFeatures,
   } = req.body.data;
 
   console.log("========================================");
@@ -128,26 +187,54 @@ export const updateResidency = asyncHandler(async (req, res) => {
   console.log("Residency ID:", id);
   console.log("Title:", title);
   console.log("Price:", price);
+  console.log("Category:", category);
+  console.log("Interior Features:", interiorFeatures?.length || 0);
+  console.log("Exterior Features:", exteriorFeatures?.length || 0);
 
   try {
-    const residency = await prisma.residency.update({
-      where: { id },
-      data: {
-        title,
-        description,
-        price,
-        address,
-        city,
-        country,
-        image,
-        images: images || [image],
-        facilities,
-        propertyType: propertyType || "sale",
-      },
-    });
+    // Use MongoDB directly to update all fields including new ones
+    const db = await getMongoDb();
+    const updateData = {
+      title,
+      description,
+      price,
+      address,
+      city,
+      country,
+      image,
+      images: images || [image],
+      facilities,
+      propertyType: propertyType || "sale",
+      category: category || "residential",
+      consultantId: consultantId || null,
+      interiorFeatures: interiorFeatures || [],
+      exteriorFeatures: exteriorFeatures || [],
+      updatedAt: new Date(),
+    };
+
+    console.log("Consultant ID:", consultantId || "Not assigned");
+
+    const result = await db
+      .collection("Residency")
+      .updateOne({ _id: new ObjectId(id) }, { $set: updateData });
+
+    if (result.matchedCount === 0) {
+      console.log("⚠️  Residency not found:", id);
+      console.log("========================================");
+      return res.status(404).send({
+        message: "Residency not found",
+      });
+    }
 
     console.log("✅ Residency updated successfully!");
     console.log("========================================");
+
+    // Fetch the updated document
+    const residency = await db
+      .collection("Residency")
+      .findOne({ _id: new ObjectId(id) });
+    residency.id = residency._id.toString();
+    delete residency._id;
 
     res.status(200).send({
       message: "Residency updated successfully",
@@ -157,19 +244,25 @@ export const updateResidency = asyncHandler(async (req, res) => {
     console.log("❌ Error updating residency!");
     console.error("Error details:", error.message);
 
-    if (error.code === "P2025") {
-      console.log("⚠️  Residency not found:", id);
-      console.log("========================================");
-      return res.status(404).send({
-        message: "Residency not found",
-      });
-    }
-
     console.log("========================================");
     res.status(500).send({
       message: "Error updating residency",
       error: error.message,
     });
+  }
+});
+
+// Get residencies by consultant
+export const getResidenciesByConsultant = asyncHandler(async (req, res) => {
+  const { consultantId } = req.params;
+  try {
+    const residencies = await prisma.residency.findMany({
+      where: { consultantId },
+      orderBy: { createdAt: "desc" },
+    });
+    res.send(residencies);
+  } catch (err) {
+    throw new Error(err.message);
   }
 });
 

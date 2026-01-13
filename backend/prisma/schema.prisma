@@ -25,22 +25,52 @@ model User {
 model Residency {
     id String @id @default(auto()) @map("_id") @db.ObjectId
     title String
-    description String
+    description String?
     price Int
-    address String
-    city String
-    country String
-    image String
+    currency String @default("USD")
+    address String?
+    addressDetails Json? // { city, district, neighborhood }
+    city String?
+    country String?
+    image String?
     images String[]
-    facilities Json
+    facilities Json?
     propertyType String @default("sale") // "sale" or "rent"
-    userEmail String
-    owner User @relation("Owner",fields: [userEmail],references: [email])
+    category String @default("residential") // residential, commercial, land, building, timeshare, tourist-facility
+    
+    // Turkish real estate fields
+    listingNo String?
+    listingDate DateTime?
+    area Json? // { gross, net }
+    rooms String?
+    buildingAge Int?
+    floor Int?
+    totalFloors Int?
+    heating String?
+    bathrooms Int?
+    kitchen String?
+    balcony Boolean?
+    elevator Boolean?
+    parking String?
+    furnished Boolean?
+    usageStatus String?
+    siteName String?
+    dues Int?
+    mortgageEligible Boolean?
+    deedStatus String?
+    
+    // Property Features
+    interiorFeatures String[] // İç Özellikler
+    exteriorFeatures String[] // Dış Özellikler
+    
+    userEmail String?
+    owner User? @relation("Owner",fields: [userEmail],references: [email])
+    
+    consultantId String? @db.ObjectId
+    consultant Consultant? @relation(fields: [consultantId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-
-    @@unique(fields: [address,userEmail])
 }
 
 model Consultant {
@@ -60,6 +90,8 @@ model Consultant {
     image String
     bio String
     available Boolean @default(true)
+    
+    residencies Residency[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

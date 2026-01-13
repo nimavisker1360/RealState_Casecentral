@@ -13,7 +13,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       domain="dev-pdz8rd3zuiwyzqzo.us.auth0.com"
       clientId="BxBZ7tbUCQk1y0zngWitB0k0vTdIACft"
       authorizationParams={{
-        redirect_uri:"https://real-state-casecentral.vercel.app",
+        redirect_uri: window.location.origin,
         scope: "openid profile email",
       }}
       cacheLocation="localstorage"

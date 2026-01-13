@@ -1,26 +1,152 @@
-import React from 'react'
-import {Link} from "react-router-dom"
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import heroBg from "../assets/img1.png";
+import useProperties from "../hooks/useProperties";
 
 const Hero = () => {
-    return (
-        <section className='max-padd-container pt-[99px] overflow-x-hidden'>
-            <div className='bg-hero bg-center bg-no-repeat bg-cover h-[400px] sm:h-[500px] md:h-[655px] w-full rounded-3xl px-4 sm:px-6 lg:px-12'>
-                <div className='relative top-16 sm:top-24 md:top-32 lg:top-52'>
-                    <span className='medium-18 text-sm sm:text-base'>Welcome to CasaCentral</span>
-                    <h1 className='h1 capitalize max-w-full sm:max-w-[30rem] md:max-w-[40rem] text-2xl sm:text-3xl md:text-4xl lg:text-5xl'>Discover Exceptional Homes with Casacentral</h1>
-                    <p className='my-4 sm:my-6 md:my-10 max-w-full sm:max-w-[25rem] md:max-w-[33rem] text-sm sm:text-base'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Non rerum dolorum cumque magni rem illo quia, autem porro excepturi.</p>
-                    {/* button */}
-                    <div className='inline-flex items-center justify-center gap-2 sm:gap-4 p-2 bg-white rounded-xl'>
-                        <div className='text-center regular-14 leading-tight pl-3 sm:pl-5 hidden xs:block'>
-                            <h5 className='uppercase font-bold text-xs sm:text-sm'>10% Off</h5>
-                            <p className='regular-14 text-xs sm:text-sm'>On All Properties</p>
-                        </div>
-                        <Link to={'/listing'} className={"btn-secondary rounded-xl flexCenter !py-3 sm:!py-5 text-sm sm:text-base"}>Shop now</Link>
-                    </div>
-                </div>
-            </div>
-        </section>
-    )
-}
+  const [query, setQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [filteredResults, setFilteredResults] = useState([]);
+  const { data: properties, isLoading } = useProperties();
+  const navigate = useNavigate();
+  const searchRef = useRef(null);
 
-export default Hero
+  // Filter properties based on search query
+  useEffect(() => {
+    if (query.trim() && properties) {
+      const filtered = properties.filter(
+        (property) =>
+          property.title.toLowerCase().includes(query.toLowerCase()) ||
+          property.city.toLowerCase().includes(query.toLowerCase()) ||
+          property.country.toLowerCase().includes(query.toLowerCase()) ||
+          property.address.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredResults(filtered);
+      setShowResults(true);
+    } else {
+      setFilteredResults([]);
+      setShowResults(false);
+    }
+  }, [query, properties]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/listing?search=${encodeURIComponent(query)}`);
+    }
+  };
+
+  const handleResultClick = (property) => {
+    setShowResults(false);
+    // Navigate to listing page with city as search query to show all properties in that city
+    setQuery("");
+    navigate(`/listing?search=${encodeURIComponent(property.city)}`);
+  };
+
+  return (
+    <section className="relative h-[520px] sm:h-[600px] md:h-[720px] overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0">
+        <img
+          src={heroBg}
+          alt="city skyline"
+          className="w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#101828]/70 via-[#101828]/40 to-[#101828]/80" />
+      </div>
+
+      {/* Content */}
+      <div className="relative max-w-[1100px] mx-auto h-full px-6 sm:px-10 flex flex-col items-center justify-center text-white text-center gap-4">
+        <h1 className="text-[36px] sm:text-[48px] md:text-[64px] font-semibold leading-tight italic">
+          Discover Your New Home
+        </h1>
+        <p className="text-lg sm:text-xl text-white/90 italic">
+          Helping 100 million renters find their perfect fit.
+        </p>
+
+        {/* Search Form */}
+        <div ref={searchRef} className="relative w-full max-w-[560px] mt-6">
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center bg-white rounded-full shadow-[0_14px_40px_rgba(15,23,42,0.25)]"
+          >
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => query.trim() && setShowResults(true)}
+              placeholder="Search city, country or title..."
+              className="flex-1 rounded-full border-none py-3 px-5 text-sm text-gray-800 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="w-10 h-10 mr-1 rounded-full bg-[#06a84e] flex items-center justify-center text-white text-sm transition hover:bg-[#058a41]"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+                fill="currentColor"
+              >
+                <path d="M10 4a6 6 0 014.472 10.04l4.744 4.744-1.415 1.415-4.744-4.744A6 6 0 1110 4zm0 2a4 4 0 100 8 4 4 0 000-8z" />
+              </svg>
+            </button>
+          </form>
+
+          {/* Search Results Dropdown */}
+          {showResults && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+              {isLoading ? (
+                <div className="p-4 text-center text-gray-500">Loading...</div>
+              ) : filteredResults.length > 0 ? (
+                <ul>
+                  {filteredResults.map((property) => (
+                    <li
+                      key={property.id}
+                      onClick={() => handleResultClick(property)}
+                      className="flex items-center gap-4 p-3 hover:bg-gray-50 cursor-pointer transition border-b border-gray-100 last:border-b-0"
+                    >
+                      <img
+                        src={property.image}
+                        alt={property.title}
+                        className="w-16 h-12 object-cover rounded-lg flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0 text-left">
+                        <h4 className="text-sm font-semibold text-gray-800 truncate">
+                          {property.title}
+                        </h4>
+                        <p className="text-xs text-gray-500 truncate">
+                          {property.city}, {property.country}
+                        </p>
+                      </div>
+                      <div className="text-sm font-bold text-[#06a84e] flex-shrink-0">
+                        ₺{property.price.toLocaleString()}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  No properties found for &ldquo;{query}&rdquo;
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Hero;

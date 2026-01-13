@@ -1,131 +1,265 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import Searchbar from "../components/Searchbar";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import useProperties from "../hooks/useProperties";
 import { PuffLoader } from "react-spinners";
-import Item from "../components/Item";
-import { MdSell, MdHome, MdList } from "react-icons/md";
+import PropertyCard from "../components/PropertyCard";
+import PropertiesMap from "../components/PropertiesMap";
+import { MdSell, MdHome, MdList, MdSearch } from "react-icons/md";
+import { FaBuilding, FaLandmark, FaUmbrellaBeach, FaWarehouse, FaHome, FaBriefcase } from "react-icons/fa";
+
+// Property categories
+const propertyCategories = [
+  { value: "residential", label: "Residential", icon: FaHome },
+  { value: "commercial", label: "Commercial", icon: FaBriefcase },
+  { value: "land", label: "Land", icon: FaLandmark },
+  { value: "building", label: "Building", icon: FaBuilding },
+  { value: "timeshare", label: "Timeshare", icon: FaWarehouse },
+  { value: "tourist-facility", label: "Tourist Facility", icon: FaUmbrellaBeach },
+];
 
 const Listing = () => {
   const { data, isError, isLoading } = useProperties();
-  const [filter, setFilter] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  
-  // Get property type filter from URL
+  const navigate = useNavigate();
+
+  // Get filters from URL
   const typeFilter = searchParams.get("type");
+  const categoryFilter = searchParams.get("category");
+  const searchQuery = searchParams.get("search") || "";
+
+  const [filter, setFilter] = useState(searchQuery);
+
+  // Update filter when URL search param changes
+  useEffect(() => {
+    setFilter(searchQuery);
+  }, [searchQuery]);
+
+  // Update URL when filter changes
+  const handleFilterChange = (value) => {
+    setFilter(value);
+    if (value.trim()) {
+      searchParams.set("search", value);
+    } else {
+      searchParams.delete("search");
+    }
+    setSearchParams(searchParams);
+  };
 
   if (isError) {
     return (
-      <div>
-        <span>Error while fetching data</span>
+      <div className="h-screen flexCenter">
+        <span className="text-red-500">Error while fetching data</span>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="h-64 flexCenter">
+      <div className="h-screen flexCenter">
         <PuffLoader
           height="80"
           width="80"
           radius={1}
-          color="#555"
+          color="#16a34a"
           aria-label="puff-loading"
         />
       </div>
     );
   }
 
-  // Filter properties by type and search
+  // Filter properties by type, category, and search
   const filteredData = data
     .filter((property) => {
-      // Filter by property type if set
       if (typeFilter) {
         return property.propertyType === typeFilter;
       }
       return true;
     })
-    .filter((property) =>
-      property.title.toLowerCase().includes(filter.toLowerCase()) ||
-      property.city.toLowerCase().includes(filter.toLowerCase()) ||
-      property.country.toLowerCase().includes(filter.toLowerCase())
+    .filter((property) => {
+      if (categoryFilter) {
+        return property.category === categoryFilter;
+      }
+      return true;
+    })
+    .filter(
+      (property) =>
+        property.title.toLowerCase().includes(filter.toLowerCase()) ||
+        property.city.toLowerCase().includes(filter.toLowerCase()) ||
+        property.country.toLowerCase().includes(filter.toLowerCase()) ||
+        property.address.toLowerCase().includes(filter.toLowerCase())
     );
 
   const handleTypeFilter = (type) => {
     if (type === null) {
       searchParams.delete("type");
+      searchParams.delete("category");
     } else {
       searchParams.set("type", type);
     }
     setSearchParams(searchParams);
   };
 
+  const handleCategoryFilter = (category) => {
+    if (category === null) {
+      searchParams.delete("category");
+    } else {
+      searchParams.set("category", category);
+    }
+    setSearchParams(searchParams);
+  };
+
+  const handlePropertyClick = (id) => {
+    navigate(`/listing/${id}`);
+  };
+
   return (
-    <main className="max-padd-container my-[99px] overflow-x-hidden">
-      <div className="py-10 xl:py-22 bg-primary rounded-3xl px-4 sm:px-6 lg:px-12">
-        <div className="">
-          <Searchbar filter={filter} setFilter={setFilter} />
-          
-          {/* Property Type Filter Buttons */}
-          <div className="flex items-center justify-center gap-3 mt-6 mb-4">
+    <main className="h-screen pt-[80px] flex flex-col lg:flex-row overflow-hidden">
+      {/* Left Side - Map */}
+      <div className="w-full lg:w-[60%] h-[300px] lg:h-full relative">
+        <PropertiesMap
+          properties={filteredData}
+          onPropertyClick={handlePropertyClick}
+        />
+
+        {/* Map Controls */}
+        <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
+          <button className="bg-white p-2 rounded shadow hover:bg-gray-100 transition">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+          <button className="bg-white p-2 rounded shadow hover:bg-gray-100 transition">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Right Side - Property Listings */}
+      <div className="w-full lg:w-[40%] h-full flex flex-col bg-white overflow-hidden">
+        {/* Header */}
+        <div className="p-4 border-b bg-white">
+          {/* Search Title */}
+          <div className="mb-3">
+            <h1 className="text-xl font-bold text-gray-900">
+              {filter
+                ? `Properties in ${filter}`
+                : "All Properties"}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {filteredData.length} properties found
+            </p>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative mb-3">
+            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={filter}
+              onChange={(e) => handleFilterChange(e.target.value)}
+              placeholder="Search city, country, address..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Type Filter Buttons */}
+          <div className="flex items-center gap-2 flex-wrap mb-3">
             <button
               onClick={() => handleTypeFilter(null)}
-              className={`flexCenter gap-x-2 px-4 py-2 rounded-full font-medium transition-all ${
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                 !typeFilter
-                  ? "bg-gray-700 text-white shadow-md"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                  ? "bg-gray-800 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              <MdList size={18} />
-              <span>Tümü</span>
+              <MdList size={16} />
+              <span>All</span>
             </button>
             <button
               onClick={() => handleTypeFilter("sale")}
-              className={`flexCenter gap-x-2 px-4 py-2 rounded-full font-medium transition-all ${
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                 typeFilter === "sale"
-                  ? "bg-green-500 text-white shadow-md"
-                  : "bg-green-100 text-green-700 hover:bg-green-200"
+                  ? "bg-green-500 text-white"
+                  : "bg-green-50 text-green-700 hover:bg-green-100"
               }`}
             >
-              <MdSell size={18} />
-              <span>Satılık</span>
+              <MdSell size={16} />
+              <span>For Sale</span>
             </button>
             <button
               onClick={() => handleTypeFilter("rent")}
-              className={`flexCenter gap-x-2 px-4 py-2 rounded-full font-medium transition-all ${
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                 typeFilter === "rent"
-                  ? "bg-blue-500 text-white shadow-md"
-                  : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  ? "bg-blue-500 text-white"
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100"
               }`}
             >
-              <MdHome size={18} />
-              <span>Kiralık</span>
+              <MdHome size={16} />
+              <span>For Rent</span>
             </button>
           </div>
 
-          {/* Results Count */}
-          <div className="text-center text-gray-500 text-sm mb-4">
-            {filteredData.length} mülk bulundu
-            {typeFilter && (
-              <span className="ml-1">
-                ({typeFilter === "sale" ? "Satılık" : "Kiralık"})
-              </span>
-            )}
-          </div>
+          {/* Category Filter Buttons - Show when type is selected */}
+          {typeFilter && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => handleCategoryFilter(null)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  !categoryFilter
+                    ? typeFilter === "sale" ? "bg-green-600 text-white" : "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <span>All Categories</span>
+              </button>
+              {propertyCategories.map((cat) => {
+                const IconComponent = cat.icon;
+                const isActive = categoryFilter === cat.value;
+                const isSale = typeFilter === "sale";
+                return (
+                  <button
+                    key={cat.value}
+                    onClick={() => handleCategoryFilter(cat.value)}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      isActive
+                        ? isSale ? "bg-green-500 text-white" : "bg-blue-500 text-white"
+                        : isSale 
+                          ? "bg-green-50 text-green-700 hover:bg-green-100" 
+                          : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    }`}
+                  >
+                    <IconComponent size={12} />
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-          {/* Properties Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mt-6">
-            {filteredData.length > 0 ? (
-              filteredData.map((property, i) => (
-                <Item key={i} property={property} />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">🏠</div>
-                <p className="text-gray-500">Bu kategoride mülk bulunmuyor</p>
-              </div>
-            )}
-          </div>
+        {/* Property List */}
+        <div className="flex-1 overflow-y-auto">
+          {filteredData.length > 0 ? (
+            filteredData.map((property) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onCardClick={handlePropertyClick}
+              />
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center p-8">
+              <div className="text-6xl mb-4">🏠</div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                No Properties Found
+              </h3>
+              <p className="text-gray-500">
+                Try adjusting your search or filters
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </main>

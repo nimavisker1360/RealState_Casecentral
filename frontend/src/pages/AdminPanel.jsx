@@ -32,7 +32,16 @@ import useAdmin from "../hooks/useAdmin";
 import useProperties from "../hooks/useProperties";
 import useConsultants from "../hooks/useConsultants";
 import UserDetailContext from "../context/UserDetailContext";
-import { getAdminAllBookings, deleteResidency, createConsultant, updateConsultant, deleteConsultant, toggleConsultantAvailability, getAllUsers, removeBooking } from "../utils/api";
+import {
+  getAdminAllBookings,
+  deleteResidency,
+  createConsultant,
+  updateConsultant,
+  deleteConsultant,
+  toggleConsultantAvailability,
+  getAllUsers,
+  removeBooking,
+} from "../utils/api";
 import { toast } from "react-toastify";
 import {
   MdDashboard,
@@ -70,7 +79,11 @@ const AdminPanel = () => {
   const [totalBookings, setTotalBookings] = useState(0);
 
   // Properties state
-  const { data: properties, isLoading: propertiesLoading, refetch: refetchProperties } = useProperties();
+  const {
+    data: properties,
+    isLoading: propertiesLoading,
+    refetch: refetchProperties,
+  } = useProperties();
   const [editModalOpened, setEditModalOpened] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
@@ -78,11 +91,17 @@ const AdminPanel = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Consultants state
-  const { data: consultants, isLoading: consultantsLoading, refetch: refetchConsultants } = useConsultants();
+  const {
+    data: consultants,
+    isLoading: consultantsLoading,
+    refetch: refetchConsultants,
+  } = useConsultants();
   const [consultantModalOpened, setConsultantModalOpened] = useState(false);
-  const [editConsultantModalOpened, setEditConsultantModalOpened] = useState(false);
+  const [editConsultantModalOpened, setEditConsultantModalOpened] =
+    useState(false);
   const [selectedConsultant, setSelectedConsultant] = useState(null);
-  const [deleteConsultantModalOpened, setDeleteConsultantModalOpened] = useState(false);
+  const [deleteConsultantModalOpened, setDeleteConsultantModalOpened] =
+    useState(false);
   const [consultantToDelete, setConsultantToDelete] = useState(null);
   const [consultantLoading, setConsultantLoading] = useState(false);
 
@@ -139,7 +158,10 @@ const AdminPanel = () => {
       },
       (err, result) => {
         if (result.event === "success") {
-          setConsultantForm((prev) => ({ ...prev, image: result.info.secure_url }));
+          setConsultantForm((prev) => ({
+            ...prev,
+            image: result.info.secure_url,
+          }));
           setImageUploading(false);
         }
         if (result.event === "close") {
@@ -173,6 +195,8 @@ const AdminPanel = () => {
       bathrooms: 0,
     },
     propertyType: "sale",
+    category: "residential",
+    consultantId: null,
     userEmail: user?.email,
   });
 
@@ -221,16 +245,18 @@ const AdminPanel = () => {
   // Handle delete booking (admin)
   const handleDeleteBooking = async (userEmail, propertyId) => {
     if (!token || !userEmail || !propertyId) return;
-    
+
     try {
       await removeBooking(propertyId, userEmail, token);
-      toast.success("Rezervasyon başarıyla silindi!", { position: "bottom-right" });
+      toast.success("Booking deleted successfully!", {
+        position: "bottom-right",
+      });
       // Refresh users list to update bookings
       fetchUsers();
       fetchBookings();
     } catch (error) {
       console.error("Delete booking error:", error);
-      toast.error("Rezervasyon silinirken hata oluştu", { position: "bottom-right" });
+      toast.error("Error deleting booking", { position: "bottom-right" });
     }
   };
 
@@ -248,11 +274,13 @@ const AdminPanel = () => {
 
   const confirmDelete = async () => {
     if (!propertyToDelete || !token) return;
-    
+
     setDeleteLoading(true);
     try {
       await deleteResidency(propertyToDelete.id, token);
-      toast.success("Delete operation completed successfully!", { position: "bottom-right" });
+      toast.success("Delete operation completed successfully!", {
+        position: "bottom-right",
+      });
       setDeleteModalOpened(false);
       setPropertyToDelete(null);
       refetchProperties();
@@ -286,15 +314,23 @@ const AdminPanel = () => {
 
   const handleCreateConsultant = async () => {
     if (!token) return;
-    if (!consultantForm.name || !consultantForm.email || !consultantForm.phone) {
-      toast.error("Lütfen gerekli alanları doldurun (Ad, Email, Telefon)", { position: "bottom-right" });
+    if (
+      !consultantForm.name ||
+      !consultantForm.email ||
+      !consultantForm.phone
+    ) {
+      toast.error("Please fill required fields (Name, Email, Phone)", {
+        position: "bottom-right",
+      });
       return;
     }
 
     setConsultantLoading(true);
     try {
       await createConsultant(consultantForm, token);
-      toast.success("Danışman başarıyla eklendi!", { position: "bottom-right" });
+      toast.success("Consultant added successfully!", {
+        position: "bottom-right",
+      });
       setConsultantModalOpened(false);
       resetConsultantForm();
       refetchConsultants();
@@ -322,7 +358,8 @@ const AdminPanel = () => {
       linkedin: consultant.linkedin || "",
       image: consultant.image || "",
       bio: consultant.bio || "",
-      available: consultant.available !== undefined ? consultant.available : true,
+      available:
+        consultant.available !== undefined ? consultant.available : true,
     });
     setEditConsultantModalOpened(true);
   };
@@ -333,7 +370,9 @@ const AdminPanel = () => {
     setConsultantLoading(true);
     try {
       await updateConsultant(selectedConsultant.id, consultantForm, token);
-      toast.success("Danışman başarıyla güncellendi!", { position: "bottom-right" });
+      toast.success("Consultant updated successfully!", {
+        position: "bottom-right",
+      });
       setEditConsultantModalOpened(false);
       setSelectedConsultant(null);
       resetConsultantForm();
@@ -356,7 +395,9 @@ const AdminPanel = () => {
     setConsultantLoading(true);
     try {
       await deleteConsultant(consultantToDelete.id, token);
-      toast.success("Danışman başarıyla silindi!", { position: "bottom-right" });
+      toast.success("Consultant deleted successfully!", {
+        position: "bottom-right",
+      });
       setDeleteConsultantModalOpened(false);
       setConsultantToDelete(null);
       refetchConsultants();
@@ -401,6 +442,8 @@ const AdminPanel = () => {
         bathrooms: 0,
       },
       propertyType: "sale",
+      category: "residential",
+      consultantId: null,
       userEmail: user?.email,
     });
     setActive(0);
@@ -484,9 +527,9 @@ const AdminPanel = () => {
                 <MdAddHome size={24} />
               </div>
               <div>
-                <Text fw={600}>Yeni Mülk Ekle</Text>
+                <Text fw={600}>Add New Property</Text>
                 <Text size="sm" color="dimmed">
-                  Sisteme yeni mülk kaydet
+                  Add new property to system
                 </Text>
               </div>
             </Group>
@@ -506,9 +549,9 @@ const AdminPanel = () => {
                 <MdList size={24} />
               </div>
               <div>
-                <Text fw={600}>Mülk Listesi</Text>
+                <Text fw={600}>Property List</Text>
                 <Text size="sm" color="dimmed">
-                  {properties?.length || 0} kayıtlı mülk
+                  {properties?.length || 0} registered properties
                 </Text>
               </div>
             </Group>
@@ -528,9 +571,9 @@ const AdminPanel = () => {
                 <MdPeople size={24} />
               </div>
               <div>
-                <Text fw={600}>Danışmanlar</Text>
+                <Text fw={600}>Consultants</Text>
                 <Text size="sm" color="dimmed">
-                  {consultants?.length || 0} kayıtlı danışman
+                  {consultants?.length || 0} registered consultants
                 </Text>
               </div>
             </Group>
@@ -569,10 +612,10 @@ const AdminPanel = () => {
                   className="flex items-center gap-2 text-gray-800"
                 >
                   <MdList className="text-blue-500" />
-                  Mülk Listesi
+                  Property List
                 </Title>
                 <Text size="sm" color="dimmed" className="mt-1">
-                  Tüm kayıtlı mülkleri görüntüle, düzenle veya sil
+                  View, edit or delete all registered properties
                 </Text>
               </div>
               <Button
@@ -595,20 +638,18 @@ const AdminPanel = () => {
             ) : !properties || properties.length === 0 ? (
               <div className="text-center py-12">
                 <MdHome size={64} className="text-gray-300 mx-auto mb-4" />
-                <Text color="dimmed">
-                  Henüz kayıtlı mülk bulunmamaktadır
-                </Text>
+                <Text color="dimmed">No properties registered yet</Text>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table striped highlightOnHover>
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>Mülk</Table.Th>
+                      <Table.Th>Property</Table.Th>
                       <Table.Th>Konum</Table.Th>
                       <Table.Th>Fiyat</Table.Th>
                       <Table.Th>Tür</Table.Th>
-                      <Table.Th>Olanaklar</Table.Th>
+                      <Table.Th>Consultant</Table.Th>
                       <Table.Th>İşlemler</Table.Th>
                     </Table.Tr>
                   </Table.Thead>
@@ -628,7 +669,12 @@ const AdminPanel = () => {
                               <Text size="sm" fw={500} lineClamp={1} maw={200}>
                                 {property.title}
                               </Text>
-                              <Text size="xs" color="dimmed" lineClamp={1} maw={200}>
+                              <Text
+                                size="xs"
+                                color="dimmed"
+                                lineClamp={1}
+                                maw={200}
+                              >
                                 {property.address}
                               </Text>
                             </div>
@@ -644,23 +690,45 @@ const AdminPanel = () => {
                         </Table.Td>
                         <Table.Td>
                           <Text size="sm" fw={600} color="green">
-                            ${property.price?.toLocaleString()}
+                            ₺{property.price?.toLocaleString()}
                           </Text>
                         </Table.Td>
                         <Table.Td>
                           <Badge
-                            color={property.propertyType === "sale" ? "green" : "blue"}
+                            color={
+                              property.propertyType === "sale"
+                                ? "green"
+                                : "blue"
+                            }
                             variant="light"
                           >
-                            {property.propertyType === "sale" ? "Satılık" : "Kiralık"}
+                            {property.propertyType === "sale"
+                              ? "For Sale"
+                              : "For Rent"}
                           </Badge>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="xs" color="dimmed">
-                            {property.facilities?.bedrooms || 0} Yatak •{" "}
-                            {property.facilities?.bathrooms || 0} Banyo •{" "}
-                            {property.facilities?.parkings || 0} Otopark
-                          </Text>
+                          {property.consultant ? (
+                            <div className="flex items-center gap-2">
+                              <Avatar
+                                src={property.consultant.image}
+                                size="sm"
+                                radius="xl"
+                              />
+                              <div>
+                                <Text size="xs" fw={500}>
+                                  {property.consultant.name}
+                                </Text>
+                                <Text size="xs" color="dimmed">
+                                  {property.consultant.phone}
+                                </Text>
+                              </div>
+                            </div>
+                          ) : (
+                            <Badge color="gray" variant="light" size="sm">
+                              Not Assigned
+                            </Badge>
+                          )}
                         </Table.Td>
                         <Table.Td>
                           <Group gap="xs">
@@ -685,7 +753,9 @@ const AdminPanel = () => {
                             <Button
                               variant="subtle"
                               size="xs"
-                              onClick={() => navigate(`/listing/${property.id}`)}
+                              onClick={() =>
+                                navigate(`/listing/${property.id}`)
+                              }
                             >
                               Görüntüle
                             </Button>
@@ -703,16 +773,22 @@ const AdminPanel = () => {
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <div className="flex items-center justify-between">
                   <Text size="sm" color="dimmed">
-                    Toplam: {properties.length} mülk
+                    Total: {properties.length} properties
                   </Text>
                   <div className="flex gap-4">
                     <Text size="sm" color="dimmed">
-                      Satılık:{" "}
-                      {properties.filter((p) => p.propertyType === "sale").length}
+                      For Sale:{" "}
+                      {
+                        properties.filter((p) => p.propertyType === "sale")
+                          .length
+                      }
                     </Text>
                     <Text size="sm" color="dimmed">
-                      Kiralık:{" "}
-                      {properties.filter((p) => p.propertyType === "rent").length}
+                      For Rent:{" "}
+                      {
+                        properties.filter((p) => p.propertyType === "rent")
+                          .length
+                      }
                     </Text>
                   </div>
                 </div>
@@ -731,10 +807,10 @@ const AdminPanel = () => {
                   className="flex items-center gap-2 text-gray-800"
                 >
                   <MdPeople className="text-purple-500" />
-                  Danışman Yönetimi
+                  Consultant Management
                 </Title>
                 <Text size="sm" color="dimmed" className="mt-1">
-                  Danışmanları görüntüle, ekle, düzenle veya sil
+                  View, add, edit or delete consultants
                 </Text>
               </div>
               <Group>
@@ -752,7 +828,7 @@ const AdminPanel = () => {
                   leftSection={<MdPersonAdd size={18} />}
                   onClick={() => setConsultantModalOpened(true)}
                 >
-                  Yeni Danışman Ekle
+                  Add New Consultant
                 </Button>
               </Group>
             </div>
@@ -766,16 +842,14 @@ const AdminPanel = () => {
             ) : !consultants || consultants.length === 0 ? (
               <div className="text-center py-12">
                 <MdPeople size={64} className="text-gray-300 mx-auto mb-4" />
-                <Text color="dimmed">
-                  Henüz kayıtlı danışman bulunmamaktadır
-                </Text>
+                <Text color="dimmed">No consultants registered yet</Text>
                 <Button
                   color="grape"
                   className="mt-4"
                   leftSection={<MdPersonAdd size={18} />}
                   onClick={() => setConsultantModalOpened(true)}
                 >
-                  İlk Danışmanı Ekle
+                  Add First Consultant
                 </Button>
               </div>
             ) : (
@@ -783,9 +857,9 @@ const AdminPanel = () => {
                 <Table striped highlightOnHover>
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>Danışman</Table.Th>
+                      <Table.Th>Consultant</Table.Th>
                       <Table.Th>Uzmanlık</Table.Th>
-                      <Table.Th>İletişim</Table.Th>
+                      <Table.Th>Contact</Table.Th>
                       <Table.Th>İstatistik</Table.Th>
                       <Table.Th>Durum</Table.Th>
                       <Table.Th>İşlemler</Table.Th>
@@ -842,13 +916,21 @@ const AdminPanel = () => {
                             <div className="text-center">
                               <div className="flex items-center gap-1">
                                 <FaStar className="text-amber-500 text-xs" />
-                                <Text size="sm" fw={600}>{consultant.rating}</Text>
+                                <Text size="sm" fw={600}>
+                                  {consultant.rating}
+                                </Text>
                               </div>
-                              <Text size="xs" color="dimmed">{consultant.reviews} yorum</Text>
+                              <Text size="xs" color="dimmed">
+                                {consultant.reviews} yorum
+                              </Text>
                             </div>
                             <div className="text-center">
-                              <Text size="sm" fw={600}>{consultant.deals}+</Text>
-                              <Text size="xs" color="dimmed">satış</Text>
+                              <Text size="sm" fw={600}>
+                                {consultant.deals}+
+                              </Text>
+                              <Text size="xs" color="dimmed">
+                                satış
+                              </Text>
                             </div>
                           </div>
                         </Table.Td>
@@ -877,7 +959,9 @@ const AdminPanel = () => {
                               variant="light"
                               color="red"
                               size="lg"
-                              onClick={() => handleDeleteConsultantClick(consultant)}
+                              onClick={() =>
+                                handleDeleteConsultantClick(consultant)
+                              }
                               title="Sil"
                             >
                               <MdDelete size={18} />
@@ -896,16 +980,14 @@ const AdminPanel = () => {
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <div className="flex items-center justify-between">
                   <Text size="sm" color="dimmed">
-                    Toplam: {consultants.length} danışman
+                    Total: {consultants.length} consultants
                   </Text>
                   <div className="flex gap-4">
                     <Text size="sm" color="dimmed">
-                      Müsait:{" "}
-                      {consultants.filter((c) => c.available).length}
+                      Müsait: {consultants.filter((c) => c.available).length}
                     </Text>
                     <Text size="sm" color="dimmed">
-                      Meşgul:{" "}
-                      {consultants.filter((c) => !c.available).length}
+                      Meşgul: {consultants.filter((c) => !c.available).length}
                     </Text>
                   </div>
                 </div>
@@ -965,10 +1047,10 @@ const AdminPanel = () => {
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>Kullanıcı</Table.Th>
-                      <Table.Th>İletişim</Table.Th>
+                      <Table.Th>Contact</Table.Th>
                       <Table.Th>Profil Durumu</Table.Th>
                       <Table.Th>Rezervasyonlar</Table.Th>
-                      <Table.Th>Favoriler</Table.Th>
+                      <Table.Th>Favorites</Table.Th>
                       <Table.Th>Kayıt Tarihi</Table.Th>
                       <Table.Th>Rol</Table.Th>
                     </Table.Tr>
@@ -999,14 +1081,19 @@ const AdminPanel = () => {
                             </div>
                             {u.phone && (
                               <div className="flex items-center gap-1">
-                                <FaWhatsapp size={14} className="text-green-500" />
+                                <FaWhatsapp
+                                  size={14}
+                                  className="text-green-500"
+                                />
                                 <Text size="xs">{u.phone}</Text>
                               </div>
                             )}
                             {u.address && (
                               <div className="flex items-center gap-1">
                                 <MdHome size={14} className="text-gray-400" />
-                                <Text size="xs" lineClamp={1}>{u.address}</Text>
+                                <Text size="xs" lineClamp={1}>
+                                  {u.address}
+                                </Text>
                               </div>
                             )}
                           </div>
@@ -1023,9 +1110,14 @@ const AdminPanel = () => {
                           {u.bookedVisits?.length > 0 ? (
                             <div className="space-y-2">
                               {u.bookedVisits.map((booking, idx) => {
-                                const property = properties?.find(p => p.id === booking.id);
+                                const property = properties?.find(
+                                  (p) => p.id === booking.id
+                                );
                                 return (
-                                  <div key={idx} className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                                  <div
+                                    key={idx}
+                                    className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg"
+                                  >
                                     {property?.image && (
                                       <img
                                         src={property.image}
@@ -1035,19 +1127,27 @@ const AdminPanel = () => {
                                     )}
                                     <div className="flex-1 min-w-0">
                                       <Text size="xs" fw={500} lineClamp={1}>
-                                        {property?.title || "Mülk bulunamadı"}
+                                        {property?.title ||
+                                          "Property not found"}
                                       </Text>
                                       <div className="flex items-center gap-1">
-                                        <MdCalendarToday size={10} className="text-orange-500" />
-                                        <Text size="xs" color="orange">{booking.date}</Text>
+                                        <MdCalendarToday
+                                          size={10}
+                                          className="text-orange-500"
+                                        />
+                                        <Text size="xs" color="orange">
+                                          {booking.date}
+                                        </Text>
                                       </div>
                                     </div>
                                     {property && (
                                       <ActionIcon
                                         variant="subtle"
                                         size="sm"
-                                        onClick={() => navigate(`/listing/${property.id}`)}
-                                        title="Mülkü görüntüle"
+                                        onClick={() =>
+                                          navigate(`/listing/${property.id}`)
+                                        }
+                                        title="View property"
                                       >
                                         <MdHome size={14} />
                                       </ActionIcon>
@@ -1056,7 +1156,9 @@ const AdminPanel = () => {
                                       variant="light"
                                       color="red"
                                       size="sm"
-                                      onClick={() => handleDeleteBooking(u.email, booking.id)}
+                                      onClick={() =>
+                                        handleDeleteBooking(u.email, booking.id)
+                                      }
                                       title="Rezervasyonu sil"
                                     >
                                       <MdDelete size={14} />
@@ -1066,7 +1168,9 @@ const AdminPanel = () => {
                               })}
                             </div>
                           ) : (
-                            <Text size="xs" color="dimmed">Rezervasyon yok</Text>
+                            <Text size="xs" color="dimmed">
+                              Rezervasyon yok
+                            </Text>
                           )}
                         </Table.Td>
                         <Table.Td>
@@ -1077,11 +1181,14 @@ const AdminPanel = () => {
                         <Table.Td>
                           <Text size="xs" color="dimmed">
                             {u.createdAt
-                              ? new Date(u.createdAt).toLocaleDateString("tr-TR", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                })
+                              ? new Date(u.createdAt).toLocaleDateString(
+                                  "tr-TR",
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  }
+                                )
                               : "-"}
                           </Text>
                         </Table.Td>
@@ -1113,12 +1220,14 @@ const AdminPanel = () => {
                       {users.filter((u) => u.profileComplete).length}
                     </Text>
                     <Text size="sm" color="dimmed">
-                      Admin:{" "}
-                      {users.filter((u) => u.isAdmin).length}
+                      Admin: {users.filter((u) => u.isAdmin).length}
                     </Text>
                     <Text size="sm" color="dimmed">
                       Aktif Rezervasyon:{" "}
-                      {users.reduce((acc, u) => acc + (u.bookedVisits?.length || 0), 0)}
+                      {users.reduce(
+                        (acc, u) => acc + (u.bookedVisits?.length || 0),
+                        0
+                      )}
                     </Text>
                   </div>
                 </div>
@@ -1136,10 +1245,10 @@ const AdminPanel = () => {
                 className="flex items-center gap-2 text-gray-800"
               >
                 <MdAddHome className="text-secondary" />
-                Yeni Mülk Kaydet
+                Save New Property
               </Title>
               <Text size="sm" color="dimmed" className="mt-1">
-                Aşağıdaki adımlarda mülk bilgilerini girin
+                Enter property information in the following steps
               </Text>
             </div>
 
@@ -1202,20 +1311,21 @@ const AdminPanel = () => {
                 <div className="text-center py-8">
                   <div className="text-green-500 text-6xl mb-4">✓</div>
                   <Title order={3} className="mb-2">
-                    Mülk başarıyla kaydedildi!
+                    Property saved successfully!
                   </Title>
                   <Text color="dimmed" className="mb-6">
-                    Yeni mülk listeye eklendi ve sitede görüntülenecektir.
+                    New property added to the list and will be displayed on the
+                    site.
                   </Text>
                   <Group position="center">
                     <Button onClick={resetForm} color="green">
-                      Yeni Mülk Kaydet
+                      Save New Property
                     </Button>
                     <Button
                       onClick={() => navigate("/listing")}
                       variant="outline"
                     >
-                      Mülk Listesini Görüntüle
+                      Property Listni Görüntüle
                     </Button>
                   </Group>
                 </div>
@@ -1244,14 +1354,15 @@ const AdminPanel = () => {
           }}
           title={
             <Text fw={600} color="red">
-              Mülkü Sil
+              Delete Property
             </Text>
           }
           centered
         >
           <div className="py-4">
             <Text size="sm" color="dimmed" mb="md">
-              Bu mülkü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+              Are you sure you want to delete this property? This action cannot
+              be undone.
             </Text>
             {propertyToDelete && (
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
@@ -1270,7 +1381,7 @@ const AdminPanel = () => {
                     {propertyToDelete.city}, {propertyToDelete.country}
                   </Text>
                   <Text size="xs" color="green" fw={500}>
-                    ${propertyToDelete.price?.toLocaleString()}
+                    ₺{propertyToDelete.price?.toLocaleString()}
                   </Text>
                 </div>
               </div>
@@ -1285,7 +1396,11 @@ const AdminPanel = () => {
               >
                 İptal
               </Button>
-              <Button color="red" onClick={confirmDelete} loading={deleteLoading}>
+              <Button
+                color="red"
+                onClick={confirmDelete}
+                loading={deleteLoading}
+              >
                 Sil
               </Button>
             </Group>
@@ -1303,7 +1418,7 @@ const AdminPanel = () => {
             <Text fw={600} color="grape">
               <div className="flex items-center gap-2">
                 <MdPersonAdd />
-                Yeni Danışman Ekle
+                Add New Consultant
               </div>
             </Text>
           }
@@ -1314,16 +1429,23 @@ const AdminPanel = () => {
             <div className="grid grid-cols-2 gap-4">
               <TextInput
                 label="Ad Soyad"
-                placeholder="Danışman adı"
+                placeholder="Consultant name"
                 required
                 value={consultantForm.name}
-                onChange={(e) => setConsultantForm({ ...consultantForm, name: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({ ...consultantForm, name: e.target.value })
+                }
               />
               <TextInput
                 label="Ünvan"
                 placeholder="Örn: Senior Property Advisor"
                 value={consultantForm.title}
-                onChange={(e) => setConsultantForm({ ...consultantForm, title: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    title: e.target.value,
+                  })
+                }
               />
             </div>
 
@@ -1332,13 +1454,23 @@ const AdminPanel = () => {
                 label="Uzmanlık Alanı"
                 placeholder="Örn: Luxury Villas & Apartments"
                 value={consultantForm.specialty}
-                onChange={(e) => setConsultantForm({ ...consultantForm, specialty: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    specialty: e.target.value,
+                  })
+                }
               />
               <TextInput
                 label="Deneyim"
                 placeholder="Örn: 10 years"
                 value={consultantForm.experience}
-                onChange={(e) => setConsultantForm({ ...consultantForm, experience: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    experience: e.target.value,
+                  })
+                }
               />
             </div>
 
@@ -1347,7 +1479,9 @@ const AdminPanel = () => {
               placeholder="Konuşulan dilleri seçin"
               data={languageOptions}
               value={consultantForm.languages}
-              onChange={(value) => setConsultantForm({ ...consultantForm, languages: value })}
+              onChange={(value) =>
+                setConsultantForm({ ...consultantForm, languages: value })
+              }
               searchable
             />
 
@@ -1357,14 +1491,24 @@ const AdminPanel = () => {
                 placeholder="email@example.com"
                 required
                 value={consultantForm.email}
-                onChange={(e) => setConsultantForm({ ...consultantForm, email: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    email: e.target.value,
+                  })
+                }
               />
               <TextInput
                 label="Telefon"
                 placeholder="+90 5XX XXX XXXX"
                 required
                 value={consultantForm.phone}
-                onChange={(e) => setConsultantForm({ ...consultantForm, phone: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    phone: e.target.value,
+                  })
+                }
               />
             </div>
 
@@ -1373,19 +1517,31 @@ const AdminPanel = () => {
                 label="WhatsApp"
                 placeholder="+905XXXXXXXXX"
                 value={consultantForm.whatsapp}
-                onChange={(e) => setConsultantForm({ ...consultantForm, whatsapp: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    whatsapp: e.target.value,
+                  })
+                }
               />
               <TextInput
                 label="LinkedIn URL"
                 placeholder="https://linkedin.com/in/..."
                 value={consultantForm.linkedin}
-                onChange={(e) => setConsultantForm({ ...consultantForm, linkedin: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    linkedin: e.target.value,
+                  })
+                }
               />
             </div>
 
             {/* Profile Image Upload */}
             <div>
-              <Text size="sm" fw={500} mb={4}>Profil Fotoğrafı</Text>
+              <Text size="sm" fw={500} mb={4}>
+                Profil Fotoğrafı
+              </Text>
               {consultantForm.image ? (
                 <div className="relative inline-block">
                   <img
@@ -1428,10 +1584,12 @@ const AdminPanel = () => {
 
             <Textarea
               label="Biyografi"
-              placeholder="Danışman hakkında kısa açıklama"
+              placeholder="Short description about consultant"
               rows={3}
               value={consultantForm.bio}
-              onChange={(e) => setConsultantForm({ ...consultantForm, bio: e.target.value })}
+              onChange={(e) =>
+                setConsultantForm({ ...consultantForm, bio: e.target.value })
+              }
             />
 
             <div className="grid grid-cols-3 gap-4">
@@ -1443,28 +1601,39 @@ const AdminPanel = () => {
                 step={0.1}
                 decimalScale={1}
                 value={consultantForm.rating}
-                onChange={(value) => setConsultantForm({ ...consultantForm, rating: value || 0 })}
+                onChange={(value) =>
+                  setConsultantForm({ ...consultantForm, rating: value || 0 })
+                }
               />
               <NumberInput
                 label="Yorum Sayısı"
                 placeholder="0"
                 min={0}
                 value={consultantForm.reviews}
-                onChange={(value) => setConsultantForm({ ...consultantForm, reviews: value || 0 })}
+                onChange={(value) =>
+                  setConsultantForm({ ...consultantForm, reviews: value || 0 })
+                }
               />
               <NumberInput
                 label="Satış Sayısı"
                 placeholder="0"
                 min={0}
                 value={consultantForm.deals}
-                onChange={(value) => setConsultantForm({ ...consultantForm, deals: value || 0 })}
+                onChange={(value) =>
+                  setConsultantForm({ ...consultantForm, deals: value || 0 })
+                }
               />
             </div>
 
             <Switch
               label="Müsait"
               checked={consultantForm.available}
-              onChange={(e) => setConsultantForm({ ...consultantForm, available: e.currentTarget.checked })}
+              onChange={(e) =>
+                setConsultantForm({
+                  ...consultantForm,
+                  available: e.currentTarget.checked,
+                })
+              }
             />
 
             <Group justify="flex-end" mt="xl">
@@ -1477,8 +1646,12 @@ const AdminPanel = () => {
               >
                 İptal
               </Button>
-              <Button color="grape" onClick={handleCreateConsultant} loading={consultantLoading}>
-                Danışman Ekle
+              <Button
+                color="grape"
+                onClick={handleCreateConsultant}
+                loading={consultantLoading}
+              >
+                Add Consultant
               </Button>
             </Group>
           </div>
@@ -1496,7 +1669,7 @@ const AdminPanel = () => {
             <Text fw={600} color="blue">
               <div className="flex items-center gap-2">
                 <MdEdit />
-                Danışman Düzenle
+                Edit Consultant
               </div>
             </Text>
           }
@@ -1507,16 +1680,23 @@ const AdminPanel = () => {
             <div className="grid grid-cols-2 gap-4">
               <TextInput
                 label="Ad Soyad"
-                placeholder="Danışman adı"
+                placeholder="Consultant name"
                 required
                 value={consultantForm.name}
-                onChange={(e) => setConsultantForm({ ...consultantForm, name: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({ ...consultantForm, name: e.target.value })
+                }
               />
               <TextInput
                 label="Ünvan"
                 placeholder="Örn: Senior Property Advisor"
                 value={consultantForm.title}
-                onChange={(e) => setConsultantForm({ ...consultantForm, title: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    title: e.target.value,
+                  })
+                }
               />
             </div>
 
@@ -1525,13 +1705,23 @@ const AdminPanel = () => {
                 label="Uzmanlık Alanı"
                 placeholder="Örn: Luxury Villas & Apartments"
                 value={consultantForm.specialty}
-                onChange={(e) => setConsultantForm({ ...consultantForm, specialty: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    specialty: e.target.value,
+                  })
+                }
               />
               <TextInput
                 label="Deneyim"
                 placeholder="Örn: 10 years"
                 value={consultantForm.experience}
-                onChange={(e) => setConsultantForm({ ...consultantForm, experience: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    experience: e.target.value,
+                  })
+                }
               />
             </div>
 
@@ -1540,7 +1730,9 @@ const AdminPanel = () => {
               placeholder="Konuşulan dilleri seçin"
               data={languageOptions}
               value={consultantForm.languages}
-              onChange={(value) => setConsultantForm({ ...consultantForm, languages: value })}
+              onChange={(value) =>
+                setConsultantForm({ ...consultantForm, languages: value })
+              }
               searchable
             />
 
@@ -1550,14 +1742,24 @@ const AdminPanel = () => {
                 placeholder="email@example.com"
                 required
                 value={consultantForm.email}
-                onChange={(e) => setConsultantForm({ ...consultantForm, email: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    email: e.target.value,
+                  })
+                }
               />
               <TextInput
                 label="Telefon"
                 placeholder="+90 5XX XXX XXXX"
                 required
                 value={consultantForm.phone}
-                onChange={(e) => setConsultantForm({ ...consultantForm, phone: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    phone: e.target.value,
+                  })
+                }
               />
             </div>
 
@@ -1566,19 +1768,31 @@ const AdminPanel = () => {
                 label="WhatsApp"
                 placeholder="+905XXXXXXXXX"
                 value={consultantForm.whatsapp}
-                onChange={(e) => setConsultantForm({ ...consultantForm, whatsapp: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    whatsapp: e.target.value,
+                  })
+                }
               />
               <TextInput
                 label="LinkedIn URL"
                 placeholder="https://linkedin.com/in/..."
                 value={consultantForm.linkedin}
-                onChange={(e) => setConsultantForm({ ...consultantForm, linkedin: e.target.value })}
+                onChange={(e) =>
+                  setConsultantForm({
+                    ...consultantForm,
+                    linkedin: e.target.value,
+                  })
+                }
               />
             </div>
 
             {/* Profile Image Upload */}
             <div>
-              <Text size="sm" fw={500} mb={4}>Profil Fotoğrafı</Text>
+              <Text size="sm" fw={500} mb={4}>
+                Profil Fotoğrafı
+              </Text>
               {consultantForm.image ? (
                 <div className="relative inline-block">
                   <img
@@ -1621,10 +1835,12 @@ const AdminPanel = () => {
 
             <Textarea
               label="Biyografi"
-              placeholder="Danışman hakkında kısa açıklama"
+              placeholder="Short description about consultant"
               rows={3}
               value={consultantForm.bio}
-              onChange={(e) => setConsultantForm({ ...consultantForm, bio: e.target.value })}
+              onChange={(e) =>
+                setConsultantForm({ ...consultantForm, bio: e.target.value })
+              }
             />
 
             <div className="grid grid-cols-3 gap-4">
@@ -1636,28 +1852,39 @@ const AdminPanel = () => {
                 step={0.1}
                 decimalScale={1}
                 value={consultantForm.rating}
-                onChange={(value) => setConsultantForm({ ...consultantForm, rating: value || 0 })}
+                onChange={(value) =>
+                  setConsultantForm({ ...consultantForm, rating: value || 0 })
+                }
               />
               <NumberInput
                 label="Yorum Sayısı"
                 placeholder="0"
                 min={0}
                 value={consultantForm.reviews}
-                onChange={(value) => setConsultantForm({ ...consultantForm, reviews: value || 0 })}
+                onChange={(value) =>
+                  setConsultantForm({ ...consultantForm, reviews: value || 0 })
+                }
               />
               <NumberInput
                 label="Satış Sayısı"
                 placeholder="0"
                 min={0}
                 value={consultantForm.deals}
-                onChange={(value) => setConsultantForm({ ...consultantForm, deals: value || 0 })}
+                onChange={(value) =>
+                  setConsultantForm({ ...consultantForm, deals: value || 0 })
+                }
               />
             </div>
 
             <Switch
               label="Müsait"
               checked={consultantForm.available}
-              onChange={(e) => setConsultantForm({ ...consultantForm, available: e.currentTarget.checked })}
+              onChange={(e) =>
+                setConsultantForm({
+                  ...consultantForm,
+                  available: e.currentTarget.checked,
+                })
+              }
             />
 
             <Group justify="flex-end" mt="xl">
@@ -1671,8 +1898,12 @@ const AdminPanel = () => {
               >
                 İptal
               </Button>
-              <Button color="blue" onClick={handleUpdateConsultant} loading={consultantLoading}>
-                Güncelle
+              <Button
+                color="blue"
+                onClick={handleUpdateConsultant}
+                loading={consultantLoading}
+              >
+                Update
               </Button>
             </Group>
           </div>
@@ -1687,14 +1918,15 @@ const AdminPanel = () => {
           }}
           title={
             <Text fw={600} color="red">
-              Danışmanı Sil
+              Delete Consultant
             </Text>
           }
           centered
         >
           <div className="py-4">
             <Text size="sm" color="dimmed" mb="md">
-              Bu danışmanı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+              Are you sure you want to delete this consultant? This action
+              cannot be undone.
             </Text>
             {consultantToDelete && (
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
@@ -1729,7 +1961,11 @@ const AdminPanel = () => {
               >
                 İptal
               </Button>
-              <Button color="red" onClick={confirmDeleteConsultant} loading={consultantLoading}>
+              <Button
+                color="red"
+                onClick={confirmDeleteConsultant}
+                loading={consultantLoading}
+              >
                 Sil
               </Button>
             </Group>

@@ -1,11 +1,11 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useCallback, useRef } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import { Outlet } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import UserDetailContext from "../context/UserDetailContext";
 import { useMutation } from "react-query";
-import { createUser } from "../utils/api";
+import { createUser, setTokenRefreshCallback } from "../utils/api";
 import useFavourites from "../hooks/useFavourites.jsx";
 import useBookings from "../hooks/useBookings.jsx";
 
@@ -15,11 +15,32 @@ const Layout = () => {
 
   const { isAuthenticated, user, getIdTokenClaims } = useAuth0();
   const { setUserDetails } = useContext(UserDetailContext);
+  const tokenRefreshIntervalRef = useRef(null);
+  const hasRegisteredRef = useRef(false);
 
   const { mutate } = useMutation({
     mutationKey: [user?.email],
     mutationFn: ({ userData, token }) => createUser(userData, token),
   });
+
+  // Function to refresh token
+  const refreshToken = useCallback(async () => {
+    try {
+      console.log("🔄 Layout: Refreshing token...");
+      const claims = await getIdTokenClaims();
+      const token = claims?.__raw;
+
+      if (token) {
+        localStorage.setItem("access_token", token);
+        setUserDetails((prev) => ({ ...prev, token: token }));
+        console.log("✅ Layout: Token refreshed successfully");
+        return token;
+      }
+    } catch (error) {
+      console.error("❌ Layout: Failed to refresh token", error.message);
+    }
+    return null;
+  }, [getIdTokenClaims, setUserDetails]);
 
   useEffect(() => {
     const getTokenAndRegister = async () => {
@@ -33,14 +54,20 @@ const Layout = () => {
           setUserDetails((prev) => ({ ...prev, token: token }));
           console.log("✅ Layout: ID Token received");
 
-          // Send user data to database
-          const userData = {
-            email: user.email,
-            name: user.name,
-            image: user.picture,
-          };
-          console.log("📤 Layout: Registering user to database", userData);
-          mutate({ userData, token: token });
+          // Set the token refresh callback for API interceptor
+          setTokenRefreshCallback(refreshToken);
+
+          // Send user data to database (only once per session)
+          if (!hasRegisteredRef.current) {
+            const userData = {
+              email: user.email,
+              name: user.name,
+              image: user.picture,
+            };
+            console.log("📤 Layout: Registering user to database", userData);
+            mutate({ userData, token: token });
+            hasRegisteredRef.current = true;
+          }
         }
       } catch (error) {
         console.error("❌ Layout: Failed to get token", error.message);
@@ -49,8 +76,28 @@ const Layout = () => {
 
     if (isAuthenticated && user?.email) {
       getTokenAndRegister();
+
+      // Set up token refresh every 15 minutes
+      if (tokenRefreshIntervalRef.current) {
+        clearInterval(tokenRefreshIntervalRef.current);
+      }
+      tokenRefreshIntervalRef.current = setInterval(() => {
+        refreshToken();
+      }, 15 * 60 * 1000); // 15 minutes
     }
-  }, [isAuthenticated, user, getIdTokenClaims, mutate, setUserDetails]);
+
+    // Cleanup interval on unmount
+    return () => {
+      if (tokenRefreshIntervalRef.current) {
+        clearInterval(tokenRefreshIntervalRef.current);
+      }
+    };
+  }, [isAuthenticated, user, getIdTokenClaims, mutate, setUserDetails, refreshToken]);
+
+  // Reset registration flag when user changes
+  useEffect(() => {
+    hasRegisteredRef.current = false;
+  }, [user?.email]);
 
   return (
     <div className="overflow-x-hidden min-h-screen flex flex-col">

@@ -10,25 +10,140 @@ import {
   SegmentedControl,
   Text,
   Loader,
+  Avatar,
+  Checkbox,
+  ScrollArea,
+  Collapse,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { MdSell, MdHome, MdOutlineCloudUpload } from "react-icons/md";
+import { useDisclosure } from "@mantine/hooks";
+import {
+  MdSell,
+  MdHome,
+  MdOutlineCloudUpload,
+  MdPerson,
+  MdExpandMore,
+  MdExpandLess,
+} from "react-icons/md";
 import { AiOutlineClose } from "react-icons/ai";
+import { BsHouseDoor, BsTree } from "react-icons/bs";
+import {
+  FaBuilding,
+  FaLandmark,
+  FaUmbrellaBeach,
+  FaWarehouse,
+  FaHome,
+  FaBriefcase,
+} from "react-icons/fa";
+
+// Property categories
+const propertyCategories = [
+  { value: "residential", label: "Residential", icon: FaHome },
+  { value: "commercial", label: "Commercial", icon: FaBriefcase },
+  { value: "land", label: "Land", icon: FaLandmark },
+  { value: "building", label: "Building", icon: FaBuilding },
+  { value: "timeshare", label: "Timeshare", icon: FaWarehouse },
+  {
+    value: "tourist-facility",
+    label: "Tourist Facility",
+    icon: FaUmbrellaBeach,
+  },
+];
+
+// All possible interior features
+const ALL_INTERIOR_FEATURES = [
+  "ADSL",
+  "Smart Home",
+  "Burglar Alarm",
+  "Fire Alarm",
+  "Aluminum Joinery",
+  "American Door",
+  "Built-in Oven",
+  "White Goods",
+  "Dishwasher",
+  "Dryer Machine",
+  "Washing Machine",
+  "Laundry Room",
+  "Steel Door",
+  "Shower Cabin",
+  "Fiber Internet",
+  "Oven",
+  "Dressing Room",
+  "Built-in Wardrobe",
+  "Intercom System",
+  "Crown Molding",
+  "Pantry",
+  "Air Conditioning",
+  "Laminate Flooring",
+  "Furniture",
+  "Built-in Kitchen",
+  "Laminate Kitchen",
+  "Kitchen Natural Gas",
+  "Parquet Flooring",
+  "PVC Joinery",
+  "Ceramic Flooring",
+  "Stovetop",
+  "Spot Lighting",
+  "Jacuzzi",
+  "Bathtub",
+  "Terrace",
+  "Wi-Fi",
+  "Fireplace",
+];
+
+// All possible exterior features
+const ALL_EXTERIOR_FEATURES = [
+  "24/7 Security",
+  "Doorman",
+  "EV Charging Station",
+  "Steam Room",
+  "Children's Playground",
+  "Turkish Bath (Hamam)",
+  "Booster Pump",
+  "Thermal Insulation",
+  "Generator",
+  "Cable TV",
+  "Security Camera",
+  "Nursery/Daycare",
+  "Private Pool",
+  "Sauna",
+  "Sound Insulation",
+  "Siding",
+  "Sports Area",
+  "Water Tank",
+  "Satellite",
+  "Fire Escape",
+  "Indoor Swimming Pool",
+  "Outdoor Swimming Pool",
+  "Tennis Court",
+  "Fitness Center",
+  "Concierge",
+  "Garden",
+  "BBQ Area",
+  "Parking Garage",
+];
 import { toast } from "react-toastify";
 import { useMutation } from "react-query";
 import PropTypes from "prop-types";
 import useCountries from "../hooks/useCountries";
+import useConsultants from "../hooks/useConsultants";
 import UserDetailContext from "../context/UserDetailContext";
 import { updateResidency } from "../utils/api";
 import { validateString } from "../utils/common";
 
 const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
   const { getAll } = useCountries();
+  const { data: consultants, isLoading: consultantsLoading } = useConsultants();
   const {
     userDetails: { token },
   } = useContext(UserDetailContext);
 
   const [imageURLs, setImageURLs] = useState([]);
+  const [selectedConsultantId, setSelectedConsultantId] = useState("");
+  const [interiorFeatures, setInteriorFeatures] = useState([]);
+  const [exteriorFeatures, setExteriorFeatures] = useState([]);
+  const [interiorOpened, { toggle: toggleInterior }] = useDisclosure(false);
+  const [exteriorOpened, { toggle: toggleExterior }] = useDisclosure(false);
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
 
@@ -41,6 +156,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       city: "",
       address: "",
       propertyType: "sale",
+      category: "residential",
       bedrooms: 0,
       parkings: 0,
       bathrooms: 0,
@@ -48,7 +164,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
     validate: {
       title: (value) => validateString(value),
       description: (value) => validateString(value),
-      price: (value) => (value < 999 ? "Minimum 999 dolar olmalı" : null),
+      price: (value) => (value < 999 ? "Minimum 999 lira olmalı" : null),
       country: (value) => validateString(value),
       city: (value) => validateString(value),
       address: (value) => validateString(value),
@@ -56,6 +172,15 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       bathrooms: (value) => (value < 1 ? "En az 1 banyo olmalı" : null),
     },
   });
+
+  // Prepare consultant options for select
+  const consultantOptions =
+    consultants?.map((c) => ({
+      value: c.id,
+      label: c.name,
+      image: c.image,
+      title: c.title,
+    })) || [];
 
   // Initialize form when property changes
   useEffect(() => {
@@ -68,11 +193,15 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
         city: property.city || "",
         address: property.address || "",
         propertyType: property.propertyType || "sale",
+        category: property.category || "residential",
         bedrooms: property.facilities?.bedrooms || 0,
         parkings: property.facilities?.parkings || 0,
         bathrooms: property.facilities?.bathrooms || 0,
       });
       setImageURLs(property.images || (property.image ? [property.image] : []));
+      setSelectedConsultantId(property.consultantId || "");
+      setInteriorFeatures(property.interiorFeatures || []);
+      setExteriorFeatures(property.exteriorFeatures || []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [property]);
@@ -84,7 +213,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       {
         cloudName: "ducct0j1f",
         uploadPreset: "auvy3sl6",
-        maxFiles: 10,
+        maxFiles: 30,
         multiple: true,
       },
       (err, result) => {
@@ -103,7 +232,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
     mutationFn: (data) => updateResidency(property.id, data, token),
     onError: (error) => {
       const message =
-        error?.response?.data?.message || "Mülk güncellenirken hata oluştu";
+        error?.response?.data?.message || "Error updating property";
       toast.error(message, { position: "bottom-right" });
     },
     onSuccess: () => {
@@ -120,7 +249,9 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
     if (hasErrors) return;
 
     if (imageURLs.length === 0) {
-      toast.error("En az bir görsel eklemelisiniz", { position: "bottom-right" });
+      toast.error("Please add at least one image", {
+        position: "bottom-right",
+      });
       return;
     }
 
@@ -133,6 +264,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       city: values.city,
       address: values.address,
       propertyType: values.propertyType,
+      category: values.category,
       image: imageURLs[0],
       images: imageURLs,
       facilities: {
@@ -140,6 +272,9 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
         parkings: values.parkings,
         bathrooms: values.bathrooms,
       },
+      consultantId: selectedConsultantId || null,
+      interiorFeatures: interiorFeatures,
+      exteriorFeatures: exteriorFeatures,
     };
 
     mutate(data);
@@ -151,7 +286,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       onClose={() => setOpened(false)}
       title={
         <Text fw={600} size="lg">
-          Mülk Düzenle
+          Edit Property
         </Text>
       }
       size="xl"
@@ -166,7 +301,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
         {/* Property Type */}
         <div className="mb-4">
           <Text size="sm" fw={500} mb={4}>
-            Mülk Türü <span className="text-red-500">*</span>
+            Property Type <span className="text-red-500">*</span>
           </Text>
           <SegmentedControl
             fullWidth
@@ -178,7 +313,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
                 label: (
                   <div className="flex items-center justify-center gap-2 py-1">
                     <MdSell size={18} />
-                    <span>Satılık</span>
+                    <span>For Sale</span>
                   </div>
                 ),
                 value: "sale",
@@ -187,7 +322,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
                 label: (
                   <div className="flex items-center justify-center gap-2 py-1">
                     <MdHome size={18} />
-                    <span>Kiralık</span>
+                    <span>For Rent</span>
                   </div>
                 ),
                 value: "rent",
@@ -196,18 +331,46 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
           />
         </div>
 
+        {/* Property Category */}
+        <Select
+          label="Property Category"
+          placeholder="Select property category"
+          data={propertyCategories.map((cat) => ({
+            value: cat.value,
+            label: cat.label,
+          }))}
+          value={form.values.category}
+          onChange={(value) => form.setFieldValue("category", value)}
+          mb="md"
+          withAsterisk
+          renderOption={({ option }) => {
+            const cat = propertyCategories.find(
+              (c) => c.value === option.value
+            );
+            const IconComponent = cat?.icon || FaHome;
+            return (
+              <div className="flex items-center gap-2 py-1">
+                <IconComponent size={16} />
+                <span>{option.label}</span>
+              </div>
+            );
+          }}
+        />
+
         {/* Basic Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextInput
             withAsterisk
-            label="Başlık"
-            placeholder="Mülk adı"
+            label="Title"
+            placeholder="Property name"
             {...form.getInputProps("title")}
           />
           <NumberInput
             withAsterisk
             label={
-              form.values.propertyType === "sale" ? "Fiyat ($)" : "Aylık Kira ($)"
+              form.values.propertyType === "sale"
+                ? "Fiyat (₺)"
+                : "Aylık Kira (₺)"
             }
             placeholder="999"
             min={0}
@@ -217,8 +380,8 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
 
         <Textarea
           withAsterisk
-          label="Açıklama"
-          placeholder="Mülk açıklaması"
+          label="Description"
+          placeholder="Property description"
           mt="sm"
           minRows={3}
           {...form.getInputProps("description")}
@@ -237,13 +400,13 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
           <TextInput
             withAsterisk
             label="Şehir"
-            placeholder="Şehir"
+            placeholder="City"
             {...form.getInputProps("city")}
           />
           <TextInput
             withAsterisk
             label="Adres"
-            placeholder="Adres"
+            placeholder="Address"
             {...form.getInputProps("address")}
           />
         </div>
@@ -270,6 +433,128 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
             min={0}
             {...form.getInputProps("parkings")}
           />
+        </div>
+
+        {/* Consultant Selector */}
+        <Select
+          label="Assign Consultant"
+          placeholder="Select a consultant for this property"
+          description="The consultant will be shown as the contact person for this property"
+          data={consultantOptions}
+          value={selectedConsultantId}
+          onChange={(value) => setSelectedConsultantId(value || "")}
+          clearable
+          searchable
+          disabled={consultantsLoading}
+          mt="md"
+          leftSection={<MdPerson size={16} />}
+          renderOption={({ option }) => (
+            <div className="flex items-center gap-2 py-1">
+              <Avatar src={option.image} size="sm" radius="xl" />
+              <div>
+                <Text size="sm" fw={500}>
+                  {option.label}
+                </Text>
+                <Text size="xs" c="dimmed">
+                  {option.title}
+                </Text>
+              </div>
+            </div>
+          )}
+        />
+
+        {/* Interior Features */}
+        <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={toggleInterior}
+            className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <BsHouseDoor className="text-green-600" size={18} />
+              <Text fw={500} size="sm">
+                Interior Features
+              </Text>
+              <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
+                {interiorFeatures.length} selected
+              </span>
+            </div>
+            {interiorOpened ? (
+              <MdExpandLess size={20} />
+            ) : (
+              <MdExpandMore size={20} />
+            )}
+          </button>
+          <Collapse in={interiorOpened}>
+            <ScrollArea h={200} className="p-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {ALL_INTERIOR_FEATURES.map((feature) => (
+                  <Checkbox
+                    key={feature}
+                    label={feature}
+                    size="xs"
+                    checked={interiorFeatures.includes(feature)}
+                    onChange={(e) => {
+                      if (e.currentTarget.checked) {
+                        setInteriorFeatures([...interiorFeatures, feature]);
+                      } else {
+                        setInteriorFeatures(
+                          interiorFeatures.filter((f) => f !== feature)
+                        );
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
+          </Collapse>
+        </div>
+
+        {/* Exterior Features */}
+        <div className="mt-3 border border-gray-200 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={toggleExterior}
+            className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <BsTree className="text-blue-600" size={18} />
+              <Text fw={500} size="sm">
+                Exterior Features
+              </Text>
+              <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">
+                {exteriorFeatures.length} selected
+              </span>
+            </div>
+            {exteriorOpened ? (
+              <MdExpandLess size={20} />
+            ) : (
+              <MdExpandMore size={20} />
+            )}
+          </button>
+          <Collapse in={exteriorOpened}>
+            <ScrollArea h={200} className="p-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {ALL_EXTERIOR_FEATURES.map((feature) => (
+                  <Checkbox
+                    key={feature}
+                    label={feature}
+                    size="xs"
+                    checked={exteriorFeatures.includes(feature)}
+                    onChange={(e) => {
+                      if (e.currentTarget.checked) {
+                        setExteriorFeatures([...exteriorFeatures, feature]);
+                      } else {
+                        setExteriorFeatures(
+                          exteriorFeatures.filter((f) => f !== feature)
+                        );
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
+          </Collapse>
         </div>
 
         {/* Images */}
@@ -336,10 +621,10 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
             {isLoading ? (
               <>
                 <Loader size="xs" color="white" mr={8} />
-                Güncelleniyor...
+                Updating...
               </>
             ) : (
-              "Güncelle"
+              "Update"
             )}
           </Button>
         </Group>
@@ -356,4 +641,3 @@ EditPropertyModal.propTypes = {
 };
 
 export default EditPropertyModal;
-

@@ -36,7 +36,7 @@ const UploadImage = ({
       {
         cloudName: "ducct0j1f",
         uploadPreset: "auvy3sl6",
-        maxFiles: 10,
+        maxFiles: 30,
         multiple: true,
       },
       (err, result) => {

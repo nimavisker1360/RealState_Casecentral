@@ -35,7 +35,7 @@ const Consultants = () => {
       <section className="max-padd-container my-[99px] flexCenter min-h-[50vh]">
         <div className="text-center">
           <Loader color="green" size="lg" />
-          <p className="text-gray-30 mt-4">Danışmanlar yükleniyor...</p>
+          <p className="text-gray-30 mt-4">Loading consultants...</p>
         </div>
       </section>
     );
@@ -45,7 +45,7 @@ const Consultants = () => {
     return (
       <section className="max-padd-container my-[99px] flexCenter min-h-[50vh]">
         <div className="text-center">
-          <p className="text-red-500">Danışmanlar yüklenirken bir hata oluştu.</p>
+          <p className="text-red-500">Error loading consultants.</p>
         </div>
       </section>
     );
@@ -108,7 +108,7 @@ const Consultants = () => {
         {!consultants || consultants.length === 0 ? (
           <div className="text-center py-12">
             <FaUserTie className="text-gray-300 text-6xl mx-auto mb-4" />
-            <p className="text-gray-30">Henüz kayıtlı danışman bulunmamaktadır.</p>
+            <p className="text-gray-30">No consultants registered yet.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

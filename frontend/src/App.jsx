@@ -10,11 +10,12 @@ import { ToastContainer } from "react-toastify";
 import { ReactQueryDevtools } from 'react-query/devtools';
 import "react-toastify/dist/ReactToastify.css"
 import Property from "./pages/Property";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import UserDetailContext from "./context/UserDetailContext";
 import Layout from "./components/Layout";
 import Favourites from "./pages/Favourites";
 import Bookings from "./pages/Bookings";
+import ScrollToTop from "./components/ScrollToTop";
 
 export default function App() {
 
@@ -24,10 +25,22 @@ export default function App() {
     bookings: [],
     token: null
   })
+
+  // Scroll to top on initial load and disable browser scroll restoration
+  useEffect(() => {
+    // Disable automatic scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    // Scroll to top
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <UserDetailContext.Provider  value={{ userDetails, setUserDetails }} >
       <QueryClientProvider client={queryClient}>
           <BrowserRouter>
+            <ScrollToTop />
             <Suspense fallback={<div>Loading data...</div>}>
               <Routes>
                 <Route element={<Layout />}>

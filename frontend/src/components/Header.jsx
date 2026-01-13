@@ -6,19 +6,16 @@ import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProfileMenu from "./ProfileMenu";
 import LoginModal from "./LoginModal";
+import logo from "../assets/logo.png";
 
 const Header = () => {
   const [active, setActive] = useState(false);
   const [menuOpened, setMenuOpened] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const toggleMenu = () => setMenuOpened(!menuOpened);
-  const { isAuthenticated, user, logout, isLoading, error } =
-    useAuth0();
+  const { isAuthenticated, user, logout, isLoading } = useAuth0();
 
-  // Debug Auth0 status
-  console.log("🔍 Auth0 Status:", { isAuthenticated, isLoading, error, user });
-
-  const handleLogin = () => {
+  const handleLoginClick = () => {
     setLoginModalOpen(true);
   };
 
@@ -51,9 +48,11 @@ const Header = () => {
         <div className="flexBetween py-3 ">
           {/* logo */}
           <Link to={"/"} className="flex items-center gap-x-2">
-            <span className="font-[900] text-[24px]">
-              Casa<span className="font-[600] medium-20">Central</span>
-            </span>
+            <img
+              src={logo}
+              alt="HB International"
+              className="h-10 sm:h-12 md:h-14 object-contain"
+            />
           </Link>
           {/* Navbar */}
           <div className="flexCenter gap-x-4">
@@ -90,7 +89,7 @@ const Header = () => {
               <span className="medium-16">Loading...</span>
             ) : !isAuthenticated ? (
               <button
-                onClick={handleLogin}
+                onClick={handleLoginClick}
                 className={
                   "btn-secondary flexCenter gap-x-2 medium-16 rounded-full"
                 }
@@ -106,9 +105,9 @@ const Header = () => {
       </div>
 
       {/* Login Modal */}
-      <LoginModal 
-        isOpen={loginModalOpen} 
-        onClose={() => setLoginModalOpen(false)} 
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
       />
     </header>
   );

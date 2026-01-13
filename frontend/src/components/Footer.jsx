@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FOOTER_CONTACT_INFO, FOOTER_LINKS, SOCIALS } from "../constant/data";
 import PropTypes from "prop-types";
+import logo from "../assets/logo.png";
 
 const Footer = () => {
   return (
@@ -18,9 +19,7 @@ const Footer = () => {
         >
           <div className="max-w-full sm:max-w-sm w-full sm:w-auto">
             <Link to={"/"} className="flex items-center gap-x-2">
-              <span className="font-[900] text-[20px] sm:text-[24px]">
-                Casa<span className="font-[600] medium-20">Central</span>
-              </span>
+              <img src={logo} alt="HB International" className="h-10 sm:h-12 object-contain" />
             </Link>
             <p className="py-4 text-sm sm:text-base">
               Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nulla
@@ -79,7 +78,7 @@ const Footer = () => {
       </div>
       {/* copyrights */}
       <p className="text-white bg-tertiary medium-14 py-2 px-4 sm:px-8 rounded-b-3xl flexBetween text-xs sm:text-sm">
-        <span>2024 CasaCentral</span>
+        <span>2024 HB International Gayrimenkul</span>
         <span>All rights reserved</span>
       </p>
     </footer>

@@ -3,8 +3,54 @@ import dayjs from "dayjs";
 import { toast } from "react-toastify";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://casecentral-yt-backend.vercel.app/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
 });
+
+// Store for the token refresh function (will be set from Layout)
+let tokenRefreshCallback = null;
+let lastToastTime = 0;
+
+export const setTokenRefreshCallback = (callback) => {
+  tokenRefreshCallback = callback;
+};
+
+// Response interceptor to handle 401 errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If error is 401 and we haven't retried yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      // Try to refresh the token
+      if (tokenRefreshCallback) {
+        try {
+          const newToken = await tokenRefreshCallback();
+          if (newToken) {
+            // Update the authorization header and retry
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            return api(originalRequest);
+          }
+        } catch (refreshError) {
+          console.error("Token refresh failed:", refreshError);
+        }
+      }
+
+      // Show toast only once every 5 seconds to avoid spam
+      const now = Date.now();
+      if (now - lastToastTime > 5000) {
+        lastToastTime = now;
+        toast.error("Session expired. Please login again.", {
+          position: "bottom-right",
+        });
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export const getAllProperties = async () => {
   try {

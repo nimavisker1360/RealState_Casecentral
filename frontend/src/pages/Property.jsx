@@ -8,7 +8,7 @@ import useAuthCheck from "../hooks/useAuthCheck";
 import { useAuth0 } from "@auth0/auth0-react";
 import BookingModal from "../components/BookingModal";
 import UserDetailContext from "../context/UserDetailContext";
-import { Button } from "@mantine/core";
+import { Button, Avatar } from "@mantine/core";
 import { toast } from "react-toastify";
 import {
   MdOutlineBed,
@@ -16,8 +16,94 @@ import {
   MdOutlineGarage,
   MdSell,
   MdHome,
+  MdVerified,
+  MdCheck,
+  MdClose,
 } from "react-icons/md";
-import { FaLocationDot, FaRegClock, FaCalendarPlus } from "react-icons/fa6";
+import {
+  FaLocationDot,
+  FaRegClock,
+  FaCalendarPlus,
+  FaPhone,
+  FaWhatsapp,
+  FaEnvelope,
+  FaStar,
+  FaLinkedin,
+} from "react-icons/fa6";
+import { BsHouseDoor, BsTree } from "react-icons/bs";
+
+// All possible interior features
+const ALL_INTERIOR_FEATURES = [
+  "ADSL",
+  "Smart Home",
+  "Burglar Alarm",
+  "Fire Alarm",
+  "Aluminum Joinery",
+  "American Door",
+  "Built-in Oven",
+  "White Goods",
+  "Dishwasher",
+  "Dryer Machine",
+  "Washing Machine",
+  "Laundry Room",
+  "Steel Door",
+  "Shower Cabin",
+  "Fiber Internet",
+  "Oven",
+  "Dressing Room",
+  "Built-in Wardrobe",
+  "Intercom System",
+  "Crown Molding",
+  "Pantry",
+  "Air Conditioning",
+  "Laminate Flooring",
+  "Furniture",
+  "Built-in Kitchen",
+  "Laminate Kitchen",
+  "Kitchen Natural Gas",
+  "Parquet Flooring",
+  "PVC Joinery",
+  "Ceramic Flooring",
+  "Stovetop",
+  "Spot Lighting",
+  "Jacuzzi",
+  "Bathtub",
+  "Terrace",
+  "Wi-Fi",
+  "Fireplace",
+];
+
+// All possible exterior features
+const ALL_EXTERIOR_FEATURES = [
+  "24/7 Security",
+  "Doorman",
+  "EV Charging Station",
+  "Steam Room",
+  "Children's Playground",
+  "Turkish Bath (Hamam)",
+  "Booster Pump",
+  "Thermal Insulation",
+  "Generator",
+  "Cable TV",
+  "Security Camera",
+  "Nursery/Daycare",
+  "Private Pool",
+  "Sauna",
+  "Sound Insulation",
+  "Siding",
+  "Sports Area",
+  "Water Tank",
+  "Satellite",
+  "Fire Escape",
+  "Indoor Swimming Pool",
+  "Outdoor Swimming Pool",
+  "Tennis Court",
+  "Fitness Center",
+  "Concierge",
+  "Garden",
+  "BBQ Area",
+  "Parking Garage",
+];
 import { CgRuler } from "react-icons/cg";
 import HeartBtn from "../components/HeartBtn";
 
@@ -25,7 +111,7 @@ import HeartBtn from "../components/HeartBtn";
 const formatDate = (dateString, showFullDate = false) => {
   if (!dateString) return null;
   const date = new Date(dateString);
-  
+
   if (showFullDate) {
     return date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -35,32 +121,23 @@ const formatDate = (dateString, showFullDate = false) => {
       minute: "2-digit",
     });
   }
-  
+
   const now = new Date();
   const diffTime = Math.abs(now - date);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
   if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-  
+
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
 };
-
-// Swiper imports
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Thumbs, FreeMode } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/thumbs";
-import "swiper/css/free-mode";
 
 const Property = () => {
   const { pathname } = useLocation();
@@ -72,7 +149,8 @@ const Property = () => {
   );
   // console.log(data)
   const [modalOpened, setModalOpened] = useState(false);
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const [galleryOpened, setGalleryOpened] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { validateLogin } = useAuthCheck();
   const { user } = useAuth0();
 
@@ -127,70 +205,169 @@ const Property = () => {
     );
   }
 
+  // Navigate gallery
+  const nextImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === propertyImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? propertyImages.length - 1 : prev - 1
+    );
+  };
+
   return (
     <section className="max-padd-container my-[99px] overflow-x-hidden">
-      {/* Image Slider */}
+      {/* Image Gallery Grid */}
       <div className="pb-4 relative">
-        <div className="space-y-3">
-          {/* Main Slider */}
-          <Swiper
-            modules={[Navigation, Pagination, Thumbs]}
-            navigation={propertyImages.length > 1}
-            pagination={propertyImages.length > 1 ? { clickable: true } : false}
-            thumbs={{
-              swiper:
-                thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
-            }}
-            className="property-main-slider rounded-xl overflow-hidden"
-            style={{
-              "--swiper-navigation-color": "#fff",
-              "--swiper-pagination-color": "#fff",
-            }}
+        <div className="flex gap-2 h-[400px] md:h-[500px] rounded-xl overflow-hidden">
+          {/* Main Large Image - Left Side */}
+          <div
+            className="relative flex-[1.5] group cursor-pointer"
+            onClick={() => setGalleryOpened(true)}
           >
-            {propertyImages.map((img, index) => (
-              <SwiperSlide key={index}>
-                <img
-                  src={img}
-                  alt={`${data?.title} - ${index + 1}`}
-                  className="w-full h-[27rem] object-cover"
-                />
-              </SwiperSlide>
-            ))}
-            {/* like btn */}
-            <div className="absolute top-8 right-8 z-10">
+            <img
+              src={propertyImages[0] || "https://via.placeholder.com/800x600"}
+              alt={data?.title}
+              className="w-full h-full object-cover"
+            />
+            {/* Navigation Arrow Left */}
+            {propertyImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevImage();
+                }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flexCenter shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <MdOutlineBed className="rotate-180 text-xl" />‹
+              </button>
+            )}
+            {/* Like Button */}
+            <div className="absolute top-4 right-4 z-10">
               <HeartBtn id={id} />
             </div>
-          </Swiper>
+          </div>
 
-          {/* Thumbnails - only show if more than 1 image */}
+          {/* Right Side - 2x2 Grid */}
           {propertyImages.length > 1 && (
-            <Swiper
-              onSwiper={setThumbsSwiper}
-              modules={[FreeMode, Thumbs]}
-              spaceBetween={10}
-              slidesPerView={4}
-              freeMode={true}
-              watchSlidesProgress={true}
-              className="property-thumbs-slider"
-              breakpoints={{
-                320: { slidesPerView: 3 },
-                640: { slidesPerView: 4 },
-                1024: { slidesPerView: 5 },
-              }}
-            >
-              {propertyImages.map((img, index) => (
-                <SwiperSlide key={index} className="cursor-pointer">
+            <div className="flex-1 grid grid-cols-2 gap-2">
+              {propertyImages.slice(1, 5).map((img, index) => (
+                <div
+                  key={index}
+                  className="relative cursor-pointer overflow-hidden group"
+                  onClick={() => {
+                    setCurrentImageIndex(index + 1);
+                    setGalleryOpened(true);
+                  }}
+                >
                   <img
                     src={img}
-                    alt={`thumb-${index + 1}`}
-                    className="w-full h-20 object-cover rounded-lg border-2 border-transparent hover:border-secondary transition-all"
+                    alt={`${data?.title} - ${index + 2}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                </SwiperSlide>
+                  {/* Show overlay on last visible image if more images */}
+                  {index === 3 && propertyImages.length > 5 && (
+                    <div className="absolute inset-0 bg-black/50 flexCenter">
+                      <span className="text-white font-semibold text-lg">
+                        +{propertyImages.length - 5} more
+                      </span>
+                    </div>
+                  )}
+                </div>
               ))}
-            </Swiper>
+            </div>
+          )}
+
+          {/* Navigation Arrow Right */}
+          {propertyImages.length > 1 && (
+            <button
+              onClick={nextImage}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flexCenter shadow-lg z-10"
+            >
+              ›
+            </button>
           )}
         </div>
+
+        {/* Bottom Info Bar */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-full px-6 py-2 shadow-lg flex items-center gap-4">
+          <button
+            onClick={() => setGalleryOpened(true)}
+            className="flex items-center gap-2 text-gray-700 hover:text-secondary transition-colors"
+          >
+            <span className="font-medium text-secondary">
+              {propertyImages.length} Photos
+            </span>
+          </button>
+          <div className="w-px h-5 bg-gray-300"></div>
+          <button className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors">
+            <span>Virtual Tour</span>
+          </button>
+        </div>
       </div>
+
+      {/* Full Screen Gallery Modal */}
+      {galleryOpened && (
+        <div className="fixed inset-0 bg-black/95 z-[200] flex items-center justify-center">
+          {/* Close Button */}
+          <button
+            onClick={() => setGalleryOpened(false)}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flexCenter text-white text-2xl z-10"
+          >
+            ×
+          </button>
+
+          {/* Image Counter */}
+          <div className="absolute top-4 left-4 text-white/80 text-sm">
+            {currentImageIndex + 1} / {propertyImages.length}
+          </div>
+
+          {/* Main Image */}
+          <img
+            src={propertyImages[currentImageIndex]}
+            alt={`${data?.title} - ${currentImageIndex + 1}`}
+            className="max-h-[85vh] max-w-[90vw] object-contain"
+          />
+
+          {/* Navigation Arrows */}
+          {propertyImages.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flexCenter text-white text-3xl"
+              >
+                ‹
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flexCenter text-white text-3xl"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          {/* Thumbnail Strip */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90vw] overflow-x-auto p-2">
+            {propertyImages.map((img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt={`thumb-${index + 1}`}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`h-16 w-24 object-cover rounded-lg cursor-pointer transition-all ${
+                  currentImageIndex === index
+                    ? "ring-2 ring-secondary opacity-100"
+                    : "opacity-50 hover:opacity-80"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
       {/* container */}
       <div className="xl:flexBetween gap-8">
         {/* left side */}
@@ -205,15 +382,21 @@ const Property = () => {
                   : "bg-green-500 text-white"
               }`}
             >
-              {data?.propertyType === "rent" ? <MdHome size={16} /> : <MdSell size={16} />}
-              {data?.propertyType === "rent" ? "Kiralık" : "Satılık"}
+              {data?.propertyType === "rent" ? (
+                <MdHome size={16} />
+              ) : (
+                <MdSell size={16} />
+              )}
+              {data?.propertyType === "rent" ? "For Rent" : "For Sale"}
             </span>
           </div>
           <div className="flexBetween">
             <h4 className="medium-18">{data?.title}</h4>
             <div className="bold-20">
-              ${data?.price?.toLocaleString()}
-              {data?.propertyType === "rent" && <span className="text-sm font-normal text-gray-500">/ay</span>}
+              ₺{data?.price?.toLocaleString()}
+              {data?.propertyType === "rent" && (
+                <span className="text-sm font-normal text-gray-500">/mo</span>
+              )}
             </div>
           </div>
           {/* info */}
@@ -247,7 +430,9 @@ const Property = () => {
                 </div>
                 <div>
                   <p className="text-gray-30 text-xs">Listed on</p>
-                  <p className="font-medium text-tertiary">{formatDate(data.createdAt, true)}</p>
+                  <p className="font-medium text-tertiary">
+                    {formatDate(data.createdAt, true)}
+                  </p>
                 </div>
               </div>
             )}
@@ -258,7 +443,9 @@ const Property = () => {
                 </div>
                 <div>
                   <p className="text-gray-30 text-xs">Last updated</p>
-                  <p className="font-medium text-tertiary">{formatDate(data.updatedAt, true)}</p>
+                  <p className="font-medium text-tertiary">
+                    {formatDate(data.updatedAt, true)}
+                  </p>
                 </div>
               </div>
             )}
@@ -297,6 +484,209 @@ const Property = () => {
               email={user?.email}
             />
           </div>
+
+          {/* Property Features Section */}
+          <div className="mt-8 space-y-6">
+            {/* Interior Features */}
+            <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                <div className="w-8 h-8 bg-green-500/10 rounded-lg flexCenter">
+                  <BsHouseDoor className="text-green-600" />
+                </div>
+                <h4 className="font-semibold text-tertiary">
+                  Interior Features
+                </h4>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {ALL_INTERIOR_FEATURES.map((feature, index) => {
+                  const hasFeature = data?.interiorFeatures?.includes(feature);
+                  return (
+                    <div
+                      key={index}
+                      className={`flex items-center gap-2 text-sm ${
+                        !hasFeature ? "opacity-50" : ""
+                      }`}
+                    >
+                      {hasFeature ? (
+                        <MdCheck
+                          className="text-green-500 flex-shrink-0"
+                          size={18}
+                        />
+                      ) : (
+                        <MdClose
+                          className="text-red-400 flex-shrink-0"
+                          size={18}
+                        />
+                      )}
+                      <span
+                        className={
+                          hasFeature
+                            ? "text-gray-700 font-medium"
+                            : "text-gray-400"
+                        }
+                      >
+                        {feature}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Exterior Features */}
+            <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                <div className="w-8 h-8 bg-blue-500/10 rounded-lg flexCenter">
+                  <BsTree className="text-blue-600" />
+                </div>
+                <h4 className="font-semibold text-tertiary">
+                  Exterior Features
+                </h4>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {ALL_EXTERIOR_FEATURES.map((feature, index) => {
+                  const hasFeature = data?.exteriorFeatures?.includes(feature);
+                  return (
+                    <div
+                      key={index}
+                      className={`flex items-center gap-2 text-sm ${
+                        !hasFeature ? "opacity-50" : ""
+                      }`}
+                    >
+                      {hasFeature ? (
+                        <MdCheck
+                          className="text-green-500 flex-shrink-0"
+                          size={18}
+                        />
+                      ) : (
+                        <MdClose
+                          className="text-red-400 flex-shrink-0"
+                          size={18}
+                        />
+                      )}
+                      <span
+                        className={
+                          hasFeature
+                            ? "text-gray-700 font-medium"
+                            : "text-gray-400"
+                        }
+                      >
+                        {feature}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Consultant Contact Section */}
+          {data?.consultant && (
+            <div className="mt-6 p-5 bg-gradient-to-br from-tertiary to-tertiary/90 rounded-2xl text-white">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-secondary rounded-lg flexCenter">
+                  <FaPhone className="text-white text-sm" />
+                </div>
+                <h4 className="font-semibold">Contact Property Consultant</h4>
+              </div>
+
+              <div className="flex items-center gap-4 mb-5">
+                <Avatar
+                  src={data.consultant.image}
+                  alt={data.consultant.name}
+                  size="lg"
+                  radius="xl"
+                  className="border-2 border-secondary"
+                />
+                <div className="flex-1">
+                  <h5 className="font-semibold flex items-center gap-2">
+                    {data.consultant.name}
+                    <MdVerified className="text-secondary" />
+                  </h5>
+                  <p className="text-white/70 text-sm">
+                    {data.consultant.title}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-full">
+                      <FaStar className="text-amber-400 text-xs" />
+                      <span className="text-xs font-medium">
+                        {data.consultant.rating}
+                      </span>
+                    </div>
+                    <span className="text-white/50 text-xs">•</span>
+                    <span className="text-white/70 text-xs">
+                      {data.consultant.deals}+ deals
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Consultant Specialty */}
+              <div className="mb-4 p-3 bg-white/10 rounded-xl">
+                <p className="text-white/60 text-xs mb-1">Specialty</p>
+                <p className="text-sm">{data.consultant.specialty}</p>
+              </div>
+
+              {/* Contact Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href={`tel:${data.consultant.phone}`}
+                  className="flexCenter gap-2 bg-white text-tertiary py-3 rounded-xl hover:bg-gray-100 transition-colors font-medium text-sm"
+                >
+                  <FaPhone className="text-secondary" />
+                  Call Now
+                </a>
+                <a
+                  href={`https://wa.me/${data.consultant.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flexCenter gap-2 bg-[#25D366] text-white py-3 rounded-xl hover:bg-[#20bd5a] transition-colors font-medium text-sm"
+                >
+                  <FaWhatsapp />
+                  WhatsApp
+                </a>
+              </div>
+
+              {/* Additional Contact */}
+              <div className="flex items-center justify-center gap-4 mt-4">
+                <a
+                  href={`mailto:${data.consultant.email}`}
+                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm"
+                >
+                  <FaEnvelope />
+                  Email
+                </a>
+                {data.consultant.linkedin && (
+                  <a
+                    href={data.consultant.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm"
+                  >
+                    <FaLinkedin />
+                    LinkedIn
+                  </a>
+                )}
+              </div>
+
+              {/* Languages */}
+              {data.consultant.languages?.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <p className="text-white/60 text-xs mb-2">Languages</p>
+                  <div className="flex flex-wrap gap-2">
+                    {data.consultant.languages.map((lang) => (
+                      <span
+                        key={lang}
+                        className="bg-secondary/20 text-secondary px-2 py-1 rounded-full text-xs font-medium"
+                      >
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {/* right side */}
         <div className="flex-1">

@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { MdClose, MdEmail, MdHome, MdSecurity, MdArrowForward } from "react-icons/md";
+import {
+  MdClose,
+  MdEmail,
+  MdHome,
+  MdSecurity,
+  MdArrowForward,
+} from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
+import PropTypes from "prop-types";
+import logo from "../assets/logo.png";
 
 const LoginModal = ({ isOpen, onClose }) => {
   const { loginWithRedirect } = useAuth0();
@@ -44,24 +52,33 @@ const LoginModal = ({ isOpen, onClose }) => {
 
           {/* Close Button */}
           <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10 group"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-50 group cursor-pointer"
           >
-            <MdClose className="text-white/70 group-hover:text-white text-xl transition-colors" />
+            <MdClose className="text-white/70 group-hover:text-white text-xl transition-colors pointer-events-none" />
           </button>
 
           {/* Content */}
           <div className="relative z-10 p-8 pt-6">
             {/* Logo & Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-secondary to-green-600 rounded-2xl mb-4 shadow-lg shadow-secondary/30">
-                <MdHome className="text-4xl text-white" />
+              <div className="inline-flex items-center justify-center bg-white rounded-2xl p-3 mb-4 shadow-lg">
+                <img
+                  src={logo}
+                  alt="HB International"
+                  className="h-14 object-contain"
+                />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">
-                CasaCentral'a Hoş Geldiniz
+                Hoş Geldiniz
               </h2>
               <p className="text-slate-400 text-sm">
-                Rüya evinizi bulmak için giriş yapın
+                Hayalinizdeki evi bulmak için giriş yapın
               </p>
             </div>
 
@@ -71,13 +88,13 @@ const LoginModal = ({ isOpen, onClose }) => {
                 <div className="p-2 bg-secondary/20 rounded-lg">
                   <MdHome className="text-secondary text-lg" />
                 </div>
-                <span className="text-xs text-slate-300">1000+ Mülk</span>
+                <span className="text-xs text-slate-300">1000+ Properties</span>
               </div>
               <div className="flex items-center gap-2 p-3 bg-white/5 rounded-xl border border-white/10">
                 <div className="p-2 bg-secondaryBlue/20 rounded-lg">
                   <MdSecurity className="text-secondaryBlue text-lg" />
                 </div>
-                <span className="text-xs text-slate-300">Güvenli Giriş</span>
+                <span className="text-xs text-slate-300">Secure Login</span>
               </div>
             </div>
 
@@ -90,13 +107,15 @@ const LoginModal = ({ isOpen, onClose }) => {
                 className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white hover:bg-gray-50 rounded-xl font-medium text-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FcGoogle className="text-2xl" />
-                <span>Google ile Devam Et</span>
+                <span>Continue with Google</span>
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-4 py-2">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                <span className="text-xs text-slate-500 uppercase tracking-wider">veya</span>
+                <span className="text-xs text-slate-500 uppercase tracking-wider">
+                  or
+                </span>
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               </div>
 
@@ -107,7 +126,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                 className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-secondary to-green-600 hover:from-secondary/90 hover:to-green-600/90 rounded-xl font-medium text-white transition-all duration-200 shadow-lg shadow-secondary/30 hover:shadow-xl hover:shadow-secondary/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 <MdEmail className="text-xl" />
-                <span>Email ile Giriş Yap</span>
+                <span>Login with Email</span>
                 <MdArrowForward className="text-lg opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
               </button>
             </div>
@@ -115,15 +134,15 @@ const LoginModal = ({ isOpen, onClose }) => {
             {/* Footer */}
             <div className="mt-8 text-center">
               <p className="text-xs text-slate-500">
-                Giriş yaparak{" "}
+                By logging in, you agree to our{" "}
                 <a href="#" className="text-secondary hover:underline">
-                  Kullanım Şartları
+                  Terms of Service
                 </a>{" "}
-                ve{" "}
+                and{" "}
                 <a href="#" className="text-secondary hover:underline">
-                  Gizlilik Politikası
+                  Privacy Policy
                 </a>
-                'nı kabul ediyorsunuz.
+                .
               </p>
             </div>
 
@@ -161,6 +180,11 @@ const LoginModal = ({ isOpen, onClose }) => {
       `}</style>
     </>
   );
+};
+
+LoginModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default LoginModal;

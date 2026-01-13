@@ -59,7 +59,7 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
   const { mutate, isLoading } = useMutation({
     mutationFn: () => bookVisit(value, propertyId, email, token),
     onSuccess: () => handleBookingSuccess(),
-    onError: ({ response }) => toast.error(response?.data?.message || "Bir hata oluştu"),
+    onError: ({ response }) => toast.error(response?.data?.message || "An error occurred"),
     onSettled: () => setOpened(false),
   });
 

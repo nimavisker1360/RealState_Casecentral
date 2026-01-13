@@ -151,7 +151,7 @@ const ProfileModal = ({ opened, setOpened }) => {
           ...prev,
           profile: result.user,
         }));
-        toast.success("Profil başarıyla güncellendi!", { position: "bottom-right" });
+        toast.success("Profile updated successfully!", { position: "bottom-right" });
         setOpened(false);
       }
     } catch (error) {

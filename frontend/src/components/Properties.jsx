@@ -1,85 +1,63 @@
-'use client'
-
-import Item from './Item'
-import { VscSettings } from 'react-icons/vsc'
-import { Link } from "react-router-dom"
-// import { PROPERTIES } from '../constant/data'
-import useProperties from '../hooks/useProperties';
-import { PuffLoader } from "react-spinners"
-// swiper
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
+import PropertyGridCard from "./PropertyGridCard";
+import { Link } from "react-router-dom";
+import useProperties from "../hooks/useProperties";
+import { PuffLoader } from "react-spinners";
 
 const Properties = () => {
-
   const { data, isError, isLoading } = useProperties();
+
   if (isError) {
     return (
-      <div>
-        <span>Error while fetching data</span>
+      <div className="max-padd-container py-16">
+        <span className="text-red-500">Error while fetching data</span>
       </div>
-    )
+    );
   }
 
   if (isLoading) {
     return (
-      <div className='h-64 flexCenter'>
+      <div className="h-64 flexCenter">
         <PuffLoader
           height="80"
           width="80"
           radius={1}
-          color="#555"
+          color="#16a34a"
           aria-label="puff-loading"
         />
       </div>
-
-    )
+    );
   }
 
-  // console.log(data);
   return (
-    <section className='max-padd-container overflow-x-hidden'>
-      <div className='bg-primary py-16 xl:py-28 rounded-3xl px-4 sm:px-6 lg:px-12'>
-        <span className='medium-18'>Your Future Home Awaits!</span>
-        <h2 className='h2'>Find Your Dream Here</h2>
-        <div className="flexBetween mt-8 mb-6">
-          <h5><span className="font-bold">Showing 1-9</span> out of 3k properties</h5>
-          <Link to={'/'}><VscSettings className="bg-white text-3xl rounded-md h-10 w-10 p-2 border" /></Link>
-        </div>
-        {/* container */}
-        <Swiper
-          autoplay={{
-            delay: 4000,
-            disableOnInteraction: false,
-          }}
-          breakpoints={{
-            600: {
-              slidesPerView: 2,
-              spaceBetween: 30,
-            },
-            1124: {
-              slidesPerView: 3,
-              spaceBetween: 30,
-            },
-            1300: {
-              slidesPerView: 4,
-              spaceBetween: 30,
-            },
-          }}
-          modules={[Autoplay]}
-          className='h-[488px] md:h-[533px] xl:h-[422px] mt-5'
-        >
-          {data.slice(0, 6).map((property) => (
-            <SwiperSlide key={property.title}>
-              <Item property={property} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+    <section className="max-padd-container py-16 xl:py-24">
+      {/* Section Header */}
+      <div className="text-center mb-12">
+        <p className="text-green-600 font-medium text-sm uppercase tracking-wider mb-2">
+          Your Future Home Awaits
+        </p>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          Find Your Dream Here
+        </h2>
       </div>
-    </section >
-  )
-}
 
-export default Properties
+      {/* Properties Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {data.slice(0, 8).map((property) => (
+          <PropertyGridCard key={property.id} property={property} />
+        ))}
+      </div>
+
+      {/* View More Button */}
+      <div className="flex justify-center mt-12">
+        <Link
+          to="/listing"
+          className="px-8 py-3 bg-[#3d6b2f] text-white font-medium rounded hover:bg-[#2d5022] transition-colors"
+        >
+          View More
+        </Link>
+      </div>
+    </section>
+  );
+};
+
+export default Properties;

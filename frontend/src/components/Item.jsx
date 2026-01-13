@@ -18,13 +18,13 @@ const formatDate = (dateString) => {
   const now = new Date();
   const diffTime = Math.abs(now - date);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
   if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-  
+
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -35,7 +35,7 @@ const formatDate = (dateString) => {
 const Item = ({ property }) => {
   const navigate = useNavigate();
   const isForSale = property.propertyType === "sale" || !property.propertyType;
-  
+
   return (
     <div
       className="rounded-2xl p-5 bg-white cursor-pointer hover:shadow-lg transition-shadow"
@@ -47,13 +47,11 @@ const Item = ({ property }) => {
         <div className="absolute top-4 left-4">
           <span
             className={`flexCenter gap-x-1 px-3 py-1 rounded-full text-xs font-semibold ${
-              isForSale
-                ? "bg-green-500 text-white"
-                : "bg-blue-500 text-white"
+              isForSale ? "bg-green-500 text-white" : "bg-blue-500 text-white"
             }`}
           >
             {isForSale ? <MdSell size={14} /> : <MdHome size={14} />}
-            {isForSale ? "Satılık" : "Kiralık"}
+            {isForSale ? "For Sale" : "For Rent"}
           </span>
         </div>
         {/* like btn */}
@@ -90,8 +88,10 @@ const Item = ({ property }) => {
       <p className="pt-2 mb-4 line-clamp-2">{property.description}</p>
       <div className="flexBetween flex-wrap gap-2">
         <div className="bold-18 sm:bold-20">
-          ${property.price.toLocaleString()}
-          {!isForSale && <span className="text-sm font-normal text-gray-500">/ay</span>}
+          ₺{property.price.toLocaleString()}
+          {!isForSale && (
+            <span className="text-sm font-normal text-gray-500">/ay</span>
+          )}
         </div>
         <Link to={`/`}>
           <button className="btn-secondary rounded-xl !px-4 sm:!px-5 !py-[7px] shadow-sm text-sm sm:text-base">

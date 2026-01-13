@@ -83,6 +83,9 @@ const Facilities = ({
           parkings: 0,
           bathrooms: 0,
         },
+        propertyType: "sale",
+        category: "residential",
+        consultantId: null,
         userEmail: user?.email,
       });
 
