@@ -451,32 +451,60 @@ const Property = () => {
               </div>
             )}
           </div>
-          <div>
+          <div className="space-y-3">
             {bookings?.map((booking) => booking.id).includes(id) ? (
               <>
-                <Button
-                  onClick={() => cancelBooking()}
-                  variant="outline"
-                  w={"100%"}
-                  color="red"
-                  disabled={cancelling}
-                >
-                  Cancel booking
-                </Button>
-                <p className="text-red-500 medium-15 mt-3">
-                  You&apos;ve Already booked visit for{" "}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => cancelBooking()}
+                    variant="outline"
+                    className="flex-1"
+                    color="red"
+                    disabled={cancelling}
+                  >
+                    Cancel booking
+                  </Button>
+                  <Button
+                    onClick={() => setContactModalOpen(true)}
+                    className="flex-1 bg-secondary hover:bg-secondary/90"
+                    leftSection={<FaEnvelope />}
+                  >
+                    Send Message
+                  </Button>
+                </div>
+                <p className="text-green-600 medium-15 flex items-center gap-2">
+                  <MdCheck className="text-lg" />
+                  You&apos;ve booked visit for{" "}
                   {bookings?.filter((booking) => booking?.id === id)[0].date}
                 </p>
               </>
             ) : (
-              <button
-                onClick={() => {
-                  validateLogin() && setModalOpened(true);
-                }}
-                className="btn-secondary rounded-xl !px-5 !py-[7px] shadow-sm"
-              >
-                Book the visit
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    validateLogin() && setModalOpened(true);
+                  }}
+                  className="btn-secondary rounded-xl !px-5 !py-[7px] shadow-sm w-full"
+                >
+                  Book the visit
+                </button>
+                <Button
+                  onClick={() => {
+                    if (!validateLogin()) return;
+                    toast.warning("⚠️ Please book this property first to send a message", {
+                      position: "bottom-right",
+                      autoClose: 5000,
+                    });
+                  }}
+                  variant="outline"
+                  color="gray"
+                  className="w-full"
+                  leftSection={<FaEnvelope />}
+                  disabled
+                >
+                  Send Message (Book First)
+                </Button>
+              </>
             )}
             <BookingModal
               opened={modalOpened}
@@ -643,13 +671,6 @@ const Property = () => {
                   <FaWhatsapp />
                   WhatsApp
                 </a>
-                <button
-                  onClick={() => setContactModalOpen(true)}
-                  className="flexCenter gap-2 bg-white text-tertiary py-3 rounded-xl hover:bg-secondary hover:text-white transition-colors font-medium text-sm w-full cursor-pointer"
-                >
-                  <FaEnvelope className="text-secondary" />
-                  Send Message
-                </button>
               </div>
 
               {/* Languages */}
@@ -681,10 +702,13 @@ const Property = () => {
         </div>
       </div>
 
-      {/* Contact Modal */}
+      {/* Contact Modal - Only opens after booking */}
       <ContactModal
         opened={contactModalOpen}
         onClose={() => setContactModalOpen(false)}
+        propertyId={id}
+        propertyTitle={data?.title}
+        userEmail={user?.email}
       />
     </section>
   );

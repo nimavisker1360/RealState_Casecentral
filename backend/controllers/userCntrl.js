@@ -382,3 +382,21 @@ export const getAllUsersBookings = asyncHandler(async (req, res) => {
     throw new Error(err.message);
   }
 });
+
+// Delete user
+export const deleteUser = asyncHandler(async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    await prisma.user.delete({
+      where: { email },
+    });
+
+    res.status(200).json({
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    throw new Error(err.message);
+  }
+});

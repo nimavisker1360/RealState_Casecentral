@@ -55,17 +55,13 @@ const About = () => {
           </div>
         </div>
         {/* Right side */}
-        <div className="flex-1 flex justify-center flex-col">
+        <div className="flex-1 flex justify-center flex-col text-left">
           <span className={`medium-18 ${isVisible ? 'animate-about-slide-right' : 'opacity-0'}`} style={{animationDelay: '0.1s'}}>Unveiling Our Journey</span>
           <h2 className={`h2 ${isVisible ? 'animate-about-slide-right' : 'opacity-0'}`} style={{animationDelay: '0.2s'}}>
             Our Commitment Crafting Extraordinary Real Estate Experiences
           </h2>
           <p className={`py-5 ${isVisible ? 'animate-about-slide-right' : 'opacity-0'}`} style={{animationDelay: '0.3s'}}>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nobis
-            dolore expedita delectus in a eligendi explicabo laborum eveniet?
-            Ratione modi et earum assumenda est vitae neque laborum fugiat unde
-            expedita perferendis amet rem illum quis facere voluptatum culpa
-            repudiandae natus provident porro, nihil fuga.
+            Hıdır Bulmak, Koç Holding bünyesinde finans, operasyon ve liderlik alanlarında uzun yıllara dayanan kurumsal deneyime sahip bir işletme mezunudur. Girişimcilik yolculuğunda geri dönüşüm, uluslararası ticaret ve gayrimenkul sektörlerinde başarılı projelere imza atmıştır. Kurucusu olduğu HB Gayrimenkul INTERNATIONAL ile güvene dayalı ilişkiler, değer üretimi ve sürdürülebilir başarıyı hedeflemektedir.
           </p>
           {/* Statistics Container */}
           <div className="flex flex-wrap gap-4">

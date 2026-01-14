@@ -455,3 +455,48 @@ export const sendEmail = async (emailData) => {
     throw error;
   }
 };
+
+// Get All Contact Messages
+export const getAllContactMessages = async (token) => {
+  try {
+    const response = await api.get("/email/messages", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contact messages:", error);
+    return { totalMessages: 0, messages: [] };
+  }
+};
+
+// Delete Contact Message
+export const deleteContactMessage = async (id, token) => {
+  try {
+    const response = await api.delete(`/email/messages/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting contact message:", error);
+    throw error;
+  }
+};
+
+// Mark Message as Read
+export const markMessageAsRead = async (id, token) => {
+  try {
+    const response = await api.put(`/email/messages/${id}/read`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error marking message as read:", error);
+    throw error;
+  }
+};

@@ -39,8 +39,9 @@ import {
   updateConsultant,
   deleteConsultant,
   toggleConsultantAvailability,
-  getAllUsers,
   removeBooking,
+  getAllContactMessages,
+  deleteContactMessage,
 } from "../utils/api";
 import { toast } from "react-toastify";
 import {
@@ -59,6 +60,7 @@ import {
   MdEmail,
   MdOutlineCloudUpload,
   MdClose,
+  MdMessage,
 } from "react-icons/md";
 import { FaWhatsapp, FaStar } from "react-icons/fa6";
 import { useRef } from "react";
@@ -105,10 +107,12 @@ const AdminPanel = () => {
   const [consultantToDelete, setConsultantToDelete] = useState(null);
   const [consultantLoading, setConsultantLoading] = useState(false);
 
-  // Users state
-  const [users, setUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(true);
-  const [totalUsers, setTotalUsers] = useState(0);
+
+  // Contact Messages state
+  const [contactMessages, setContactMessages] = useState([]);
+  const [messagesLoading, setMessagesLoading] = useState(true);
+  const [totalMessages, setTotalMessages] = useState(0);
+
   const [consultantForm, setConsultantForm] = useState({
     name: "",
     title: "",
@@ -223,26 +227,45 @@ const AdminPanel = () => {
     }
   }, [token, isAdmin, fetchBookings]);
 
-  // Fetch all users
-  const fetchUsers = useCallback(async () => {
+
+  // Fetch all contact messages
+  const fetchMessages = useCallback(async () => {
     if (!token) return;
-    setUsersLoading(true);
+    setMessagesLoading(true);
     try {
-      const data = await getAllUsers(token);
-      setUsers(data.users || []);
-      setTotalUsers(data.totalUsers || 0);
+      const data = await getAllContactMessages(token);
+      setContactMessages(data.messages || []);
+      setTotalMessages(data.totalMessages || 0);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching messages:", error);
     } finally {
-      setUsersLoading(false);
+      setMessagesLoading(false);
     }
   }, [token]);
 
   useEffect(() => {
     if (token && isAdmin) {
-      fetchUsers();
+      fetchMessages();
     }
-  }, [token, isAdmin, fetchUsers]);
+  }, [token, isAdmin, fetchMessages]);
+
+  // Handle delete contact message
+  const handleDeleteMessage = async (messageId) => {
+    if (!token || !messageId) return;
+
+    try {
+      await deleteContactMessage(messageId, token);
+      toast.success("Message deleted successfully!", {
+        position: "bottom-right",
+      });
+      fetchMessages();
+    } catch (error) {
+      console.error("Delete message error:", error);
+      toast.error("Failed to delete message", {
+        position: "bottom-right",
+      });
+    }
+  };
 
   // Handle delete booking (admin)
   const handleDeleteBooking = async (userEmail, propertyId) => {
@@ -253,8 +276,7 @@ const AdminPanel = () => {
       toast.success("Booking deleted successfully!", {
         position: "bottom-right",
       });
-      // Refresh users list to update bookings
-      fetchUsers();
+      // Refresh bookings
       fetchBookings();
     } catch (error) {
       console.error("Delete booking error:", error);
@@ -584,18 +606,18 @@ const AdminPanel = () => {
             p="lg"
             radius="md"
             className={`cursor-pointer hover:shadow-md transition-shadow ${
-              activeTab === "users" ? "border-2 border-cyan-500" : ""
+              activeTab === "messages" ? "border-2 border-orange-500" : ""
             }`}
-            onClick={() => setActiveTab("users")}
+            onClick={() => setActiveTab("messages")}
           >
             <Group>
-              <div className="bg-cyan-100 text-cyan-600 p-3 rounded-full">
-                <MdPeople size={24} />
+              <div className="bg-orange-100 text-orange-600 p-3 rounded-full">
+                <MdMessage size={24} />
               </div>
               <div>
-                <Text fw={600}>Kullanıcılar</Text>
+                <Text fw={600}>Mesajlar</Text>
                 <Text size="sm" color="dimmed">
-                  {totalUsers} kullanıcı • {totalBookings} rez.
+                  {totalMessages} contact message
                 </Text>
               </div>
             </Group>
@@ -988,8 +1010,8 @@ const AdminPanel = () => {
           </Paper>
         )}
 
-        {/* Users Section */}
-        {activeTab === "users" && (
+        {/* Contact Messages Section */}
+        {activeTab === "messages" && (
           <Paper shadow="sm" p="xl" radius="md" className="mb-6">
             <div className="flexBetween mb-6">
               <div>
@@ -997,23 +1019,20 @@ const AdminPanel = () => {
                   order={3}
                   className="flex items-center gap-2 text-gray-800"
                 >
-                  <MdPeople className="text-cyan-500" />
-                  Kullanıcılar & Rezervasyonlar
+                  <MdMessage className="text-orange-500" />
+                  İletişim Mesajları
                 </Title>
                 <Text size="sm" color="dimmed" className="mt-1">
-                  Tüm kullanıcılar, bilgileri ve rezervasyonları
+                  Form üzerinden gönderilen tüm mesajlar
                 </Text>
               </div>
               <Group>
                 <Button
                   variant="light"
-                  color="cyan"
+                  color="orange"
                   leftSection={<MdRefresh size={18} />}
-                  onClick={() => {
-                    fetchUsers();
-                    fetchBookings();
-                  }}
-                  loading={usersLoading}
+                  onClick={() => fetchMessages()}
+                  loading={messagesLoading}
                 >
                   Yenile
                 </Button>
@@ -1022,207 +1041,120 @@ const AdminPanel = () => {
 
             <Divider className="mb-6" />
 
-            {usersLoading ? (
+            {messagesLoading ? (
               <div className="flexCenter py-12">
-                <Loader color="cyan" />
+                <Loader color="orange" />
               </div>
-            ) : users.length === 0 ? (
+            ) : contactMessages.length === 0 ? (
               <div className="text-center py-12">
-                <MdPeople size={64} className="text-gray-300 mx-auto mb-4" />
-                <Text color="dimmed">
-                  Henüz kayıtlı kullanıcı bulunmamaktadır
-                </Text>
+                <MdMessage size={64} className="text-gray-300 mx-auto mb-4" />
+                <Text color="dimmed">Henüz mesaj bulunmamaktadır</Text>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table striped highlightOnHover>
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>Kullanıcı</Table.Th>
-                      <Table.Th>Contact</Table.Th>
-                      <Table.Th>Profil Durumu</Table.Th>
-                      <Table.Th>Rezervasyonlar</Table.Th>
-                      <Table.Th>Favorites</Table.Th>
-                      <Table.Th>Kayıt Tarihi</Table.Th>
-                      <Table.Th>Rol</Table.Th>
+                      <Table.Th>Gönderen</Table.Th>
+                      <Table.Th>İletişim</Table.Th>
+                      <Table.Th>ملک</Table.Th>
+                      <Table.Th>Konu</Table.Th>
+                      <Table.Th>Mesaj</Table.Th>
+                      <Table.Th>Tarih</Table.Th>
+                      <Table.Th>Aksiyon</Table.Th>
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
-                    {users.map((u) => (
-                      <Table.Tr key={u.id}>
+                    {contactMessages.map((m) => (
+                      <Table.Tr key={m.id}>
                         <Table.Td>
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
                             <Avatar
-                              src={u.image}
-                              alt={u.name}
                               radius="xl"
                               size="md"
-                            />
+                              color="cyan"
+                              variant="light"
+                            >
+                              {m.name?.[0]?.toUpperCase() || "?"}
+                            </Avatar>
                             <div>
                               <Text size="sm" fw={500}>
-                                {u.name || "İsimsiz"}
+                                {m.name}
                               </Text>
+                              {m.phone && (
+                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                  <MdPhone size={12} />
+                                  {m.phone}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </Table.Td>
                         <Table.Td>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1">
-                              <MdEmail size={14} className="text-gray-400" />
-                              <Text size="xs">{u.email}</Text>
-                            </div>
-                            {u.phone && (
-                              <div className="flex items-center gap-1">
-                                <FaWhatsapp
-                                  size={14}
-                                  className="text-green-500"
-                                />
-                                <Text size="xs">{u.phone}</Text>
-                              </div>
-                            )}
-                            {u.address && (
-                              <div className="flex items-center gap-1">
-                                <MdHome size={14} className="text-gray-400" />
-                                <Text size="xs" lineClamp={1}>
-                                  {u.address}
-                                </Text>
-                              </div>
-                            )}
+                          <div className="flex items-center gap-1 text-xs text-gray-600">
+                            <MdEmail size={14} className="text-gray-400" />
+                            <Text size="xs" className="truncate max-w-[180px]">
+                              {m.email}
+                            </Text>
                           </div>
                         </Table.Td>
                         <Table.Td>
-                          <Badge
-                            color={u.profileComplete ? "green" : "orange"}
-                            variant="light"
-                          >
-                            {u.profileComplete ? "Tamamlandı" : "Eksik"}
-                          </Badge>
-                        </Table.Td>
-                        <Table.Td>
-                          {u.bookedVisits?.length > 0 ? (
-                            <div className="space-y-2">
-                              {u.bookedVisits.map((booking, idx) => {
-                                const property = properties?.find(
-                                  (p) => p.id === booking.id
-                                );
-                                return (
-                                  <div
-                                    key={idx}
-                                    className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg"
-                                  >
-                                    {property?.image && (
-                                      <img
-                                        src={property.image}
-                                        alt={property.title}
-                                        className="w-10 h-10 rounded object-cover"
-                                      />
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                      <Text size="xs" fw={500} lineClamp={1}>
-                                        {property?.title ||
-                                          "Property not found"}
-                                      </Text>
-                                      <div className="flex items-center gap-1">
-                                        <MdCalendarToday
-                                          size={10}
-                                          className="text-orange-500"
-                                        />
-                                        <Text size="xs" color="orange">
-                                          {booking.date}
-                                        </Text>
-                                      </div>
-                                    </div>
-                                    {property && (
-                                      <ActionIcon
-                                        variant="subtle"
-                                        size="sm"
-                                        onClick={() =>
-                                          navigate(`/listing/${property.id}`)
-                                        }
-                                        title="View property"
-                                      >
-                                        <MdHome size={14} />
-                                      </ActionIcon>
-                                    )}
-                                    <ActionIcon
-                                      variant="light"
-                                      color="red"
-                                      size="sm"
-                                      onClick={() =>
-                                        handleDeleteBooking(u.email, booking.id)
-                                      }
-                                      title="Rezervasyonu sil"
-                                    >
-                                      <MdDelete size={14} />
-                                    </ActionIcon>
-                                  </div>
-                                );
-                              })}
+                          {m.propertyTitle ? (
+                            <div className="max-w-[200px]">
+                              <Text size="xs" fw={500} lineClamp={2} className="text-green-600">
+                                {m.propertyTitle}
+                              </Text>
+                              {m.propertyId && (
+                                <Button
+                                  variant="subtle"
+                                  size="xs"
+                                  compact
+                                  onClick={() => navigate(`/listing/${m.propertyId}`)}
+                                  className="mt-1"
+                                >
+                                  مشاهده ملک
+                                </Button>
+                              )}
                             </div>
                           ) : (
-                            <Text size="xs" color="dimmed">
-                              Rezervasyon yok
-                            </Text>
+                            <Badge color="gray" variant="light" size="sm">
+                              عمومی
+                            </Badge>
                           )}
                         </Table.Td>
                         <Table.Td>
-                          <Badge color="pink" variant="light">
-                            {u.favResidenciesID?.length || 0} favori
-                          </Badge>
+                          <Text size="sm" fw={500}>
+                            {m.subject || "Property Inquiry"}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="xs" color="dimmed" lineClamp={2}>
+                            {m.message}
+                          </Text>
                         </Table.Td>
                         <Table.Td>
                           <Text size="xs" color="dimmed">
-                            {u.createdAt
-                              ? new Date(u.createdAt).toLocaleDateString(
-                                  "tr-TR",
-                                  {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                  }
-                                )
+                            {m.createdAt
+                              ? new Date(m.createdAt).toLocaleString("tr-TR")
                               : "-"}
                           </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Badge
-                            color={u.isAdmin ? "green" : "gray"}
-                            variant="filled"
-                          >
-                            {u.isAdmin ? "Admin" : "Kullanıcı"}
-                          </Badge>
+                          <Group gap="xs">
+                            <ActionIcon
+                              color="red"
+                              variant="light"
+                              onClick={() => handleDeleteMessage(m.id)}
+                              title="Sil"
+                            >
+                              <MdDelete size={16} />
+                            </ActionIcon>
+                          </Group>
                         </Table.Td>
                       </Table.Tr>
                     ))}
                   </Table.Tbody>
                 </Table>
-              </div>
-            )}
-
-            {/* Users Summary */}
-            {users.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <Text size="sm" color="dimmed">
-                    Toplam: {totalUsers} kullanıcı
-                  </Text>
-                  <div className="flex gap-4 flex-wrap">
-                    <Text size="sm" color="dimmed">
-                      Profil Tamamlayan:{" "}
-                      {users.filter((u) => u.profileComplete).length}
-                    </Text>
-                    <Text size="sm" color="dimmed">
-                      Admin: {users.filter((u) => u.isAdmin).length}
-                    </Text>
-                    <Text size="sm" color="dimmed">
-                      Aktif Rezervasyon:{" "}
-                      {users.reduce(
-                        (acc, u) => acc + (u.bookedVisits?.length || 0),
-                        0
-                      )}
-                    </Text>
-                  </div>
-                </div>
               </div>
             )}
           </Paper>

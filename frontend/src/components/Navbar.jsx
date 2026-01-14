@@ -22,7 +22,7 @@ const propertyCategories = [
   { value: "land", label: "Land", icon: FaLandmark },
 ];
 
-const Navbar = ({ containerStyles, onContactClick }) => {
+const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
   const { isAdmin, loading } = useAdmin();
   const { validateLogin } = useAuthCheck();
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ const Navbar = ({ containerStyles, onContactClick }) => {
 
   const handleAddPropertyClick = () => {
     if (validateLogin()) {
+      closeMenu && closeMenu();
       navigate("/admin");
     }
   };
@@ -45,150 +46,228 @@ const Navbar = ({ containerStyles, onContactClick }) => {
     navigate(`/listing?type=${type}&category=${category}`);
     setSaleDropdownOpen(false);
     setRentDropdownOpen(false);
+    closeMenu && closeMenu();
+  };
+
+  const toggleSaleDropdown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSaleDropdownOpen(!saleDropdownOpen);
+    setRentDropdownOpen(false);
+  };
+
+  const toggleRentDropdown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setRentDropdownOpen(!rentDropdownOpen);
+    setSaleDropdownOpen(false);
   };
 
   return (
-    <nav className={`${containerStyles}`}>
+    <nav
+      className={`${containerStyles} flex flex-col md:flex-row md:items-center`}
+    >
+      {/* Home */}
       <NavLink
         to={"/"}
+        onClick={() => closeMenu && closeMenu()}
         className={({ isActive }) =>
-          isActive
-            ? "active-link flexCenter gap-x-1 rounded-full px-2 py-1"
-            : "flexCenter gap-x-1 rounded-full px-2 py-1"
+          `flex items-center justify-between w-full md:w-auto px-4 py-4 md:px-2 md:py-1 border-b md:border-b-0 border-gray-300 hover:bg-gray-50 md:hover:bg-transparent transition-colors ${
+            isActive
+              ? "text-blue-600 font-semibold md:active-link"
+              : "text-gray-800"
+          }`
         }
       >
-        <MdHomeWork />
-        <div>Home</div>
-      </NavLink>
-      <NavLink
-        to={"/listing"}
-        className={({ isActive }) =>
-          isActive && !currentFilter
-            ? "active-link flexCenter gap-x-1 rounded-full px-2 py-1"
-            : "flexCenter gap-x-1 rounded-full px-2 py-1"
-        }
-      >
-        <RiCheckboxMultipleBlankFill />
-        <div>Listing</div>
+        <div className="flex items-center gap-3">
+          <MdHomeWork size={20} />
+          <span>Home</span>
+        </div>
       </NavLink>
 
-      {/* Sale Filter Button with Dropdown */}
-      <div
-        className="relative group"
-        onMouseEnter={() => setSaleDropdownOpen(true)}
-        onMouseLeave={() => setSaleDropdownOpen(false)}
+      {/* Listing */}
+      <NavLink
+        to={"/listing"}
+        onClick={() => closeMenu && closeMenu()}
+        className={({ isActive }) =>
+          `flex items-center justify-between w-full md:w-auto px-4 py-4 md:px-2 md:py-1 border-b md:border-b-0 border-gray-300 hover:bg-gray-50 md:hover:bg-transparent transition-colors ${
+            isActive && !currentFilter
+              ? "text-blue-600 font-semibold md:active-link"
+              : "text-gray-800"
+          }`
+        }
       >
-        <NavLink
-          to={"/listing?type=sale"}
-          className={() =>
+        <div className="flex items-center gap-3">
+          <RiCheckboxMultipleBlankFill size={20} />
+          <span>Listing</span>
+        </div>
+      </NavLink>
+
+      {/* For Sale with Dropdown */}
+      <div
+        className="w-full md:w-auto md:relative md:group"
+        onMouseEnter={() =>
+          window.innerWidth >= 768 && setSaleDropdownOpen(true)
+        }
+        onMouseLeave={() =>
+          window.innerWidth >= 768 && setSaleDropdownOpen(false)
+        }
+      >
+        <div
+          className={`flex items-center justify-between w-full px-4 py-4 md:px-3 md:py-1 border-b md:border-b-0 border-gray-300 cursor-pointer hover:bg-green-50 md:hover:bg-transparent transition-colors ${
             currentFilter === "sale"
-              ? "flexCenter gap-x-1 rounded-full px-3 py-1 bg-green-500 text-white"
-              : "flexCenter gap-x-1 rounded-full px-3 py-1 bg-green-100 text-green-700 hover:bg-green-500 hover:text-white transition-colors"
-          }
+              ? "text-green-600 font-semibold md:bg-green-500 md:text-white"
+              : "text-gray-800 md:bg-green-100 md:text-green-700 md:hover:bg-green-500 md:hover:text-white"
+          }`}
+          onClick={(e) => {
+            // On mobile: toggle dropdown
+            if (window.innerWidth < 768) {
+              toggleSaleDropdown(e);
+            } else {
+              // On desktop: navigate
+              closeMenu && closeMenu();
+              navigate("/listing?type=sale");
+            }
+          }}
         >
-          <MdSell />
-          <div>For Sale</div>
+          <div className="flex items-center gap-3 md:gap-1">
+            <MdSell size={20} />
+            <span>For Sale</span>
+          </div>
           <MdKeyboardArrowDown
-            className={`transition-transform ${
+            size={20}
+            className={`transition-transform duration-300 ${
               saleDropdownOpen ? "rotate-180" : ""
             }`}
+            onClick={(e) => {
+              if (window.innerWidth < 768) {
+                toggleSaleDropdown(e);
+              }
+            }}
           />
-        </NavLink>
+        </div>
 
         {/* Sale Dropdown */}
         {saleDropdownOpen && (
-          <div className="absolute top-full left-0 pt-2 z-50">
-            <div className="bg-white rounded-lg shadow-lg border border-gray-100 py-2 min-w-[180px]">
-              {propertyCategories.map((cat) => {
-                const IconComponent = cat.icon;
-                const isActive =
-                  currentFilter === "sale" && currentCategory === cat.value;
-                return (
-                  <div
-                    key={cat.value}
-                    onClick={() => handleCategoryClick("sale", cat.value)}
-                    className={`flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors ${
-                      isActive
-                        ? "bg-green-500 text-white"
-                        : "text-gray-700 hover:bg-green-50 hover:text-green-600"
-                    }`}
-                  >
-                    <IconComponent size={14} />
-                    <span className="text-sm font-medium">{cat.label}</span>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="md:absolute md:top-full md:left-0 md:z-50 bg-white md:shadow-lg md:border md:border-gray-100">
+            {propertyCategories.map((cat) => {
+              const IconComponent = cat.icon;
+              const isActive =
+                currentFilter === "sale" && currentCategory === cat.value;
+              return (
+                <div
+                  key={cat.value}
+                  onClick={() => handleCategoryClick("sale", cat.value)}
+                  className={`flex items-start gap-3 px-8 md:px-4 py-3 md:py-2 cursor-pointer transition-colors border-b md:border-b-0 border-gray-300 last:border-b-0 ${
+                    isActive
+                      ? "bg-green-100 text-green-700 font-medium md:bg-green-500 md:text-white"
+                      : "text-green-700 hover:bg-green-50 md:hover:bg-green-50 md:hover:text-green-600"
+                  }`}
+                >
+                  <IconComponent size={18} />
+                  <span className="text-sm md:text-sm font-medium">
+                    {cat.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Rent Filter Button with Dropdown */}
+      {/* For Rent with Dropdown */}
       <div
-        className="relative group"
-        onMouseEnter={() => setRentDropdownOpen(true)}
-        onMouseLeave={() => setRentDropdownOpen(false)}
+        className="w-full md:w-auto md:relative md:group"
+        onMouseEnter={() =>
+          window.innerWidth >= 768 && setRentDropdownOpen(true)
+        }
+        onMouseLeave={() =>
+          window.innerWidth >= 768 && setRentDropdownOpen(false)
+        }
       >
-        <NavLink
-          to={"/listing?type=rent"}
-          className={() =>
+        <div
+          className={`flex items-center justify-between w-full px-4 py-4 md:px-3 md:py-1 border-b md:border-b-0 border-gray-300 cursor-pointer hover:bg-blue-50 md:hover:bg-transparent transition-colors ${
             currentFilter === "rent"
-              ? "flexCenter gap-x-1 rounded-full px-3 py-1 bg-blue-500 text-white"
-              : "flexCenter gap-x-1 rounded-full px-3 py-1 bg-blue-100 text-blue-700 hover:bg-blue-500 hover:text-white transition-colors"
-          }
+              ? "text-blue-600 font-semibold md:bg-blue-500 md:text-white"
+              : "text-gray-800 md:bg-blue-100 md:text-blue-700 md:hover:bg-blue-500 md:hover:text-white"
+          }`}
+          onClick={(e) => {
+            // On mobile: toggle dropdown
+            if (window.innerWidth < 768) {
+              toggleRentDropdown(e);
+            } else {
+              // On desktop: navigate
+              closeMenu && closeMenu();
+              navigate("/listing?type=rent");
+            }
+          }}
         >
-          <MdHome />
-          <div>For Rent</div>
+          <div className="flex items-center gap-3 md:gap-1">
+            <MdHome size={20} />
+            <span>For Rent</span>
+          </div>
           <MdKeyboardArrowDown
-            className={`transition-transform ${
+            size={20}
+            className={`transition-transform duration-300 ${
               rentDropdownOpen ? "rotate-180" : ""
             }`}
+            onClick={(e) => {
+              if (window.innerWidth < 768) {
+                toggleRentDropdown(e);
+              }
+            }}
           />
-        </NavLink>
+        </div>
 
         {/* Rent Dropdown */}
         {rentDropdownOpen && (
-          <div className="absolute top-full left-0 pt-2 z-50">
-            <div className="bg-white rounded-lg shadow-lg border border-gray-100 py-2 min-w-[180px]">
-              {propertyCategories.map((cat) => {
-                const IconComponent = cat.icon;
-                const isActive =
-                  currentFilter === "rent" && currentCategory === cat.value;
-                return (
-                  <div
-                    key={cat.value}
-                    onClick={() => handleCategoryClick("rent", cat.value)}
-                    className={`flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors ${
-                      isActive
-                        ? "bg-blue-500 text-white"
-                        : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                    }`}
-                  >
-                    <IconComponent size={14} />
-                    <span className="text-sm font-medium">{cat.label}</span>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="md:absolute md:top-full md:left-0 md:z-50 bg-blue-50 md:bg-white md:shadow-lg md:border md:border-gray-100">
+            {propertyCategories.map((cat) => {
+              const IconComponent = cat.icon;
+              const isActive =
+                currentFilter === "rent" && currentCategory === cat.value;
+              return (
+                <div
+                  key={cat.value}
+                  onClick={() => handleCategoryClick("rent", cat.value)}
+                  className={`flex items-center gap-3 px-8 md:px-4 py-3 md:py-2 cursor-pointer transition-colors border-b md:border-b-0 border-gray-300 last:border-b-0 ${
+                    isActive
+                      ? "bg-blue-100 text-blue-700 font-medium md:bg-blue-500 md:text-white"
+                      : "text-blue-700 hover:bg-blue-50 md:hover:bg-blue-50 md:hover:text-blue-600"
+                  }`}
+                >
+                  <IconComponent size={18} />
+                  <span className="text-sm md:text-sm font-medium">
+                    {cat.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
+      {/* Contact */}
       <button
         onClick={onContactClick}
-        className="flexCenter gap-x-1 rounded-full px-2 py-1 hover:text-secondary transition-colors"
+        className="flex items-center justify-between w-full md:w-auto px-4 py-4 md:px-2 md:py-1 border-b md:border-b-0 border-gray-300 hover:bg-gray-50 md:hover:bg-transparent md:hover:text-secondary transition-colors text-gray-800"
       >
-        <MdPermContactCalendar />
-        <div>Contact</div>
+        <div className="flex items-center gap-3">
+          <MdPermContactCalendar size={20} />
+          <span>Contact</span>
+        </div>
       </button>
-      {/* Only show Add Property for admins */}
+
+      {/* Add Property - Admin Only */}
       {!loading && isAdmin && (
         <div
           onClick={handleAddPropertyClick}
-          className="cursor-pointer flexCenter gap-x-1 rounded-full px-2 py-1 hover:bg-secondary hover:text-white transition-colors"
+          className="flex items-center justify-between w-full md:w-auto px-4 py-4 md:px-2 md:py-1 border-b md:border-b-0 border-gray-300 cursor-pointer hover:bg-gray-50 md:hover:bg-secondary md:hover:text-white transition-colors text-gray-800"
         >
-          <MdAddHome />
-          <div>Add Property</div>
+          <div className="flex items-center gap-3">
+            <MdAddHome size={20} />
+            <span>Add Property</span>
+          </div>
         </div>
       )}
     </nav>
@@ -198,6 +277,7 @@ const Navbar = ({ containerStyles, onContactClick }) => {
 Navbar.propTypes = {
   containerStyles: PropTypes.string,
   onContactClick: PropTypes.func,
+  closeMenu: PropTypes.func,
 };
 
 export default Navbar;

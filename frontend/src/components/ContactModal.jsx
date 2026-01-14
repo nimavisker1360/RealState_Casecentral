@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Modal, TextInput, Textarea, Button, Group } from "@mantine/core";
 import { toast } from "react-toastify";
 import { sendEmail } from "../utils/api";
 import { FaEnvelope, FaUser, FaPhone } from "react-icons/fa6";
 import PropTypes from "prop-types";
+import UserDetailContext from "../context/UserDetailContext";
 
-const ContactModal = ({ opened, onClose }) => {
+const ContactModal = ({ opened, onClose, propertyId, propertyTitle, userEmail }) => {
   const [loading, setLoading] = useState(false);
+  const {
+    userDetails: { bookings },
+  } = useContext(UserDetailContext);
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -43,8 +48,14 @@ const ContactModal = ({ opened, onClose }) => {
 
     setLoading(true);
     try {
-      await sendEmail(formData);
-      toast.success("Message sent successfully! We will contact you soon.");
+      const emailDataToSend = {
+        ...formData,
+        propertyId: propertyId || null,
+        propertyTitle: propertyTitle || null,
+      };
+      
+      await sendEmail(emailDataToSend);
+      toast.success("Your message has been sent successfully! We will contact you soon.");
       setFormData({
         name: "",
         email: "",
@@ -144,6 +155,9 @@ const ContactModal = ({ opened, onClose }) => {
 ContactModal.propTypes = {
   opened: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  propertyId: PropTypes.string,
+  propertyTitle: PropTypes.string,
+  userEmail: PropTypes.string,
 };
 
 export default ContactModal;

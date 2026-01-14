@@ -25,4 +25,5 @@ app.use("/api/email", emailRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Email API available at /api/email`);
 });

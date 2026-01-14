@@ -305,7 +305,7 @@ const Consultants = () => {
 
             {/* Bio Section */}
             <div className="px-6 pb-4">
-              <p className="text-white/70 text-sm leading-relaxed text-center">
+              <p className="text-white/70 text-sm leading-relaxed text-left">
                 {selectedConsultant.bio}
               </p>
             </div>
