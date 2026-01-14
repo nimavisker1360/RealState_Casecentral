@@ -359,6 +359,10 @@ const AdminPanel = () => {
       refetchConsultants();
     } catch (error) {
       console.error("Create consultant error:", error);
+      const errorMessage = error.response?.data?.message || "Failed to add consultant";
+      toast.error(errorMessage, {
+        position: "bottom-right",
+      });
     } finally {
       setConsultantLoading(false);
     }
@@ -401,6 +405,10 @@ const AdminPanel = () => {
       refetchConsultants();
     } catch (error) {
       console.error("Update consultant error:", error);
+      const errorMessage = error.response?.data?.message || "Failed to update consultant";
+      toast.error(errorMessage, {
+        position: "bottom-right",
+      });
     } finally {
       setConsultantLoading(false);
     }

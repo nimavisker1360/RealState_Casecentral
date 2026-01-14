@@ -85,7 +85,7 @@ model Consultant {
     deals Int @default(0)
     phone String
     whatsapp String
-    email String @unique
+    email String
     linkedin String?
     image String
     bio String

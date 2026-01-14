@@ -35,15 +35,6 @@ export const createConsultant = asyncHandler(async (req, res) => {
   console.log("Creating consultant with data:", data);
 
   try {
-    // Check if consultant with email already exists
-    const existingConsultant = await prisma.consultant.findUnique({
-      where: { email: data.email },
-    });
-
-    if (existingConsultant) {
-      return res.status(400).json({ message: "Consultant with this email already exists" });
-    }
-
     const consultant = await prisma.consultant.create({
       data: {
         name: data.name,
@@ -78,6 +69,9 @@ export const createConsultant = asyncHandler(async (req, res) => {
 export const updateConsultant = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { data } = req.body;
+
+  console.log("=== UPDATE CONSULTANT ===");
+  console.log("Consultant ID:", id);
 
   try {
     const existingConsultant = await prisma.consultant.findUnique({
