@@ -4,22 +4,21 @@ import {
   FaWhatsapp,
   FaEnvelope,
   FaStar,
-  FaLinkedin,
   FaUserTie,
   FaGlobe,
   FaBriefcase,
-  FaHandshake,
 } from "react-icons/fa6";
 import { MdVerified, MdClose } from "react-icons/md";
 import { Loader } from "@mantine/core";
 import useConsultants from "../hooks/useConsultants";
+import ContactModal from "../components/ContactModal";
 
 const Consultants = () => {
   const [selectedConsultant, setSelectedConsultant] = useState(null);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
   const { data: consultants, isLoading, isError } = useConsultants();
 
   // Calculate stats
-  const totalDeals = consultants?.reduce((sum, c) => sum + (c.deals || 0), 0) || 0;
   const averageRating = consultants?.length 
     ? (consultants.reduce((sum, c) => sum + (c.rating || 0), 0) / consultants.length).toFixed(1) 
     : 0;
@@ -72,15 +71,6 @@ const Consultants = () => {
           <div>
             <h3 className="bold-20 text-tertiary">{consultants?.length || 0}+</h3>
             <p className="text-gray-30 text-sm">Expert Advisors</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-secondary rounded-xl flexCenter">
-            <FaHandshake className="text-white text-xl" />
-          </div>
-          <div>
-            <h3 className="bold-20 text-tertiary">{totalDeals.toLocaleString()}+</h3>
-            <p className="text-gray-30 text-sm">Successful Deals</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -179,11 +169,6 @@ const Consultants = () => {
                   {/* Stats */}
                   <div className="flex items-center justify-between mb-5 py-3 px-4 bg-primary rounded-xl">
                     <div className="text-center">
-                      <p className="font-bold text-tertiary">{consultant.deals || 0}+</p>
-                      <p className="text-xs text-gray-30">Deals</p>
-                    </div>
-                    <div className="w-px h-8 bg-gray-200"></div>
-                    <div className="text-center">
                       <p className="font-bold text-tertiary">{consultant.experience}</p>
                       <p className="text-xs text-gray-30">Experience</p>
                     </div>
@@ -195,21 +180,20 @@ const Consultants = () => {
                   </div>
 
                   {/* Contact Buttons */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <a
-                      href={`tel:${consultant.phone}`}
+                  <div className="space-y-2">
+                    <div
                       onClick={(e) => e.stopPropagation()}
-                      className="flexCenter gap-2 bg-tertiary text-white py-3 rounded-xl hover:bg-tertiary/90 transition-colors font-medium"
+                      className="flexCenter gap-2 bg-tertiary text-white py-3 rounded-xl font-medium w-full select-text cursor-default"
                     >
                       <FaPhone />
-                      Call
-                    </a>
+                      <span dir="ltr">+90 542 435 9694</span>
+                    </div>
                     <a
                       href={`https://wa.me/${consultant.whatsapp}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="flexCenter gap-2 bg-[#25D366] text-white py-3 rounded-xl hover:bg-[#20bd5a] transition-colors font-medium"
+                      className="flexCenter gap-2 bg-[#25D366] text-white py-3 rounded-xl hover:bg-[#20bd5a] transition-colors font-medium w-full"
                     >
                       <FaWhatsapp />
                       WhatsApp
@@ -252,18 +236,21 @@ const Consultants = () => {
           <div className="lg:w-80 bg-white/5 p-8 sm:p-12 flex flex-col justify-center">
             <h4 className="text-white font-semibold mb-6">Quick Contact</h4>
             <div className="space-y-4">
-              <a href="tel:+901234567890" className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
+              <div className="flex items-center gap-3 text-white/70 select-text cursor-default">
                 <div className="w-10 h-10 bg-white/10 rounded-lg flexCenter">
                   <FaPhone className="text-secondary" />
                 </div>
-                <span>+90 123 456 7890</span>
-              </a>
-              <a href="mailto:info@casacentral.com" className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
+                <span dir="ltr">+90 542 435 9694</span>
+              </div>
+              <button 
+                onClick={() => setContactModalOpen(true)}
+                className="flex items-center gap-3 text-white/70 hover:text-white transition-colors cursor-pointer w-full text-left"
+              >
                 <div className="w-10 h-10 bg-white/10 rounded-lg flexCenter">
                   <FaEnvelope className="text-secondary" />
                 </div>
-                <span>info@casacentral.com</span>
-              </a>
+                <span>Send Message</span>
+              </button>
             </div>
           </div>
         </div>
@@ -272,125 +259,132 @@ const Consultants = () => {
       {/* Consultant Detail Modal */}
       {selectedConsultant && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flexCenter p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flexCenter p-4"
           onClick={() => setSelectedConsultant(null)}
         >
           <div
-            className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+            className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="relative">
-              <img
-                src={selectedConsultant.image || "https://via.placeholder.com/400x400?text=No+Image"}
-                alt={selectedConsultant.name}
-                className="w-full h-56 object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-tertiary/20 to-transparent"></div>
-              <button
-                onClick={() => setSelectedConsultant(null)}
-                className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flexCenter text-white hover:bg-white/30 transition-colors"
-              >
-                <MdClose className="text-xl" />
-              </button>
-              <div className="absolute bottom-4 left-6 right-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="bold-24 text-white flex items-center gap-2">
-                      {selectedConsultant.name}
-                      <MdVerified className="text-secondary" />
-                    </h2>
-                    <p className="text-secondary font-medium">{selectedConsultant.title}</p>
-                  </div>
-                  <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg">
-                    <FaStar className="text-amber-500" />
-                    <span className="font-bold">{selectedConsultant.rating}</span>
-                  </div>
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedConsultant(null)}
+              className="absolute top-4 right-4 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flexCenter text-white/70 hover:bg-white/20 hover:text-white transition-all z-10"
+            >
+              <MdClose className="text-xl" />
+            </button>
+
+            {/* Profile Section */}
+            <div className="pt-8 pb-6 px-6 text-center relative">
+              {/* Avatar with glow effect */}
+              <div className="relative inline-block mb-4">
+                <div className="absolute inset-0 bg-secondary/30 rounded-full blur-xl scale-110"></div>
+                <img
+                  src={selectedConsultant.image || "https://via.placeholder.com/150?text=No+Image"}
+                  alt={selectedConsultant.name}
+                  className="relative w-28 h-28 rounded-full object-cover border-4 border-secondary/50 shadow-xl"
+                />
+                <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-secondary rounded-full flexCenter shadow-lg">
+                  <MdVerified className="text-white text-sm" />
                 </div>
+              </div>
+
+              {/* Name & Title */}
+              <h2 className="text-2xl font-bold text-white mb-1">
+                {selectedConsultant.name}
+              </h2>
+              <p className="text-secondary font-medium mb-3">{selectedConsultant.title}</p>
+
+              {/* Rating Badge */}
+              <div className="inline-flex items-center gap-2 bg-amber-500/20 px-4 py-2 rounded-full">
+                <FaStar className="text-amber-400" />
+                <span className="font-bold text-amber-400">{selectedConsultant.rating}</span>
+                <span className="text-white/50 text-sm">Rating</span>
               </div>
             </div>
 
-            {/* Modal Content */}
-            <div className="p-6">
-              {/* Bio */}
-              <p className="text-gray-30 mb-6">{selectedConsultant.bio}</p>
+            {/* Bio Section */}
+            <div className="px-6 pb-4">
+              <p className="text-white/70 text-sm leading-relaxed text-center">
+                {selectedConsultant.bio}
+              </p>
+            </div>
 
-              {/* Info */}
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="bg-primary rounded-xl p-3 text-center">
-                  <p className="bold-18 text-tertiary">{selectedConsultant.experience}</p>
-                  <p className="text-xs text-gray-30">Experience</p>
-                </div>
-                <div className="bg-primary rounded-xl p-3 text-center">
-                  <p className="bold-18 text-tertiary">{selectedConsultant.deals || 0}+</p>
-                  <p className="text-xs text-gray-30">Deals</p>
-                </div>
-                <div className="bg-primary rounded-xl p-3 text-center">
-                  <p className="bold-18 text-tertiary">{selectedConsultant.reviews || 0}</p>
-                  <p className="text-xs text-gray-30">Reviews</p>
-                </div>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-3 px-6 pb-6">
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/10">
+                <p className="text-2xl font-bold text-white">{selectedConsultant.experience}</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">Experience</p>
               </div>
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/10">
+                <p className="text-2xl font-bold text-white">{selectedConsultant.reviews || 0}</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">Reviews</p>
+              </div>
+            </div>
 
-              {/* Specialty */}
-              <div className="mb-4">
-                <h4 className="font-semibold text-tertiary text-sm mb-2">Specialty</h4>
-                <p className="text-gray-30 text-sm">{selectedConsultant.specialty}</p>
-              </div>
-
-              {/* Languages */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-tertiary text-sm mb-2">Languages</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedConsultant.languages?.map((lang) => (
-                    <span
-                      key={lang}
-                      className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium"
-                    >
-                      {lang}
-                    </span>
-                  ))}
+            {/* Specialty & Languages */}
+            <div className="px-6 pb-6 space-y-4">
+              {selectedConsultant.specialty && (
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+                  <h4 className="text-xs text-white/50 uppercase tracking-wider mb-2">Specialty</h4>
+                  <p className="text-white/90 text-sm">{selectedConsultant.specialty}</p>
                 </div>
-              </div>
+              )}
 
-              {/* Contact Options */}
-              <div className="grid grid-cols-2 gap-3">
-                <a
-                  href={`tel:${selectedConsultant.phone}`}
-                  className="flexCenter gap-2 bg-tertiary text-white py-3.5 rounded-xl hover:bg-tertiary/90 transition-colors font-medium"
-                >
-                  <FaPhone />
-                  Call Now
-                </a>
-                <a
-                  href={`https://wa.me/${selectedConsultant.whatsapp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flexCenter gap-2 bg-[#25D366] text-white py-3.5 rounded-xl hover:bg-[#20bd5a] transition-colors font-medium"
-                >
-                  <FaWhatsapp />
-                  WhatsApp
-                </a>
-                <a
-                  href={`mailto:${selectedConsultant.email}`}
-                  className="flexCenter gap-2 bg-primary text-tertiary py-3.5 rounded-xl hover:bg-secondary hover:text-white transition-colors font-medium"
-                >
-                  <FaEnvelope />
-                  Email
-                </a>
-                <a
-                  href={selectedConsultant.linkedin || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flexCenter gap-2 bg-primary text-tertiary py-3.5 rounded-xl hover:bg-[#0077B5] hover:text-white transition-colors font-medium"
-                >
-                  <FaLinkedin />
-                  LinkedIn
-                </a>
+              {selectedConsultant.languages?.length > 0 && (
+                <div>
+                  <h4 className="text-xs text-white/50 uppercase tracking-wider mb-3">Languages</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedConsultant.languages.map((lang) => (
+                      <span
+                        key={lang}
+                        className="bg-secondary/20 text-secondary px-4 py-1.5 rounded-full text-sm font-medium border border-secondary/30"
+                      >
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Contact Buttons */}
+            <div className="p-6 pt-0 space-y-3">
+              <div
+                className="flex items-center justify-center gap-2 bg-white text-slate-900 py-4 rounded-2xl font-semibold shadow-lg w-full select-text cursor-default"
+              >
+                <FaPhone />
+                <span dir="ltr">+90 542 435 9694</span>
               </div>
+              <a
+                href={`https://wa.me/${selectedConsultant.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-[#25D366] text-white py-4 rounded-2xl hover:bg-[#20bd5a] transition-all font-semibold shadow-lg w-full"
+              >
+                <FaWhatsapp className="text-lg" />
+                <span>WhatsApp</span>
+              </a>
+              <button
+                onClick={() => {
+                  setSelectedConsultant(null);
+                  setContactModalOpen(true);
+                }}
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-secondary/80 to-secondary text-white py-4 rounded-2xl hover:from-secondary hover:to-secondary/80 transition-all font-semibold shadow-lg w-full cursor-pointer"
+              >
+                <FaEnvelope />
+                <span>Send Message</span>
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Contact Modal */}
+      <ContactModal
+        opened={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
     </section>
   );
 };

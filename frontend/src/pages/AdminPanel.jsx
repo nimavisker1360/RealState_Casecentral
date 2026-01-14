@@ -117,7 +117,6 @@ const AdminPanel = () => {
     languages: [],
     rating: 5.0,
     reviews: 0,
-    deals: 0,
     phone: "",
     whatsapp: "",
     email: "",
@@ -155,6 +154,9 @@ const AdminPanel = () => {
         cropping: true,
         croppingAspectRatio: 1,
         croppingShowDimensions: true,
+        resourceType: "image",
+        clientAllowedFormats: ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg", "heic", "heif", "avif", "ico", "raw"],
+        sources: ["local", "url", "camera"],
       },
       (err, result) => {
         if (result.event === "success") {
@@ -301,7 +303,6 @@ const AdminPanel = () => {
       languages: [],
       rating: 5.0,
       reviews: 0,
-      deals: 0,
       phone: "",
       whatsapp: "",
       email: "",
@@ -351,7 +352,6 @@ const AdminPanel = () => {
       languages: consultant.languages || [],
       rating: consultant.rating || 5.0,
       reviews: consultant.reviews || 0,
-      deals: consultant.deals || 0,
       phone: consultant.phone || "",
       whatsapp: consultant.whatsapp || "",
       email: consultant.email || "",
@@ -922,14 +922,6 @@ const AdminPanel = () => {
                               </div>
                               <Text size="xs" color="dimmed">
                                 {consultant.reviews} yorum
-                              </Text>
-                            </div>
-                            <div className="text-center">
-                              <Text size="sm" fw={600}>
-                                {consultant.deals}+
-                              </Text>
-                              <Text size="xs" color="dimmed">
-                                satış
                               </Text>
                             </div>
                           </div>
@@ -1614,15 +1606,6 @@ const AdminPanel = () => {
                   setConsultantForm({ ...consultantForm, reviews: value || 0 })
                 }
               />
-              <NumberInput
-                label="Satış Sayısı"
-                placeholder="0"
-                min={0}
-                value={consultantForm.deals}
-                onChange={(value) =>
-                  setConsultantForm({ ...consultantForm, deals: value || 0 })
-                }
-              />
             </div>
 
             <Switch
@@ -1863,15 +1846,6 @@ const AdminPanel = () => {
                 value={consultantForm.reviews}
                 onChange={(value) =>
                   setConsultantForm({ ...consultantForm, reviews: value || 0 })
-                }
-              />
-              <NumberInput
-                label="Satış Sayısı"
-                placeholder="0"
-                min={0}
-                value={consultantForm.deals}
-                onChange={(value) =>
-                  setConsultantForm({ ...consultantForm, deals: value || 0 })
                 }
               />
             </div>

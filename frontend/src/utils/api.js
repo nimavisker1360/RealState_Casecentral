@@ -444,3 +444,14 @@ export const getAllUsers = async (token) => {
     return { totalUsers: 0, users: [] };
   }
 };
+
+// Send Email
+export const sendEmail = async (emailData) => {
+  try {
+    const response = await api.post("/email/send", emailData);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
+};

@@ -6,12 +6,14 @@ import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProfileMenu from "./ProfileMenu";
 import LoginModal from "./LoginModal";
+import ContactModal from "./ContactModal";
 import logo from "../assets/logo.png";
 
 const Header = () => {
   const [active, setActive] = useState(false);
   const [menuOpened, setMenuOpened] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
   const toggleMenu = () => setMenuOpened(!menuOpened);
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
 
@@ -61,6 +63,7 @@ const Header = () => {
               containerStyles={
                 "hidden xl:flex gap-x-5 xl:gap-x-10 capitalize medium-15 ring-1 ring-slate-900/10 rounded-full p-2 bg-primary"
               }
+              onContactClick={() => setContactModalOpen(true)}
             />
 
             {/* Mobile Navbar */}
@@ -70,6 +73,10 @@ const Header = () => {
                   ? "flex items-start flex-col gap-y-8 capitalize fixed top-20 right-4 sm:right-8 p-8 sm:p-12 bg-white rounded-3xl shadow-md w-56 sm:w-64 medium-16 ring-1 ring-slate-900/5 transition-all duration-300 z-50"
                   : "flex items-start flex-col gap-y-8 fixed top-20 p-12 bg-white rounded-3xl shadow-md w-64 medium-16 ring-1 ring-slate-900/5 transition-all duration-300 right-[-300px] invisible opacity-0"
               }`}
+              onContactClick={() => {
+                setMenuOpened(false);
+                setContactModalOpen(true);
+              }}
             />
           </div>
           {/* buttons */}
@@ -108,6 +115,12 @@ const Header = () => {
       <LoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
+      />
+
+      {/* Contact Modal */}
+      <ContactModal
+        opened={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
       />
     </header>
   );

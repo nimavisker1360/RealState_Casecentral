@@ -7,6 +7,7 @@ import { getProperty, removeBooking } from "../utils/api";
 import useAuthCheck from "../hooks/useAuthCheck";
 import { useAuth0 } from "@auth0/auth0-react";
 import BookingModal from "../components/BookingModal";
+import ContactModal from "../components/ContactModal";
 import UserDetailContext from "../context/UserDetailContext";
 import { Button, Avatar } from "@mantine/core";
 import { toast } from "react-toastify";
@@ -28,7 +29,6 @@ import {
   FaWhatsapp,
   FaEnvelope,
   FaStar,
-  FaLinkedin,
 } from "react-icons/fa6";
 import { BsHouseDoor, BsTree } from "react-icons/bs";
 
@@ -151,6 +151,7 @@ const Property = () => {
   const [modalOpened, setModalOpened] = useState(false);
   const [galleryOpened, setGalleryOpened] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
   const { validateLogin } = useAuthCheck();
   const { user } = useAuth0();
 
@@ -628,45 +629,27 @@ const Property = () => {
               </div>
 
               {/* Contact Buttons */}
-              <div className="grid grid-cols-2 gap-3">
-                <a
-                  href={`tel:${data.consultant.phone}`}
-                  className="flexCenter gap-2 bg-white text-tertiary py-3 rounded-xl hover:bg-gray-100 transition-colors font-medium text-sm"
-                >
+              <div className="space-y-2">
+                <div className="flexCenter gap-2 bg-white text-tertiary py-3 rounded-xl font-medium text-sm w-full select-text cursor-default">
                   <FaPhone className="text-secondary" />
-                  Call Now
-                </a>
+                  <span dir="ltr">+90 542 435 9694</span>
+                </div>
                 <a
                   href={`https://wa.me/${data.consultant.whatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flexCenter gap-2 bg-[#25D366] text-white py-3 rounded-xl hover:bg-[#20bd5a] transition-colors font-medium text-sm"
+                  className="flexCenter gap-2 bg-[#25D366] text-white py-3 rounded-xl hover:bg-[#20bd5a] transition-colors font-medium text-sm w-full"
                 >
                   <FaWhatsapp />
                   WhatsApp
                 </a>
-              </div>
-
-              {/* Additional Contact */}
-              <div className="flex items-center justify-center gap-4 mt-4">
-                <a
-                  href={`mailto:${data.consultant.email}`}
-                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm"
+                <button
+                  onClick={() => setContactModalOpen(true)}
+                  className="flexCenter gap-2 bg-white text-tertiary py-3 rounded-xl hover:bg-secondary hover:text-white transition-colors font-medium text-sm w-full cursor-pointer"
                 >
-                  <FaEnvelope />
-                  Email
-                </a>
-                {data.consultant.linkedin && (
-                  <a
-                    href={data.consultant.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm"
-                  >
-                    <FaLinkedin />
-                    LinkedIn
-                  </a>
-                )}
+                  <FaEnvelope className="text-secondary" />
+                  Send Message
+                </button>
               </div>
 
               {/* Languages */}
@@ -697,6 +680,12 @@ const Property = () => {
           />
         </div>
       </div>
+
+      {/* Contact Modal */}
+      <ContactModal
+        opened={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
     </section>
   );
 };

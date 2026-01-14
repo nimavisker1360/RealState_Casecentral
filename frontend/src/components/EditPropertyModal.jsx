@@ -27,27 +27,13 @@ import {
 } from "react-icons/md";
 import { AiOutlineClose } from "react-icons/ai";
 import { BsHouseDoor, BsTree } from "react-icons/bs";
-import {
-  FaBuilding,
-  FaLandmark,
-  FaUmbrellaBeach,
-  FaWarehouse,
-  FaHome,
-  FaBriefcase,
-} from "react-icons/fa";
+import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 
 // Property categories
 const propertyCategories = [
   { value: "residential", label: "Residential", icon: FaHome },
   { value: "commercial", label: "Commercial", icon: FaBriefcase },
   { value: "land", label: "Land", icon: FaLandmark },
-  { value: "building", label: "Building", icon: FaBuilding },
-  { value: "timeshare", label: "Timeshare", icon: FaWarehouse },
-  {
-    value: "tourist-facility",
-    label: "Tourist Facility",
-    icon: FaUmbrellaBeach,
-  },
 ];
 
 // All possible interior features
@@ -215,6 +201,23 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
         uploadPreset: "auvy3sl6",
         maxFiles: 30,
         multiple: true,
+        resourceType: "image",
+        clientAllowedFormats: [
+          "jpg",
+          "jpeg",
+          "png",
+          "gif",
+          "webp",
+          "bmp",
+          "tiff",
+          "svg",
+          "heic",
+          "heif",
+          "avif",
+          "ico",
+          "raw",
+        ],
+        sources: ["local", "url", "camera"],
       },
       (err, result) => {
         if (result?.event === "success") {

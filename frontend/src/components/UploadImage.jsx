@@ -38,6 +38,9 @@ const UploadImage = ({
         uploadPreset: "auvy3sl6",
         maxFiles: 30,
         multiple: true,
+        resourceType: "image",
+        clientAllowedFormats: ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg", "heic", "heif", "avif", "ico", "raw"],
+        sources: ["local", "url", "camera"],
       },
       (err, result) => {
         if (result.event === "success") {

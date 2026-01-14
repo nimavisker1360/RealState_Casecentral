@@ -6,6 +6,7 @@ import { prisma } from "./config/prismaConfig.js";
 import { userRoute } from "./routes/userRoute.js";
 import { residencyRoute } from "./routes/residencyRoute.js";
 import { consultantRoute } from "./routes/consultantRoute.js";
+import { emailRoute } from "./routes/emailRoute.js";
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.use(cors());
 app.use("/api/user", userRoute);
 app.use("/api/residency", residencyRoute);
 app.use("/api/consultant", consultantRoute);
+app.use("/api/email", emailRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

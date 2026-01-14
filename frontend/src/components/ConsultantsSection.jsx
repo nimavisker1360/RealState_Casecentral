@@ -97,14 +97,10 @@ const ConsultantsSection = () => {
                 </p>
 
                 {/* Stats Row */}
-                <div className="flex gap-6">
+                <div className="flex gap-6 justify-center">
                   <div className="text-center">
                     <p className="font-bold text-gray-900">{consultant.experience}</p>
                     <p className="text-gray-400 text-xs">Experience</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-bold text-gray-900">{consultant.deals} sales</p>
-                    <p className="text-gray-400 text-xs">In past year</p>
                   </div>
                 </div>
               </div>

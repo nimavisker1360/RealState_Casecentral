@@ -14,14 +14,7 @@ import { useForm } from "@mantine/form";
 import { validateString } from "../utils/common";
 import PropTypes from "prop-types";
 import { MdSell, MdHome, MdPerson } from "react-icons/md";
-import {
-  FaBuilding,
-  FaLandmark,
-  FaUmbrellaBeach,
-  FaWarehouse,
-  FaHome,
-  FaBriefcase,
-} from "react-icons/fa";
+import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 import useConsultants from "../hooks/useConsultants";
 
 // Property categories
@@ -29,13 +22,6 @@ const propertyCategories = [
   { value: "residential", label: "Residential", icon: FaHome },
   { value: "commercial", label: "Commercial", icon: FaBriefcase },
   { value: "land", label: "Land", icon: FaLandmark },
-  { value: "building", label: "Building", icon: FaBuilding },
-  { value: "timeshare", label: "Timeshare", icon: FaWarehouse },
-  {
-    value: "tourist-facility",
-    label: "Tourist Facility",
-    icon: FaUmbrellaBeach,
-  },
 ];
 
 const BasicDetails = ({

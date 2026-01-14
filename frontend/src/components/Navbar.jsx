@@ -2,11 +2,16 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useState } from "react";
 // icons
-import { MdHomeWork, MdSell, MdHome, MdKeyboardArrowDown } from "react-icons/md";
+import {
+  MdHomeWork,
+  MdSell,
+  MdHome,
+  MdKeyboardArrowDown,
+} from "react-icons/md";
 import { RiCheckboxMultipleBlankFill } from "react-icons/ri";
 import { MdPermContactCalendar } from "react-icons/md";
 import { MdAddHome } from "react-icons/md";
-import { FaBuilding, FaLandmark, FaUmbrellaBeach, FaWarehouse, FaHome, FaBriefcase } from "react-icons/fa";
+import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 import useAdmin from "../hooks/useAdmin";
 import useAuthCheck from "../hooks/useAuthCheck";
 
@@ -15,12 +20,9 @@ const propertyCategories = [
   { value: "residential", label: "Residential", icon: FaHome },
   { value: "commercial", label: "Commercial", icon: FaBriefcase },
   { value: "land", label: "Land", icon: FaLandmark },
-  { value: "building", label: "Building", icon: FaBuilding },
-  { value: "timeshare", label: "Timeshare", icon: FaWarehouse },
-  { value: "tourist-facility", label: "Tourist Facility", icon: FaUmbrellaBeach },
 ];
 
-const Navbar = ({ containerStyles }) => {
+const Navbar = ({ containerStyles, onContactClick }) => {
   const { isAdmin, loading } = useAdmin();
   const { validateLogin } = useAuthCheck();
   const navigate = useNavigate();
@@ -71,7 +73,7 @@ const Navbar = ({ containerStyles }) => {
       </NavLink>
 
       {/* Sale Filter Button with Dropdown */}
-      <div 
+      <div
         className="relative group"
         onMouseEnter={() => setSaleDropdownOpen(true)}
         onMouseLeave={() => setSaleDropdownOpen(false)}
@@ -86,24 +88,29 @@ const Navbar = ({ containerStyles }) => {
         >
           <MdSell />
           <div>For Sale</div>
-          <MdKeyboardArrowDown className={`transition-transform ${saleDropdownOpen ? 'rotate-180' : ''}`} />
+          <MdKeyboardArrowDown
+            className={`transition-transform ${
+              saleDropdownOpen ? "rotate-180" : ""
+            }`}
+          />
         </NavLink>
-        
+
         {/* Sale Dropdown */}
         {saleDropdownOpen && (
           <div className="absolute top-full left-0 pt-2 z-50">
             <div className="bg-white rounded-lg shadow-lg border border-gray-100 py-2 min-w-[180px]">
               {propertyCategories.map((cat) => {
                 const IconComponent = cat.icon;
-                const isActive = currentFilter === "sale" && currentCategory === cat.value;
+                const isActive =
+                  currentFilter === "sale" && currentCategory === cat.value;
                 return (
                   <div
                     key={cat.value}
                     onClick={() => handleCategoryClick("sale", cat.value)}
                     className={`flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors ${
-                      isActive 
-                        ? 'bg-green-500 text-white' 
-                        : 'text-gray-700 hover:bg-green-50 hover:text-green-600'
+                      isActive
+                        ? "bg-green-500 text-white"
+                        : "text-gray-700 hover:bg-green-50 hover:text-green-600"
                     }`}
                   >
                     <IconComponent size={14} />
@@ -117,7 +124,7 @@ const Navbar = ({ containerStyles }) => {
       </div>
 
       {/* Rent Filter Button with Dropdown */}
-      <div 
+      <div
         className="relative group"
         onMouseEnter={() => setRentDropdownOpen(true)}
         onMouseLeave={() => setRentDropdownOpen(false)}
@@ -132,24 +139,29 @@ const Navbar = ({ containerStyles }) => {
         >
           <MdHome />
           <div>For Rent</div>
-          <MdKeyboardArrowDown className={`transition-transform ${rentDropdownOpen ? 'rotate-180' : ''}`} />
+          <MdKeyboardArrowDown
+            className={`transition-transform ${
+              rentDropdownOpen ? "rotate-180" : ""
+            }`}
+          />
         </NavLink>
-        
+
         {/* Rent Dropdown */}
         {rentDropdownOpen && (
           <div className="absolute top-full left-0 pt-2 z-50">
             <div className="bg-white rounded-lg shadow-lg border border-gray-100 py-2 min-w-[180px]">
               {propertyCategories.map((cat) => {
                 const IconComponent = cat.icon;
-                const isActive = currentFilter === "rent" && currentCategory === cat.value;
+                const isActive =
+                  currentFilter === "rent" && currentCategory === cat.value;
                 return (
                   <div
                     key={cat.value}
                     onClick={() => handleCategoryClick("rent", cat.value)}
                     className={`flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors ${
-                      isActive 
-                        ? 'bg-blue-500 text-white' 
-                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                      isActive
+                        ? "bg-blue-500 text-white"
+                        : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                     }`}
                   >
                     <IconComponent size={14} />
@@ -162,13 +174,13 @@ const Navbar = ({ containerStyles }) => {
         )}
       </div>
 
-      <NavLink
-        to={"mailto:inquiries.codeatusman@gmail.com"}
-        className="flexCenter gap-x-1 rounded-full px-2 py-1"
+      <button
+        onClick={onContactClick}
+        className="flexCenter gap-x-1 rounded-full px-2 py-1 hover:text-secondary transition-colors"
       >
         <MdPermContactCalendar />
         <div>Contact</div>
-      </NavLink>
+      </button>
       {/* Only show Add Property for admins */}
       {!loading && isAdmin && (
         <div
@@ -185,6 +197,7 @@ const Navbar = ({ containerStyles }) => {
 
 Navbar.propTypes = {
   containerStyles: PropTypes.string,
+  onContactClick: PropTypes.func,
 };
 
 export default Navbar;
