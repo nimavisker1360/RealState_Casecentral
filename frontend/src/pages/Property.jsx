@@ -370,9 +370,9 @@ const Property = () => {
         </div>
       )}
       {/* container */}
-      <div className="xl:flexBetween gap-8">
-        {/* left side */}
-        <div className="flex-1 rounded-2xl bg-white p-2">
+      <div className="max-w-4xl mx-auto">
+        {/* Property Content */}
+        <div className="rounded-2xl bg-white p-2">
           <div className="flexBetween mb-2">
             <h5 className="bold-16 text-secondary">{data?.city}</h5>
             {/* Property Type Badge */}
@@ -403,16 +403,16 @@ const Property = () => {
           {/* info */}
           <div className="flex flex-wrap gap-2 sm:gap-x-4 py-2">
             <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-2 sm:pr-4 font-[500] text-sm sm:text-base">
-              <MdOutlineBed /> {data?.facilities.bedrooms}
+              <MdOutlineBed /> {data?.rooms || data?.facilities?.bedrooms}
             </div>
             <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-2 sm:pr-4 font-[500] text-sm sm:text-base">
-              <MdOutlineBathtub /> {data?.facilities.bathrooms}
+              <MdOutlineBathtub /> {data?.bathrooms || data?.facilities?.bathrooms}
             </div>
             <div className="flexCenter gap-x-2 border-r-2 border-gray-900/80 pr-2 sm:pr-4 font-[500] text-sm sm:text-base">
-              <MdOutlineGarage /> {data?.facilities.parkings}
+              <MdOutlineGarage /> {data?.facilities?.parkings}
             </div>
             <div className="flexCenter gap-x-2 font-[500] text-sm sm:text-base">
-              <CgRuler /> 400
+              <CgRuler /> {data?.area?.gross || data?.area?.net || 0} m²
             </div>
           </div>
           <p className="pt-2 mb-4">{data?.description}</p>
@@ -421,6 +421,143 @@ const Property = () => {
             <div>
               {data?.address} {data?.city} {data?.country}
             </div>
+          </div>
+
+          {/* Map Section - Moved Higher */}
+          <div className="my-6 rounded-xl overflow-hidden h-[300px]">
+            <Map
+              address={data?.address}
+              city={data?.city}
+              country={data?.country}
+            />
+          </div>
+
+          {/* Property Details Table - Turkish Real Estate Style */}
+          <div className="my-6 border border-gray-200 rounded-xl overflow-hidden bg-white">
+            <table className="w-full text-sm">
+              <tbody>
+                {data?.listingNo && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 w-1/3 border-r border-gray-200">İlan No</td>
+                    <td className="px-4 py-3 text-gray-900">{data.listingNo}</td>
+                  </tr>
+                )}
+                {data?.listingDate && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">İlan Tarihi</td>
+                    <td className="px-4 py-3 text-gray-900">
+                      {new Date(data.listingDate).toLocaleDateString("tr-TR", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </td>
+                  </tr>
+                )}
+                <tr className="border-b border-gray-200">
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Emlak Tipi</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.propertyType === "sale" ? "Satılık" : "Kiralık"} Daire</td>
+                </tr>
+                {data?.area?.gross > 0 && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">m² (Brüt)</td>
+                    <td className="px-4 py-3 text-gray-900">{data.area.gross}</td>
+                  </tr>
+                )}
+                {data?.area?.net > 0 && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">m² (Net)</td>
+                    <td className="px-4 py-3 text-gray-900">{data.area.net}</td>
+                  </tr>
+                )}
+                {data?.rooms && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Oda Sayısı</td>
+                    <td className="px-4 py-3 text-gray-900">{data.rooms}</td>
+                  </tr>
+                )}
+                {data?.buildingAge !== undefined && data?.buildingAge !== null && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Bina Yaşı</td>
+                    <td className="px-4 py-3 text-gray-900">{data.buildingAge}</td>
+                  </tr>
+                )}
+                {data?.floor !== undefined && data?.floor !== null && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Bulunduğu Kat</td>
+                    <td className="px-4 py-3 text-gray-900">{data.floor}</td>
+                  </tr>
+                )}
+                {data?.totalFloors > 0 && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Kat Sayısı</td>
+                    <td className="px-4 py-3 text-gray-900">{data.totalFloors}</td>
+                  </tr>
+                )}
+                {data?.heating && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Isıtma</td>
+                    <td className="px-4 py-3 text-gray-900 capitalize">{data.heating.replace(/-/g, " ")}</td>
+                  </tr>
+                )}
+                {(data?.bathrooms > 0 || data?.facilities?.bathrooms > 0) && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Banyo Sayısı</td>
+                    <td className="px-4 py-3 text-gray-900">{data.bathrooms || data.facilities?.bathrooms}</td>
+                  </tr>
+                )}
+                {data?.kitchen && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Mutfak</td>
+                    <td className="px-4 py-3 text-gray-900 capitalize">{data.kitchen.replace(/-/g, " ")}</td>
+                  </tr>
+                )}
+                <tr className="border-b border-gray-200">
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Balkon</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.balcony ? "Var" : "Yok"}</td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Asansör</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.elevator ? "Var" : "Yok"}</td>
+                </tr>
+                {data?.parking && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Otopark</td>
+                    <td className="px-4 py-3 text-gray-900 capitalize">{data.parking.replace(/-/g, " ")}</td>
+                  </tr>
+                )}
+                <tr className="border-b border-gray-200">
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Eşyalı</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.furnished ? "Evet" : "Hayır"}</td>
+                </tr>
+                {data?.usageStatus && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Kullanım Durumu</td>
+                    <td className="px-4 py-3 text-gray-900 capitalize">{data.usageStatus.replace(/-/g, " ")}</td>
+                  </tr>
+                )}
+                {data?.siteName && (
+                  <tr className="border-b border-gray-200">
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Site Adı</td>
+                    <td className="px-4 py-3 text-gray-900">{data.siteName}</td>
+                  </tr>
+                )}
+                <tr className="border-b border-gray-200">
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Aidat (TL)</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.dues > 0 ? `₺${data.dues.toLocaleString()}` : "Belirtilmemiş"}</td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Krediye Uygun</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.mortgageEligible ? "Evet" : "Hayır"}</td>
+                </tr>
+                {data?.deedStatus && (
+                  <tr>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Tapu Durumu</td>
+                    <td className="px-4 py-3 text-gray-900 capitalize">{data.deedStatus.replace(/-/g, " ")}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
           {/* Date Information */}
           <div className="flex flex-wrap gap-4 my-4 p-4 bg-primary rounded-xl">
@@ -691,14 +828,6 @@ const Property = () => {
               )}
             </div>
           )}
-        </div>
-        {/* right side */}
-        <div className="flex-1">
-          <Map
-            address={data?.address}
-            city={data?.city}
-            country={data?.country}
-          />
         </div>
       </div>
 

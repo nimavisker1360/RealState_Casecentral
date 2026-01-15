@@ -1,7 +1,7 @@
 import { useContext, useEffect, useCallback, useRef } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import UserDetailContext from "../context/UserDetailContext";
 import { useMutation } from "react-query";
@@ -13,10 +13,14 @@ const Layout = () => {
   useFavourites();
   useBookings();
 
+  const location = useLocation();
   const { isAuthenticated, user, getIdTokenClaims } = useAuth0();
   const { setUserDetails } = useContext(UserDetailContext);
   const tokenRefreshIntervalRef = useRef(null);
   const hasRegisteredRef = useRef(false);
+
+  // Hide footer on listing page (but not on individual property pages)
+  const hideFooter = location.pathname === "/listing";
 
   const { mutate } = useMutation({
     mutationKey: [user?.email],
@@ -105,7 +109,7 @@ const Layout = () => {
         <Header />
         <Outlet />
       </div>
-      <Footer />
+      {!hideFooter && <Footer />}
     </div>
   );
 };

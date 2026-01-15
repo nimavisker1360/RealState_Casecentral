@@ -8,8 +8,10 @@ const Blogs = () => {
   return (
     <section className="max-padd-container overflow-x-hidden">
       <div className="py-16 xl:py-28 rounded-3xl">
-        <span className="medium-18">Stay Updated with the Latest News!</span>
-        <h2 className="h2">Our Expert Blogs</h2>
+        <div className="text-center">
+          <span className="medium-18">Stay Updated with the Latest News!</span>
+          <h2 className="h2">Our Expert Blogs</h2>
+        </div>
         {/* container */}
         <div
           className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3

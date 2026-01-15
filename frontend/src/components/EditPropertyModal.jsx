@@ -14,7 +14,12 @@ import {
   Checkbox,
   ScrollArea,
   Collapse,
+  Grid,
+  Switch,
+  Divider,
+  Paper,
 } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -31,9 +36,62 @@ import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 
 // Property categories
 const propertyCategories = [
-  { value: "residential", label: "Residential", icon: FaHome },
-  { value: "commercial", label: "Commercial", icon: FaBriefcase },
-  { value: "land", label: "Land", icon: FaLandmark },
+  { value: "residential", label: "Konut", icon: FaHome },
+  { value: "commercial", label: "Ticari", icon: FaBriefcase },
+  { value: "land", label: "Arsa", icon: FaLandmark },
+];
+
+// Turkish real estate options
+const heatingOptions = [
+  { value: "merkezi", label: "Merkezi" },
+  { value: "merkezi-pay-olcer", label: "Merkezi (Pay Ölçer)" },
+  { value: "dogalgaz-kombi", label: "Doğalgaz (Kombi)" },
+  { value: "dogalgaz-soba", label: "Doğalgaz (Soba)" },
+  { value: "klima", label: "Klima" },
+  { value: "soba", label: "Soba" },
+  { value: "yerden-isitma", label: "Yerden Isıtma" },
+  { value: "yok", label: "Yok" },
+];
+
+const kitchenOptions = [
+  { value: "acik-amerikan", label: "Açık (Amerikan)" },
+  { value: "kapali", label: "Kapalı" },
+  { value: "laminat", label: "Laminat" },
+  { value: "hilton", label: "Hilton" },
+];
+
+const parkingOptions = [
+  { value: "kapali-otopark", label: "Kapalı Otopark" },
+  { value: "acik-otopark", label: "Açık Otopark" },
+  { value: "otopark-yok", label: "Otopark Yok" },
+];
+
+const usageStatusOptions = [
+  { value: "bos", label: "Boş" },
+  { value: "kiraci", label: "Kiracı" },
+  { value: "mulk-sahibi", label: "Mülk Sahibi" },
+];
+
+const deedStatusOptions = [
+  { value: "kat-mulkiyetli", label: "Kat Mülkiyetli" },
+  { value: "kat-irtifakli", label: "Kat İrtifaklı" },
+  { value: "hisseli-tapu", label: "Hisseli Tapu" },
+  { value: "kooperatif", label: "Kooperatif" },
+];
+
+const roomOptions = [
+  { value: "1+0", label: "1+0 (Stüdyo)" },
+  { value: "1+1", label: "1+1" },
+  { value: "2+1", label: "2+1" },
+  { value: "2+2", label: "2+2" },
+  { value: "3+1", label: "3+1" },
+  { value: "3+2", label: "3+2" },
+  { value: "4+1", label: "4+1" },
+  { value: "4+2", label: "4+2" },
+  { value: "5+1", label: "5+1" },
+  { value: "5+2", label: "5+2" },
+  { value: "6+1", label: "6+1" },
+  { value: "6+2", label: "6+2" },
 ];
 
 // All possible interior features
@@ -133,6 +191,27 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
 
+  // Turkish real estate fields state
+  const [listingNo, setListingNo] = useState("");
+  const [listingDate, setListingDate] = useState(null);
+  const [areaGross, setAreaGross] = useState(0);
+  const [areaNet, setAreaNet] = useState(0);
+  const [rooms, setRooms] = useState("");
+  const [buildingAge, setBuildingAge] = useState(0);
+  const [floor, setFloor] = useState(0);
+  const [totalFloors, setTotalFloors] = useState(0);
+  const [heating, setHeating] = useState("");
+  const [kitchen, setKitchen] = useState("");
+  const [balcony, setBalcony] = useState(false);
+  const [elevator, setElevator] = useState(false);
+  const [parkingType, setParkingType] = useState("");
+  const [furnished, setFurnished] = useState(false);
+  const [usageStatus, setUsageStatus] = useState("");
+  const [siteName, setSiteName] = useState("");
+  const [dues, setDues] = useState(0);
+  const [mortgageEligible, setMortgageEligible] = useState(false);
+  const [deedStatus, setDeedStatus] = useState("");
+
   const form = useForm({
     initialValues: {
       title: "",
@@ -150,7 +229,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
     validate: {
       title: (value) => validateString(value),
       description: (value) => validateString(value),
-      price: (value) => (value < 999 ? "Minimum 999 lira olmalı" : null),
+      price: (value) => (value < 999 ? "En az 999 TL olmalı" : null),
       country: (value) => validateString(value),
       city: (value) => validateString(value),
       address: (value) => validateString(value),
@@ -188,6 +267,27 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       setSelectedConsultantId(property.consultantId || "");
       setInteriorFeatures(property.interiorFeatures || []);
       setExteriorFeatures(property.exteriorFeatures || []);
+      
+      // Turkish real estate fields
+      setListingNo(property.listingNo || "");
+      setListingDate(property.listingDate ? new Date(property.listingDate) : null);
+      setAreaGross(property.area?.gross || 0);
+      setAreaNet(property.area?.net || 0);
+      setRooms(property.rooms || "");
+      setBuildingAge(property.buildingAge || 0);
+      setFloor(property.floor || 0);
+      setTotalFloors(property.totalFloors || 0);
+      setHeating(property.heating || "");
+      setKitchen(property.kitchen || "");
+      setBalcony(property.balcony || false);
+      setElevator(property.elevator || false);
+      setParkingType(property.parking || "");
+      setFurnished(property.furnished || false);
+      setUsageStatus(property.usageStatus || "");
+      setSiteName(property.siteName || "");
+      setDues(property.dues || 0);
+      setMortgageEligible(property.mortgageEligible || false);
+      setDeedStatus(property.deedStatus || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [property]);
@@ -235,11 +335,11 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
     mutationFn: (data) => updateResidency(property.id, data, token),
     onError: (error) => {
       const message =
-        error?.response?.data?.message || "Error updating property";
+        error?.response?.data?.message || "Mülk güncellenirken hata oluştu";
       toast.error(message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      toast.success("Update operation completed successfully!", {
+      toast.success("Mülk başarıyla güncellendi!", {
         position: "bottom-right",
       });
       setOpened(false);
@@ -252,7 +352,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
     if (hasErrors) return;
 
     if (imageURLs.length === 0) {
-      toast.error("Please add at least one image", {
+      toast.error("Lütfen en az bir görsel ekleyin", {
         position: "bottom-right",
       });
       return;
@@ -278,6 +378,25 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       consultantId: selectedConsultantId || null,
       interiorFeatures: interiorFeatures,
       exteriorFeatures: exteriorFeatures,
+      // Turkish real estate fields
+      listingNo,
+      listingDate,
+      area: { gross: areaGross, net: areaNet },
+      rooms,
+      buildingAge,
+      floor,
+      totalFloors,
+      heating,
+      kitchen,
+      balcony,
+      elevator,
+      parking: parkingType,
+      furnished,
+      usageStatus,
+      siteName,
+      dues,
+      mortgageEligible,
+      deedStatus,
     };
 
     mutate(data);
@@ -289,10 +408,10 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       onClose={() => setOpened(false)}
       title={
         <Text fw={600} size="lg">
-          Edit Property
+          Mülkü Düzenle
         </Text>
       }
-      size="xl"
+      size="90rem"
       centered
     >
       <form
@@ -304,7 +423,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
         {/* Property Type */}
         <div className="mb-4">
           <Text size="sm" fw={500} mb={4}>
-            Property Type <span className="text-red-500">*</span>
+            Emlak Tipi <span className="text-red-500">*</span>
           </Text>
           <SegmentedControl
             fullWidth
@@ -316,7 +435,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
                 label: (
                   <div className="flex items-center justify-center gap-2 py-1">
                     <MdSell size={18} />
-                    <span>For Sale</span>
+                    <span>Satılık</span>
                   </div>
                 ),
                 value: "sale",
@@ -325,7 +444,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
                 label: (
                   <div className="flex items-center justify-center gap-2 py-1">
                     <MdHome size={18} />
-                    <span>For Rent</span>
+                    <span>Kiralık</span>
                   </div>
                 ),
                 value: "rent",
@@ -336,8 +455,8 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
 
         {/* Property Category */}
         <Select
-          label="Property Category"
-          placeholder="Select property category"
+          label="Emlak Kategorisi"
+          placeholder="Kategori seçin"
           data={propertyCategories.map((cat) => ({
             value: cat.value,
             label: cat.label,
@@ -364,8 +483,8 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextInput
             withAsterisk
-            label="Title"
-            placeholder="Property name"
+            label="Başlık"
+            placeholder="Mülk adı"
             {...form.getInputProps("title")}
           />
           <NumberInput
@@ -377,14 +496,16 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
             }
             placeholder="999"
             min={0}
+            thousandSeparator="."
+            decimalSeparator=","
             {...form.getInputProps("price")}
           />
         </div>
 
         <Textarea
           withAsterisk
-          label="Description"
-          placeholder="Property description"
+          label="Açıklama"
+          placeholder="Mülk açıklaması"
           mt="sm"
           minRows={3}
           {...form.getInputProps("description")}
@@ -440,9 +561,9 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
 
         {/* Consultant Selector */}
         <Select
-          label="Assign Consultant"
-          placeholder="Select a consultant for this property"
-          description="The consultant will be shown as the contact person for this property"
+          label="Danışman Ata"
+          placeholder="Bu mülk için bir danışman seçin"
+          description="Danışman, bu mülk için iletişim kişisi olarak gösterilecektir"
           data={consultantOptions}
           value={selectedConsultantId}
           onChange={(value) => setSelectedConsultantId(value || "")}
@@ -466,6 +587,206 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
           )}
         />
 
+        <Divider my="lg" label="İlan Bilgileri" labelPosition="center" />
+
+        <Grid>
+          <Grid.Col span={6}>
+            <TextInput
+              label="İlan No"
+              placeholder="1275908801"
+              value={listingNo}
+              onChange={(e) => setListingNo(e.target.value)}
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <DateInput
+              label="İlan Tarihi"
+              placeholder="Tarih seçin"
+              value={listingDate}
+              onChange={setListingDate}
+              valueFormat="DD MMMM YYYY"
+            />
+          </Grid.Col>
+        </Grid>
+
+        <Divider my="lg" label="Bina ve Daire Bilgileri" labelPosition="center" />
+
+        <Grid>
+          <Grid.Col span={4}>
+            <NumberInput
+              label="m² (Brüt)"
+              placeholder="125"
+              min={0}
+              value={areaGross}
+              onChange={setAreaGross}
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <NumberInput
+              label="m² (Net)"
+              placeholder="85"
+              min={0}
+              value={areaNet}
+              onChange={setAreaNet}
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <Select
+              label="Oda Sayısı"
+              placeholder="Seçin"
+              data={roomOptions}
+              value={rooms}
+              onChange={setRooms}
+              clearable
+            />
+          </Grid.Col>
+        </Grid>
+
+        <Grid mt="sm">
+          <Grid.Col span={4}>
+            <NumberInput
+              label="Bina Yaşı"
+              placeholder="5"
+              min={0}
+              value={buildingAge}
+              onChange={setBuildingAge}
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <NumberInput
+              label="Bulunduğu Kat"
+              placeholder="2"
+              min={-2}
+              value={floor}
+              onChange={setFloor}
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <NumberInput
+              label="Kat Sayısı"
+              placeholder="18"
+              min={1}
+              value={totalFloors}
+              onChange={setTotalFloors}
+            />
+          </Grid.Col>
+        </Grid>
+
+        <Grid mt="sm">
+          <Grid.Col span={4}>
+            <Select
+              label="Isıtma"
+              placeholder="Seçin"
+              data={heatingOptions}
+              value={heating}
+              onChange={setHeating}
+              clearable
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <Select
+              label="Mutfak"
+              placeholder="Seçin"
+              data={kitchenOptions}
+              value={kitchen}
+              onChange={setKitchen}
+              clearable
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <Select
+              label="Otopark Tipi"
+              placeholder="Seçin"
+              data={parkingOptions}
+              value={parkingType}
+              onChange={setParkingType}
+              clearable
+            />
+          </Grid.Col>
+        </Grid>
+
+        <Divider my="lg" label="Özellikler" labelPosition="center" />
+
+        <Paper p="md" withBorder>
+          <Grid>
+            <Grid.Col span={3}>
+              <Switch
+                label="Balkon"
+                checked={balcony}
+                onChange={(event) => setBalcony(event.currentTarget.checked)}
+              />
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <Switch
+                label="Asansör"
+                checked={elevator}
+                onChange={(event) => setElevator(event.currentTarget.checked)}
+              />
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <Switch
+                label="Eşyalı"
+                checked={furnished}
+                onChange={(event) => setFurnished(event.currentTarget.checked)}
+              />
+            </Grid.Col>
+            <Grid.Col span={3}>
+              <Switch
+                label="Krediye Uygun"
+                checked={mortgageEligible}
+                onChange={(event) => setMortgageEligible(event.currentTarget.checked)}
+              />
+            </Grid.Col>
+          </Grid>
+        </Paper>
+
+        <Divider my="lg" label="Diğer Bilgiler" labelPosition="center" />
+
+        <Grid>
+          <Grid.Col span={6}>
+            <TextInput
+              label="Site Adı"
+              placeholder="Makyol Santral"
+              value={siteName}
+              onChange={(e) => setSiteName(e.target.value)}
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <NumberInput
+              label="Aidat (TL)"
+              placeholder="0"
+              min={0}
+              thousandSeparator="."
+              decimalSeparator=","
+              value={dues}
+              onChange={setDues}
+            />
+          </Grid.Col>
+        </Grid>
+
+        <Grid mt="sm">
+          <Grid.Col span={6}>
+            <Select
+              label="Kullanım Durumu"
+              placeholder="Seçin"
+              data={usageStatusOptions}
+              value={usageStatus}
+              onChange={setUsageStatus}
+              clearable
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Select
+              label="Tapu Durumu"
+              placeholder="Seçin"
+              data={deedStatusOptions}
+              value={deedStatus}
+              onChange={setDeedStatus}
+              clearable
+            />
+          </Grid.Col>
+        </Grid>
+
         {/* Interior Features */}
         <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
           <button
@@ -476,10 +797,10 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
             <div className="flex items-center gap-2">
               <BsHouseDoor className="text-green-600" size={18} />
               <Text fw={500} size="sm">
-                Interior Features
+                İç Özellikler
               </Text>
               <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
-                {interiorFeatures.length} selected
+                {interiorFeatures.length} seçili
               </span>
             </div>
             {interiorOpened ? (
@@ -523,10 +844,10 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
             <div className="flex items-center gap-2">
               <BsTree className="text-blue-600" size={18} />
               <Text fw={500} size="sm">
-                Exterior Features
+                Dış Özellikler
               </Text>
               <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">
-                {exteriorFeatures.length} selected
+                {exteriorFeatures.length} seçili
               </span>
             </div>
             {exteriorOpened ? (
@@ -624,10 +945,10 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
             {isLoading ? (
               <>
                 <Loader size="xs" color="white" mr={8} />
-                Updating...
+                Güncelleniyor...
               </>
             ) : (
-              "Update"
+              "Güncelle"
             )}
           </Button>
         </Group>

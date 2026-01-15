@@ -25,6 +25,25 @@ const AddPropertyModal = ({ opened, setOpened }) => {
       bathrooms: 0,
     },
     userEmail: user?.email,
+    // Turkish real estate fields
+    listingNo: "",
+    listingDate: null,
+    area: { gross: 0, net: 0 },
+    rooms: "",
+    buildingAge: 0,
+    floor: 0,
+    totalFloors: 0,
+    heating: "",
+    kitchen: "",
+    balcony: false,
+    elevator: false,
+    parking: "",
+    furnished: false,
+    usageStatus: "",
+    siteName: "",
+    dues: 0,
+    mortgageEligible: false,
+    deedStatus: "",
   });
 
   const nextStep = () => {
@@ -48,14 +67,14 @@ const AddPropertyModal = ({ opened, setOpened }) => {
           breakpoint="sm"
           allowNextStepsSelect={false}
         >
-          <Stepper.Step label="Location" description="Address">
+          <Stepper.Step label="Konum" description="Adres ve şehir">
             <AddLocation
               nextStep={nextStep}
               propertyDetails={propertyDetails}
               setPropertyDetails={setPropertyDetails}
             />
           </Stepper.Step>
-          <Stepper.Step label="Images" description="Upload">
+          <Stepper.Step label="Görseller" description="Fotoğraf yükle">
             <UploadImage
               prevStep={prevStep}
               nextStep={nextStep}
@@ -63,7 +82,7 @@ const AddPropertyModal = ({ opened, setOpened }) => {
               setPropertyDetails={setPropertyDetails}
             />
           </Stepper.Step>
-          <Stepper.Step label="Basics" description="Details">
+          <Stepper.Step label="Detaylar" description="Ana özellikler">
             <BasicDetails
               prevStep={prevStep}
               nextStep={nextStep}
@@ -71,7 +90,7 @@ const AddPropertyModal = ({ opened, setOpened }) => {
               setPropertyDetails={setPropertyDetails}
             />
           </Stepper.Step>
-          <Stepper.Step>
+          <Stepper.Step label="Olanaklar" description="Oda sayısı">
             <Facilities
               prevStep={prevStep}
               propertyDetails={propertyDetails}
@@ -81,7 +100,7 @@ const AddPropertyModal = ({ opened, setOpened }) => {
             />
           </Stepper.Step>
           <Stepper.Completed>
-            Completed, click back button to get to previous step
+            Tamamlandı, önceki adıma dönmek için geri butonuna tıklayın
           </Stepper.Completed>
         </Stepper>
       </Container>

@@ -66,7 +66,7 @@ const Facilities = ({
       toast.error(message, { position: "bottom-right" });
     },
     onSuccess: () => {
-      toast.success("Property added successfully!", {
+      toast.success("Mülk başarıyla eklendi!", {
         position: "bottom-right",
       });
       setPropertyDetails({
@@ -87,6 +87,25 @@ const Facilities = ({
         category: "residential",
         consultantId: null,
         userEmail: user?.email,
+        // Reset Turkish real estate fields
+        listingNo: "",
+        listingDate: null,
+        area: { gross: 0, net: 0 },
+        rooms: "",
+        buildingAge: 0,
+        floor: 0,
+        totalFloors: 0,
+        heating: "",
+        kitchen: "",
+        balcony: false,
+        elevator: false,
+        parking: "",
+        furnished: false,
+        usageStatus: "",
+        siteName: "",
+        dues: 0,
+        mortgageEligible: false,
+        deedStatus: "",
       });
 
       if (isPageMode) {
@@ -103,7 +122,7 @@ const Facilities = ({
   });
 
   return (
-    <Box maw={"30%"} mx="auto" my={"sm"}>
+    <Box maw={"50%"} mx="auto" my={"sm"}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -112,28 +131,28 @@ const Facilities = ({
       >
         <NumberInput
           withAsterisk
-          label="No of Bedrooms"
+          label="Yatak Odası Sayısı"
           min={0}
           {...form.getInputProps("bedrooms")}
         />
         <NumberInput
-          label="No of parkings"
-          min={0}
-          {...form.getInputProps("parkings")}
-        />
-        <NumberInput
           withAsterisk
-          label="No of bathrooms"
+          label="Banyo Sayısı"
           min={0}
           {...form.getInputProps("bathrooms")}
+        />
+        <NumberInput
+          label="Otopark Sayısı"
+          min={0}
+          {...form.getInputProps("parkings")}
         />
 
         <Group position="center" mt="xl">
           <Button variant="default" onClick={prevStep}>
-            Back
+            Geri
           </Button>
           <Button type="submit" color="green" disabled={isLoading}>
-            {isLoading ? "Submitting" : "Add Property"}
+            {isLoading ? "Ekleniyor..." : "Mülk Ekle"}
           </Button>
         </Group>
       </form>

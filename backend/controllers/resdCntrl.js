@@ -17,6 +17,25 @@ export const createResidency = asyncHandler(async (req, res) => {
     category,
     userEmail,
     consultantId,
+    // Turkish real estate fields
+    listingNo,
+    listingDate,
+    area,
+    rooms,
+    buildingAge,
+    floor,
+    totalFloors,
+    heating,
+    kitchen,
+    balcony,
+    elevator,
+    parking,
+    furnished,
+    usageStatus,
+    siteName,
+    dues,
+    mortgageEligible,
+    deedStatus,
   } = req.body.data;
 
   console.log("========================================");
@@ -30,6 +49,8 @@ export const createResidency = asyncHandler(async (req, res) => {
   console.log("Owner Email:", userEmail);
   console.log("Consultant ID:", consultantId || "Not assigned");
   console.log("Images count:", images?.length || 1);
+  console.log("Rooms:", rooms);
+  console.log("Area:", area);
 
   try {
     // Use MongoDB directly to support all fields including category
@@ -59,6 +80,26 @@ export const createResidency = asyncHandler(async (req, res) => {
       category: category || "residential",
       userEmail,
       consultantId: consultantId || null,
+      // Turkish real estate fields
+      listingNo: listingNo || null,
+      listingDate: listingDate ? new Date(listingDate) : null,
+      area: area || null,
+      rooms: rooms || null,
+      buildingAge: buildingAge || null,
+      floor: floor !== undefined ? floor : null,
+      totalFloors: totalFloors || null,
+      heating: heating || null,
+      bathrooms: facilities?.bathrooms || null,
+      kitchen: kitchen || null,
+      balcony: balcony || false,
+      elevator: elevator || false,
+      parking: parking || null,
+      furnished: furnished || false,
+      usageStatus: usageStatus || null,
+      siteName: siteName || null,
+      dues: dues || null,
+      mortgageEligible: mortgageEligible || false,
+      deedStatus: deedStatus || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -180,6 +221,25 @@ export const updateResidency = asyncHandler(async (req, res) => {
     consultantId,
     interiorFeatures,
     exteriorFeatures,
+    // Turkish real estate fields
+    listingNo,
+    listingDate,
+    area,
+    rooms,
+    buildingAge,
+    floor,
+    totalFloors,
+    heating,
+    kitchen,
+    balcony,
+    elevator,
+    parking,
+    furnished,
+    usageStatus,
+    siteName,
+    dues,
+    mortgageEligible,
+    deedStatus,
   } = req.body.data;
 
   console.log("========================================");
@@ -190,6 +250,7 @@ export const updateResidency = asyncHandler(async (req, res) => {
   console.log("Category:", category);
   console.log("Interior Features:", interiorFeatures?.length || 0);
   console.log("Exterior Features:", exteriorFeatures?.length || 0);
+  console.log("Rooms:", rooms);
 
   try {
     // Use MongoDB directly to update all fields including new ones
@@ -209,6 +270,26 @@ export const updateResidency = asyncHandler(async (req, res) => {
       consultantId: consultantId || null,
       interiorFeatures: interiorFeatures || [],
       exteriorFeatures: exteriorFeatures || [],
+      // Turkish real estate fields
+      listingNo: listingNo || null,
+      listingDate: listingDate ? new Date(listingDate) : null,
+      area: area || null,
+      rooms: rooms || null,
+      buildingAge: buildingAge || null,
+      floor: floor !== undefined ? floor : null,
+      totalFloors: totalFloors || null,
+      heating: heating || null,
+      bathrooms: facilities?.bathrooms || null,
+      kitchen: kitchen || null,
+      balcony: balcony || false,
+      elevator: elevator || false,
+      parking: parking || null,
+      furnished: furnished || false,
+      usageStatus: usageStatus || null,
+      siteName: siteName || null,
+      dues: dues || null,
+      mortgageEligible: mortgageEligible || false,
+      deedStatus: deedStatus || null,
       updatedAt: new Date(),
     };
 
