@@ -63,7 +63,9 @@ const PropertyCard = ({ property, onCardClick }) => {
   const handleWhatsAppClick = (e) => {
     e.stopPropagation();
     const message = encodeURIComponent(
-      `Hi, I'm interested in the property: ${property.title} - ₺${property.price.toLocaleString()}`
+      `Hi, I'm interested in the property: ${
+        property.title
+      } - ₺${property.price.toLocaleString()}`
     );
     window.open(`https://wa.me/905551234567?text=${message}`, "_blank");
   };
@@ -85,9 +87,7 @@ const PropertyCard = ({ property, onCardClick }) => {
           <div className="absolute top-3 left-3">
             <span
               className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold ${
-                isForSale
-                  ? "bg-green-500 text-white"
-                  : "bg-blue-500 text-white"
+                isForSale ? "bg-green-500 text-white" : "bg-blue-500 text-white"
               }`}
             >
               {isForSale ? <MdSell size={12} /> : <MdHome size={12} />}

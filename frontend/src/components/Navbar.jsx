@@ -1,6 +1,7 @@
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 // icons
 import {
   MdHomeWork,
@@ -15,20 +16,21 @@ import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 import useAdmin from "../hooks/useAdmin";
 import useAuthCheck from "../hooks/useAuthCheck";
 
-// Property categories
-const propertyCategories = [
-  { value: "residential", label: "Residential", icon: FaHome },
-  { value: "commercial", label: "Commercial", icon: FaBriefcase },
-  { value: "land", label: "Land", icon: FaLandmark },
-];
-
 const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
+  const { t } = useTranslation();
   const { isAdmin, loading } = useAdmin();
   const { validateLogin } = useAuthCheck();
   const navigate = useNavigate();
   const location = useLocation();
   const [saleDropdownOpen, setSaleDropdownOpen] = useState(false);
   const [rentDropdownOpen, setRentDropdownOpen] = useState(false);
+
+  // Property categories with translations
+  const propertyCategories = [
+    { value: "residential", label: t('categories.residential'), icon: FaHome },
+    { value: "commercial", label: t('categories.commercial'), icon: FaBriefcase },
+    { value: "land", label: t('categories.land'), icon: FaLandmark },
+  ];
 
   const handleAddPropertyClick = () => {
     if (validateLogin()) {
@@ -81,7 +83,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
       >
         <div className="flex items-center gap-3">
           <MdHomeWork size={20} />
-          <span>Home</span>
+          <span>{t('nav.home')}</span>
         </div>
       </NavLink>
 
@@ -99,7 +101,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
       >
         <div className="flex items-center gap-3">
           <RiCheckboxMultipleBlankFill size={20} />
-          <span>Listing</span>
+          <span>{t('nav.listing')}</span>
         </div>
       </NavLink>
 
@@ -132,7 +134,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
         >
           <div className="flex items-center gap-3 md:gap-1">
             <MdSell size={20} />
-            <span>For Sale</span>
+            <span>{t('nav.forSale')}</span>
           </div>
           <MdKeyboardArrowDown
             size={20}
@@ -204,7 +206,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
         >
           <div className="flex items-center gap-3 md:gap-1">
             <MdHome size={20} />
-            <span>For Rent</span>
+            <span>{t('nav.forRent')}</span>
           </div>
           <MdKeyboardArrowDown
             size={20}
@@ -254,7 +256,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
       >
         <div className="flex items-center gap-3">
           <MdPermContactCalendar size={20} />
-          <span>Contact</span>
+          <span>{t('nav.contact')}</span>
         </div>
       </button>
 
@@ -266,7 +268,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
         >
           <div className="flex items-center gap-3">
             <MdAddHome size={20} />
-            <span>Add Property</span>
+            <span>{t('nav.addProperty')}</span>
           </div>
         </div>
       )}

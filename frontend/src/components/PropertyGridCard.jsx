@@ -35,13 +35,17 @@ const PropertyGridCard = ({ property }) => {
         <p className="text-base font-semibold text-gray-800 mb-1">
           ₺{property.price.toLocaleString()}
           {property.propertyType === "rent" && (
-            <span className="font-normal text-gray-500"> - ₺{(property.price * 1.5).toLocaleString()}</span>
+            <span className="font-normal text-gray-500">
+              {" "}
+              - ₺{(property.price * 1.5).toLocaleString()}
+            </span>
           )}
         </p>
 
         {/* Beds Info */}
         <p className="text-sm text-gray-500">
-          {property.facilities?.bedrooms === 0 ? "Studio" : "Studio"} - {property.facilities?.bedrooms || 2} Beds
+          {property.facilities?.bedrooms === 0 ? "Studio" : "Studio"} -{" "}
+          {property.facilities?.bedrooms || 2} Beds
         </p>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Navbar from "./Navbar";
 import { MdClose, MdMenu } from "react-icons/md";
 import userIcon from "../assets/user.svg";
@@ -7,9 +8,11 @@ import { useAuth0 } from "@auth0/auth0-react";
 import ProfileMenu from "./ProfileMenu";
 import LoginModal from "./LoginModal";
 import ContactModal from "./ContactModal";
+import LanguageSwitcher from "./LanguageSwitcher";
 import logo from "../assets/logo.png";
 
 const Header = () => {
+  const { t } = useTranslation();
   const [active, setActive] = useState(false);
   const [menuOpened, setMenuOpened] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -83,6 +86,9 @@ const Header = () => {
           </div>
           {/* buttons */}
           <div className="flexBetween gap-x-3 sm:gap-x-5 bold-16">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+            
             {!menuOpened ? (
               <MdMenu
                 className="xl:hidden cursor-pointer text-3xl hover:text-secondary"
@@ -95,7 +101,7 @@ const Header = () => {
               />
             )}
             {isLoading ? (
-              <span className="medium-16">Loading...</span>
+              <span className="medium-16">{t('common.loading')}</span>
             ) : !isAuthenticated ? (
               <button
                 onClick={handleLoginClick}
@@ -104,7 +110,7 @@ const Header = () => {
                 }
               >
                 <img src={userIcon} alt="" height={22} width={22} />
-                <span>Login</span>
+                <span>{t('common.login')}</span>
               </button>
             ) : (
               <ProfileMenu user={user} logout={logout} />

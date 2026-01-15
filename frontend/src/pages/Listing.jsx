@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import useProperties from "../hooks/useProperties";
 import { PuffLoader } from "react-spinners";
 import PropertyCard from "../components/PropertyCard";
@@ -7,17 +8,18 @@ import PropertiesMap from "../components/PropertiesMap";
 import { MdSell, MdHome, MdList, MdSearch } from "react-icons/md";
 import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 
-// Property categories
-const propertyCategories = [
-  { value: "residential", label: "Residential", icon: FaHome },
-  { value: "commercial", label: "Commercial", icon: FaBriefcase },
-  { value: "land", label: "Land", icon: FaLandmark },
-];
-
 const Listing = () => {
+  const { t } = useTranslation();
   const { data, isError, isLoading } = useProperties();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  // Property categories with translations
+  const propertyCategories = [
+    { value: "residential", label: t('categories.residential'), icon: FaHome },
+    { value: "commercial", label: t('categories.commercial'), icon: FaBriefcase },
+    { value: "land", label: t('categories.land'), icon: FaLandmark },
+  ];
 
   // Get filters from URL
   const typeFilter = searchParams.get("type");
@@ -45,7 +47,7 @@ const Listing = () => {
   if (isError) {
     return (
       <div className="h-screen flexCenter">
-        <span className="text-red-500">Error while fetching data</span>
+        <span className="text-red-500">{t('listing.errorFetching')}</span>
       </div>
     );
   }
@@ -141,11 +143,11 @@ const Listing = () => {
           <div className="mb-3">
             <h1 className="text-xl font-bold text-gray-900">
               {filter
-                ? `Properties in ${filter}`
-                : "All Properties"}
+                ? t('listing.propertiesIn', { location: filter })
+                : t('listing.allProperties')}
             </h1>
             <p className="text-sm text-gray-500">
-              {filteredData.length} properties found
+              {t('listing.propertiesFound', { count: filteredData.length })}
             </p>
           </div>
 
@@ -156,7 +158,7 @@ const Listing = () => {
               type="text"
               value={filter}
               onChange={(e) => handleFilterChange(e.target.value)}
-              placeholder="Search city, country, address..."
+              placeholder={t('listing.searchPlaceholder')}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
@@ -172,7 +174,7 @@ const Listing = () => {
               }`}
             >
               <MdList size={16} />
-              <span>All</span>
+              <span>{t('listing.all')}</span>
             </button>
             <button
               onClick={() => handleTypeFilter("sale")}
@@ -183,7 +185,7 @@ const Listing = () => {
               }`}
             >
               <MdSell size={16} />
-              <span>For Sale</span>
+              <span>{t('listing.forSale')}</span>
             </button>
             <button
               onClick={() => handleTypeFilter("rent")}
@@ -194,7 +196,7 @@ const Listing = () => {
               }`}
             >
               <MdHome size={16} />
-              <span>For Rent</span>
+              <span>{t('listing.forRent')}</span>
             </button>
           </div>
 
@@ -209,7 +211,7 @@ const Listing = () => {
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                <span>All Categories</span>
+                <span>{t('listing.allCategories')}</span>
               </button>
               {propertyCategories.map((cat) => {
                 const IconComponent = cat.icon;
@@ -250,10 +252,10 @@ const Listing = () => {
             <div className="flex flex-col items-center justify-center h-full text-center p-8">
               <div className="text-6xl mb-4">🏠</div>
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                No Properties Found
+                {t('listing.noProperties')}
               </h3>
               <p className="text-gray-500">
-                Try adjusting your search or filters
+                {t('listing.tryAdjusting')}
               </p>
             </div>
           )}

@@ -76,7 +76,9 @@ const ProfileMenu = ({ user, logout }) => {
           )}
 
           <Menu.Label>Application</Menu.Label>
-          <Menu.Item onClick={() => navigate("./favourites", { replace: true })}>
+          <Menu.Item
+            onClick={() => navigate("./favourites", { replace: true })}
+          >
             Favourites
           </Menu.Item>
           <Menu.Item onClick={() => navigate("./bookings", { replace: true })}>
@@ -96,7 +98,10 @@ const ProfileMenu = ({ user, logout }) => {
       </Menu>
 
       {/* Profile Modal */}
-      <ProfileModal opened={profileModalOpened} setOpened={setProfileModalOpened} />
+      <ProfileModal
+        opened={profileModalOpened}
+        setOpened={setProfileModalOpened}
+      />
     </>
   );
 };

@@ -19,8 +19,8 @@ const Layout = () => {
   const tokenRefreshIntervalRef = useRef(null);
   const hasRegisteredRef = useRef(false);
 
-  // Hide footer on listing page (but not on individual property pages)
-  const hideFooter = location.pathname === "/listing";
+  // Hide footer on listing page and admin panel (but not on individual property pages)
+  const hideFooter = location.pathname === "/listing" || location.pathname === "/admin";
 
   const { mutate } = useMutation({
     mutationKey: [user?.email],

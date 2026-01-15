@@ -5,7 +5,8 @@ import "./index.css";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import { Auth0Provider } from "@auth0/auth0-react";
-import { MantineProvider } from "@mantine/core"; // Import MantineProvider
+import { MantineProvider } from "@mantine/core";
+import "./i18n"; // Initialize i18n
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

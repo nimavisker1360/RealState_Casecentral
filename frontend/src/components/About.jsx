@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import CountUp from "react-countup";
 
 const About = () => {
-  // Define the statistics
+  const { t } = useTranslation();
+
+  // Define the statistics with translations
   const statistics = [
-    { label: "Happy clients", value: 12 },
-    { label: "Different cities", value: 3 },
-    { label: "Project completed", value: 45 },
+    { label: t("about.happyClients"), value: 12 },
+    { label: t("about.differentCities"), value: 3 },
+    { label: t("about.projectCompleted"), value: 45 },
   ];
 
   const [isVisible, setIsVisible] = useState(false);
@@ -75,7 +78,7 @@ const About = () => {
                 <span className="text-gray-300">|</span>
                 <span className="text-[#06a84e] font-semibold">3,102</span> sqft
                 <span className="text-gray-300">|</span>
-                <span>House for Sale</span>
+                <span>{t("about.houseForSale")}</span>
               </div>
               <div className="mt-3 h-2 bg-gray-100 rounded-full w-3/4"></div>
               <div className="mt-2 h-2 bg-gray-100 rounded-full w-1/2"></div>
@@ -107,10 +110,10 @@ const About = () => {
             </div>
             <div>
               <div className="text-xs sm:text-sm font-semibold text-gray-900">
-                Recommended homes
+                {t("about.recommendedHomes")}
               </div>
               <div className="text-[10px] sm:text-xs text-gray-500">
-                based on your monthly budget
+                {t("about.basedOnBudget")}
               </div>
             </div>
           </div>
@@ -145,10 +148,10 @@ const About = () => {
             </div>
             <div>
               <div className="text-xs sm:text-sm font-semibold text-gray-900">
-                Recommended homes
+                {t("about.recommendedHomes")}
               </div>
               <div className="text-[10px] sm:text-xs text-gray-500">
-                based on your preferred location
+                {t("about.basedOnLocation")}
               </div>
             </div>
           </div>
@@ -176,7 +179,7 @@ const About = () => {
             }`}
             style={{ animationDelay: "0.1s" }}
           >
-            Unveiling Our Journey
+            {t("about.unveilingJourney")}
           </span>
           <h2
             className={`h2 ${
@@ -184,7 +187,7 @@ const About = () => {
             }`}
             style={{ animationDelay: "0.2s" }}
           >
-            Our Commitment Crafting Extraordinary Real Estate Experiences
+            {t("about.commitmentTitle")}
           </h2>
           <p
             className={`py-5 ${
@@ -192,27 +195,7 @@ const About = () => {
             }`}
             style={{ animationDelay: "0.3s" }}
           >
-            As HB Gayrimenkul INTERNATIONAL, our mission is not merely to offer
-            real estate to our clients, but to turn the right investment
-            opportunities into profitable outcomes. We approach every portfolio
-            with professional analysis and aim to achieve maximum results in the
-            shortest possible time through accurate pricing and effective
-            marketing strategies. By providing transparent, reliable, and
-            high-performance consultancy services to both individual and
-            corporate investors, we build long-term business partnerships. Our
-            goal is to become a reference brand in the sector through our
-            transaction-focused approach, strong on-site organization, and
-            expert consultant team.The vision of HB Gayrimenkul INTERNATIONAL is
-            to be a leading brand that elevates real estate consultancy to a new
-            level in Türkiye and international markets, recognized for its high
-            sales performance and strong corporate structure. Through
-            technology-driven marketing methods, a continuously evolving team
-            structure, and a global investment network, we aim to be an
-            institution that offers investors the most accurate opportunities
-            and sets the direction of the sector. Our long-term objective is to
-            transform the HB Gayrimenkul INTERNATIONAL brand into a strong
-            international real estate network, not only in Türkiye but on a
-            global scale.
+            {t("about.missionText")}
           </p>
           {/* Statistics Container */}
           <div className="flex flex-wrap gap-4">

@@ -1,16 +1,38 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FOOTER_CONTACT_INFO, FOOTER_LINKS, SOCIALS } from "../constant/data";
+import { useTranslation } from "react-i18next";
+import { FOOTER_CONTACT_INFO, SOCIALS } from "../constant/data";
 import PropTypes from "prop-types";
 import logo from "../assets/logo.png";
 import { MdLocationOn, MdPhone, MdEmail } from "react-icons/md";
 
 const Footer = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Footer links with translations
+  const footerLinks = [
+    {
+      title: t('footer.learnMore'),
+      links: [
+        { key: "aboutUs", label: t('footer.aboutUs'), isAbout: true },
+        { key: "latestItems", label: t('footer.latestItems') },
+        { key: "hotOffers", label: t('footer.hotOffers') },
+        { key: "popularDesigns", label: t('footer.popularDesigns') },
+      ],
+    },
+    {
+      title: t('footer.ourCommunity'),
+      links: [
+        { key: "specialOffers", label: t('footer.specialOffers') },
+        { key: "customerReviews", label: t('footer.customerReviews') },
+      ],
+    },
+  ];
+
   // Handle navigation to sections
   const handleLinkClick = (link) => {
-    if (link === "About Us") {
+    if (link.isAbout) {
       if (location.pathname === "/") {
         // Already on home page, just scroll to about section
         const aboutSection = document.getElementById("about");
@@ -54,13 +76,10 @@ const Footer = () => {
         <div className="flex flex-col lg:flex-row justify-between gap-8 mb-10">
           <div className="max-w-lg">
             <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-              Explore real estate opportunities with us
+              {t('footer.exploreTitle')}
             </h3>
             <p className="text-white/60 text-sm leading-relaxed">
-              Through technology-driven marketing methods, a continuously
-              evolving team structure, and a global investment network, we aim
-              to be an institution that offers investors the most accurate
-              opportunities.
+              {t('footer.exploreDescription')}
             </p>
           </div>
 
@@ -92,32 +111,30 @@ const Footer = () => {
               />
             </Link>
             <p className="text-white/50 text-sm leading-relaxed">
-              The vision of HB Gayrimenkul INTERNATIONAL is to be a leading
-              brand that elevates real estate consultancy to a new level in
-              Türkiye and international markets.
+              {t('footer.visionText')}
             </p>
           </div>
 
           {/* Footer Links */}
-          {FOOTER_LINKS.map((col) => (
+          {footerLinks.map((col) => (
             <div key={col.title}>
               <h4 className="text-white font-semibold mb-5">{col.title}</h4>
               <ul className="flex flex-col gap-3">
                 {col.links.map((link) => (
-                  <li key={link}>
-                    {link === "About Us" ? (
+                  <li key={link.key}>
+                    {link.isAbout ? (
                       <button
                         onClick={() => handleLinkClick(link)}
                         className="text-white/50 text-sm hover:text-[#06a84e] transition-colors cursor-pointer"
                       >
-                        {link}
+                        {link.label}
                       </button>
                     ) : (
                       <Link
                         to="/"
                         className="text-white/50 text-sm hover:text-[#06a84e] transition-colors"
                       >
-                        {link}
+                        {link.label}
                       </Link>
                     )}
                   </li>
@@ -129,14 +146,19 @@ const Footer = () => {
           {/* Contact Info */}
           <div>
             <h4 className="text-white font-semibold mb-5">
-              {FOOTER_CONTACT_INFO.title}
+              {t('footer.contactUs')}
             </h4>
             <ul className="flex flex-col gap-4">
-              {FOOTER_CONTACT_INFO.links.map((link) => (
-                <li key={link.label} className="flex gap-3 items-start">
+              {FOOTER_CONTACT_INFO.links.map((link, index) => (
+                <li key={index} className="flex gap-3 items-start">
                   {getIcon(link.label)}
                   <div>
-                    <p className="text-white/40 text-xs mb-1">{link.label}</p>
+                    <p className="text-white/40 text-xs mb-1">
+                      {index === 0 ? t('contact.mainBranch') : 
+                       index === 1 ? t('contact.secondBranch') : 
+                       index === 2 ? t('contact.contactNumber') : 
+                       t('contact.emailAddress')}
+                    </p>
                     <p className="text-white text-sm">{link.value}</p>
                   </div>
                 </li>
@@ -149,9 +171,8 @@ const Footer = () => {
       {/* Copyright */}
       <div className="bg-[#151f2b] py-4 px-6 sm:px-10 rounded-b-3xl flex flex-col sm:flex-row justify-between items-center gap-2">
         <span className="text-white/50 text-sm">
-          © 2025 HB International Gayrimenkul
+          {t('footer.copyright')}
         </span>
-        <span className="text-white/50 text-sm">All rights reserved</span>
       </div>
     </footer>
   );

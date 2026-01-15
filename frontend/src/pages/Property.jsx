@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { useMutation, useQuery } from "react-query";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { PuffLoader } from "react-spinners";
 import Map from "../components/Map";
 import { getProperty, removeBooking } from "../utils/api";
@@ -108,12 +109,13 @@ import { CgRuler } from "react-icons/cg";
 import HeartBtn from "../components/HeartBtn";
 
 // Format date helper function
-const formatDate = (dateString, showFullDate = false) => {
+const formatDate = (dateString, showFullDate = false, locale = "en") => {
   if (!dateString) return null;
   const date = new Date(dateString);
+  const localeCode = locale === "tr" ? "tr-TR" : "en-US";
 
   if (showFullDate) {
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(localeCode, {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -126,13 +128,21 @@ const formatDate = (dateString, showFullDate = false) => {
   const diffTime = Math.abs(now - date);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  if (locale === "tr") {
+    if (diffDays === 0) return "Bugün";
+    if (diffDays === 1) return "Dün";
+    if (diffDays < 7) return `${diffDays} gün önce`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} hafta önce`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} ay önce`;
+  } else {
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  }
 
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(localeCode, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -140,6 +150,7 @@ const formatDate = (dateString, showFullDate = false) => {
 };
 
 const Property = () => {
+  const { t, i18n } = useTranslation();
   const { pathname } = useLocation();
   // console.log(pathname);
   const id = pathname.split("/").slice(-1)[0];
@@ -273,7 +284,7 @@ const Property = () => {
                   {index === 3 && propertyImages.length > 5 && (
                     <div className="absolute inset-0 bg-black/50 flexCenter">
                       <span className="text-white font-semibold text-lg">
-                        +{propertyImages.length - 5} more
+                        +{propertyImages.length - 5} {t('propertyDetails.more')}
                       </span>
                     </div>
                   )}
@@ -300,12 +311,12 @@ const Property = () => {
             className="flex items-center gap-2 text-gray-700 hover:text-secondary transition-colors"
           >
             <span className="font-medium text-secondary">
-              {propertyImages.length} Photos
+              {propertyImages.length} {t('propertyDetails.photos')}
             </span>
           </button>
           <div className="w-px h-5 bg-gray-300"></div>
           <button className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors">
-            <span>Virtual Tour</span>
+            <span>{t('propertyDetails.virtualTour')}</span>
           </button>
         </div>
       </div>
@@ -388,7 +399,7 @@ const Property = () => {
               ) : (
                 <MdSell size={16} />
               )}
-              {data?.propertyType === "rent" ? "For Rent" : "For Sale"}
+              {data?.propertyType === "rent" ? t('listing.forRent') : t('listing.forSale')}
             </span>
           </div>
           <div className="flexBetween">
@@ -432,21 +443,21 @@ const Property = () => {
             />
           </div>
 
-          {/* Property Details Table - Turkish Real Estate Style */}
+          {/* Property Details Table */}
           <div className="my-6 border border-gray-200 rounded-xl overflow-hidden bg-white">
             <table className="w-full text-sm">
               <tbody>
                 {data?.listingNo && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 w-1/3 border-r border-gray-200">İlan No</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 w-1/3 border-r border-gray-200">{t('propertyDetails.listingNo')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.listingNo}</td>
                   </tr>
                 )}
                 {data?.listingDate && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">İlan Tarihi</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.listingDate')}</td>
                     <td className="px-4 py-3 text-gray-900">
-                      {new Date(data.listingDate).toLocaleDateString("tr-TR", {
+                      {new Date(data.listingDate).toLocaleDateString(i18n.language === "tr" ? "tr-TR" : "en-US", {
                         day: "numeric",
                         month: "long",
                         year: "numeric",
@@ -455,104 +466,104 @@ const Property = () => {
                   </tr>
                 )}
                 <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Emlak Tipi</td>
-                  <td className="px-4 py-3 text-gray-900">{data?.propertyType === "sale" ? "Satılık" : "Kiralık"} Daire</td>
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.propertyType')}</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.propertyType === "sale" ? t('propertyDetails.saleApartment') : t('propertyDetails.rentApartment')}</td>
                 </tr>
                 {data?.area?.gross > 0 && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">m² (Brüt)</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.grossArea')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.area.gross}</td>
                   </tr>
                 )}
                 {data?.area?.net > 0 && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">m² (Net)</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.netArea')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.area.net}</td>
                   </tr>
                 )}
                 {data?.rooms && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Oda Sayısı</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.roomCount')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.rooms}</td>
                   </tr>
                 )}
                 {data?.buildingAge !== undefined && data?.buildingAge !== null && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Bina Yaşı</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.buildingAge')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.buildingAge}</td>
                   </tr>
                 )}
                 {data?.floor !== undefined && data?.floor !== null && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Bulunduğu Kat</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.floor')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.floor}</td>
                   </tr>
                 )}
                 {data?.totalFloors > 0 && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Kat Sayısı</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.totalFloors')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.totalFloors}</td>
                   </tr>
                 )}
                 {data?.heating && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Isıtma</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.heating')}</td>
                     <td className="px-4 py-3 text-gray-900 capitalize">{data.heating.replace(/-/g, " ")}</td>
                   </tr>
                 )}
                 {(data?.bathrooms > 0 || data?.facilities?.bathrooms > 0) && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Banyo Sayısı</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.bathroomCount')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.bathrooms || data.facilities?.bathrooms}</td>
                   </tr>
                 )}
                 {data?.kitchen && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Mutfak</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.kitchen')}</td>
                     <td className="px-4 py-3 text-gray-900 capitalize">{data.kitchen.replace(/-/g, " ")}</td>
                   </tr>
                 )}
                 <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Balkon</td>
-                  <td className="px-4 py-3 text-gray-900">{data?.balcony ? "Var" : "Yok"}</td>
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.balcony')}</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.balcony ? t('propertyDetails.available') : t('propertyDetails.notAvailable')}</td>
                 </tr>
                 <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Asansör</td>
-                  <td className="px-4 py-3 text-gray-900">{data?.elevator ? "Var" : "Yok"}</td>
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.elevator')}</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.elevator ? t('propertyDetails.available') : t('propertyDetails.notAvailable')}</td>
                 </tr>
                 {data?.parking && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Otopark</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.parking')}</td>
                     <td className="px-4 py-3 text-gray-900 capitalize">{data.parking.replace(/-/g, " ")}</td>
                   </tr>
                 )}
                 <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Eşyalı</td>
-                  <td className="px-4 py-3 text-gray-900">{data?.furnished ? "Evet" : "Hayır"}</td>
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.furnished')}</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.furnished ? t('propertyDetails.yes') : t('propertyDetails.no')}</td>
                 </tr>
                 {data?.usageStatus && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Kullanım Durumu</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.usageStatus')}</td>
                     <td className="px-4 py-3 text-gray-900 capitalize">{data.usageStatus.replace(/-/g, " ")}</td>
                   </tr>
                 )}
                 {data?.siteName && (
                   <tr className="border-b border-gray-200">
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Site Adı</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.siteName')}</td>
                     <td className="px-4 py-3 text-gray-900">{data.siteName}</td>
                   </tr>
                 )}
                 <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Aidat (TL)</td>
-                  <td className="px-4 py-3 text-gray-900">{data?.dues > 0 ? `₺${data.dues.toLocaleString()}` : "Belirtilmemiş"}</td>
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.dues')}</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.dues > 0 ? `₺${data.dues.toLocaleString()}` : t('propertyDetails.notSpecified')}</td>
                 </tr>
                 <tr className="border-b border-gray-200">
-                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Krediye Uygun</td>
-                  <td className="px-4 py-3 text-gray-900">{data?.mortgageEligible ? "Evet" : "Hayır"}</td>
+                  <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.mortgageEligible')}</td>
+                  <td className="px-4 py-3 text-gray-900">{data?.mortgageEligible ? t('propertyDetails.yes') : t('propertyDetails.no')}</td>
                 </tr>
                 {data?.deedStatus && (
                   <tr>
-                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">Tapu Durumu</td>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.deedStatus')}</td>
                     <td className="px-4 py-3 text-gray-900 capitalize">{data.deedStatus.replace(/-/g, " ")}</td>
                   </tr>
                 )}
@@ -567,9 +578,9 @@ const Property = () => {
                   <FaCalendarPlus className="text-secondary" />
                 </div>
                 <div>
-                  <p className="text-gray-30 text-xs">Listed on</p>
+                  <p className="text-gray-30 text-xs">{t('propertyDetails.listedOn')}</p>
                   <p className="font-medium text-tertiary">
-                    {formatDate(data.createdAt, true)}
+                    {formatDate(data.createdAt, true, i18n.language)}
                   </p>
                 </div>
               </div>
@@ -580,9 +591,9 @@ const Property = () => {
                   <FaRegClock className="text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-gray-30 text-xs">Last updated</p>
+                  <p className="text-gray-30 text-xs">{t('propertyDetails.lastUpdated')}</p>
                   <p className="font-medium text-tertiary">
-                    {formatDate(data.updatedAt, true)}
+                    {formatDate(data.updatedAt, true, i18n.language)}
                   </p>
                 </div>
               </div>
@@ -599,19 +610,19 @@ const Property = () => {
                     color="red"
                     disabled={cancelling}
                   >
-                    Cancel booking
+                    {t('propertyDetails.cancelBooking')}
                   </Button>
                   <Button
                     onClick={() => setContactModalOpen(true)}
                     className="flex-1 bg-secondary hover:bg-secondary/90"
                     leftSection={<FaEnvelope />}
                   >
-                    Send Message
+                    {t('propertyDetails.sendMessage')}
                   </Button>
                 </div>
                 <p className="text-green-600 medium-15 flex items-center gap-2">
                   <MdCheck className="text-lg" />
-                  You&apos;ve booked visit for{" "}
+                  {t('propertyDetails.bookedVisit')}{" "}
                   {bookings?.filter((booking) => booking?.id === id)[0].date}
                 </p>
               </>
@@ -623,12 +634,12 @@ const Property = () => {
                   }}
                   className="btn-secondary rounded-xl !px-5 !py-[7px] shadow-sm w-full"
                 >
-                  Book the visit
+                  {t('propertyDetails.bookVisit')}
                 </button>
                 <Button
                   onClick={() => {
                     if (!validateLogin()) return;
-                    toast.warning("⚠️ Please book this property first to send a message", {
+                    toast.warning(`⚠️ ${t('propertyDetails.bookFirstWarning')}`, {
                       position: "bottom-right",
                       autoClose: 5000,
                     });
@@ -639,7 +650,7 @@ const Property = () => {
                   leftSection={<FaEnvelope />}
                   disabled
                 >
-                  Send Message (Book First)
+                  {t('propertyDetails.sendMessageBookFirst')}
                 </Button>
               </>
             )}
@@ -660,7 +671,7 @@ const Property = () => {
                   <BsHouseDoor className="text-green-600" />
                 </div>
                 <h4 className="font-semibold text-tertiary">
-                  Interior Features
+                  {t('propertyDetails.interiorFeatures')}
                 </h4>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -706,7 +717,7 @@ const Property = () => {
                   <BsTree className="text-blue-600" />
                 </div>
                 <h4 className="font-semibold text-tertiary">
-                  Exterior Features
+                  {t('propertyDetails.exteriorFeatures')}
                 </h4>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -753,7 +764,7 @@ const Property = () => {
                 <div className="w-8 h-8 bg-secondary rounded-lg flexCenter">
                   <FaPhone className="text-white text-sm" />
                 </div>
-                <h4 className="font-semibold">Contact Property Consultant</h4>
+                <h4 className="font-semibold">{t('propertyDetails.contactConsultant')}</h4>
               </div>
 
               <div className="flex items-center gap-4 mb-5">
@@ -781,7 +792,7 @@ const Property = () => {
                     </div>
                     <span className="text-white/50 text-xs">•</span>
                     <span className="text-white/70 text-xs">
-                      {data.consultant.deals}+ deals
+                      {data.consultant.deals}+ {t('propertyDetails.deals')}
                     </span>
                   </div>
                 </div>
@@ -789,7 +800,7 @@ const Property = () => {
 
               {/* Consultant Specialty */}
               <div className="mb-4 p-3 bg-white/10 rounded-xl">
-                <p className="text-white/60 text-xs mb-1">Specialty</p>
+                <p className="text-white/60 text-xs mb-1">{t('propertyDetails.specialty')}</p>
                 <p className="text-sm">{data.consultant.specialty}</p>
               </div>
 
@@ -820,7 +831,7 @@ const Property = () => {
               {/* Languages */}
               {data.consultant.languages?.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-white/10">
-                  <p className="text-white/60 text-xs mb-2">Languages</p>
+                  <p className="text-white/60 text-xs mb-2">{t('propertyDetails.languages')}</p>
                   <div className="flex flex-wrap gap-2">
                     {data.consultant.languages.map((lang) => (
                       <span

@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import heroBg from "../assets/img1.png";
 import useProperties from "../hooks/useProperties";
 
 const Hero = () => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [filteredResults, setFilteredResults] = useState([]);
@@ -69,10 +71,10 @@ const Hero = () => {
       {/* Content */}
       <div className="relative max-w-[1100px] mx-auto h-full px-6 sm:px-10 flex flex-col items-center justify-center text-white text-center gap-4">
         <h1 className="text-[36px] sm:text-[48px] md:text-[64px] font-semibold leading-tight italic">
-          Discover Your New Home
+          {t("hero.title")}
         </h1>
         <p className="text-lg sm:text-xl text-white/90 italic">
-          Helping 100 million renters find their perfect fit.
+          {t("hero.subtitle")}
         </p>
 
         {/* Search Form */}
@@ -86,7 +88,7 @@ const Hero = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => query.trim() && setShowResults(true)}
-              placeholder="Search city, country or title..."
+              placeholder={t("hero.searchPlaceholder")}
               className="flex-1 rounded-full border-none py-3 px-5 text-sm text-gray-800 focus:outline-none"
             />
             <button
@@ -108,7 +110,9 @@ const Hero = () => {
           {showResults && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl overflow-hidden z-50 max-h-[400px] overflow-y-auto">
               {isLoading ? (
-                <div className="p-4 text-center text-gray-500">Loading...</div>
+                <div className="p-4 text-center text-gray-500">
+                  {t("common.loading")}
+                </div>
               ) : filteredResults.length > 0 ? (
                 <ul>
                   {filteredResults.map((property) => (

@@ -8,7 +8,6 @@ import {
   Group,
   ActionIcon,
   Divider,
-  Badge,
 } from "@mantine/core";
 import { useAuth0 } from "@auth0/auth0-react";
 import PropTypes from "prop-types";
@@ -61,7 +60,21 @@ const ProfileModal = ({ opened, setOpened }) => {
         croppingAspectRatio: 1,
         croppingShowDimensions: true,
         resourceType: "image",
-        clientAllowedFormats: ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg", "heic", "heif", "avif", "ico", "raw"],
+        clientAllowedFormats: [
+          "jpg",
+          "jpeg",
+          "png",
+          "gif",
+          "webp",
+          "bmp",
+          "tiff",
+          "svg",
+          "heic",
+          "heif",
+          "avif",
+          "ico",
+          "raw",
+        ],
         sources: ["local", "url", "camera"],
       },
       (err, result) => {
@@ -130,7 +143,12 @@ const ProfileModal = ({ opened, setOpened }) => {
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.image || !formData.phone || !formData.address) {
+    if (
+      !formData.name ||
+      !formData.image ||
+      !formData.phone ||
+      !formData.address
+    ) {
       toast.error("Lütfen tüm alanları doldurun", { position: "bottom-right" });
       return;
     }
@@ -154,7 +172,9 @@ const ProfileModal = ({ opened, setOpened }) => {
           ...prev,
           profile: result.user,
         }));
-        toast.success("Profile updated successfully!", { position: "bottom-right" });
+        toast.success("Profile updated successfully!", {
+          position: "bottom-right",
+        });
         setOpened(false);
       }
     } catch (error) {
@@ -164,7 +184,8 @@ const ProfileModal = ({ opened, setOpened }) => {
     }
   };
 
-  const isFormComplete = formData.name && formData.image && formData.phone && formData.address;
+  const isFormComplete =
+    formData.name && formData.image && formData.phone && formData.address;
 
   return (
     <Modal
@@ -278,9 +299,7 @@ const ProfileModal = ({ opened, setOpened }) => {
             placeholder="Adınızı ve soyadınızı girin"
             leftSection={<MdPerson size={18} />}
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
 
           <TextInput

@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import useConsultants from "../hooks/useConsultants";
 import { MdArrowForward, MdLocationOn } from "react-icons/md";
 import { Loader } from "@mantine/core";
 
 const ConsultantsSection = () => {
+  const { t } = useTranslation();
   const { data: consultants, isLoading, isError } = useConsultants();
   const navigate = useNavigate();
 
@@ -36,33 +38,33 @@ const ConsultantsSection = () => {
           <div className="mb-2">
             <span className="text-red-500 font-semibold">HB Gayrimenkul </span>
             <span className="text-gray-900 font-semibold">
-              INTERNATIONAL™ Selling
+              INTERNATIONAL™ {t("consultantsSection.selling")}
             </span>
           </div>
 
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-            Looking to sell? Find a trusted expert.
+            {t("consultantsSection.findExpert")}
           </h2>
 
           <p className="text-gray-600 mb-2">
-            We matched you with{" "}
-            <span className="font-semibold">{consultants.length} agents</span>{" "}
-            in{" "}
+            {t("consultantsSection.matchedAgents", {
+              count: consultants.length,
+            })}{" "}
             <span className="inline-flex items-center gap-1">
               <MdLocationOn className="text-gray-500" />
-              <span>Your Area</span>
+              <span>{t("consultantsSection.yourArea")}</span>
             </span>
           </p>
 
           <p className="text-gray-500 text-sm mb-8">
-            Enter your address to review and compare agents.
+            {t("consultantsSection.enterAddress")}
           </p>
 
           <button
             onClick={() => navigate("/consultants")}
             className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-full font-medium hover:bg-gray-800 transition-colors group"
           >
-            Compare agents
+            {t("consultantsSection.compareAgents")}
             <MdArrowForward className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
@@ -109,7 +111,9 @@ const ConsultantsSection = () => {
                     <p className="font-bold text-gray-900">
                       {consultant.experience}
                     </p>
-                    <p className="text-gray-400 text-xs">Experience</p>
+                    <p className="text-gray-400 text-xs">
+                      {t("consultants.experience")}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -141,7 +145,7 @@ const ConsultantsSection = () => {
 
                 {/* Text */}
                 <p className="font-bold text-gray-900 text-center text-lg">
-                  more agents
+                  {t("consultantsSection.moreAgents")}
                 </p>
               </div>
             )}
@@ -155,7 +159,7 @@ const ConsultantsSection = () => {
           {/* Left Content */}
           <div className="flex-1 p-8 lg:p-12 xl:p-16">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-10">
-              Our Listings Lease or Sell 14% Faster*
+              {t("consultantsSection.listingsFaster")}
             </h2>
 
             {/* Features Grid */}
@@ -178,9 +182,11 @@ const ConsultantsSection = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-white font-bold mb-2">Right Audience</h3>
+                <h3 className="text-white font-bold mb-2">
+                  {t("consultantsSection.rightAudience")}
+                </h3>
                 <p className="text-white/60 text-sm">
-                  96% of the Fortune 1000 search on our platform
+                  {t("consultantsSection.rightAudienceDesc")}
                 </p>
               </div>
 
@@ -202,9 +208,11 @@ const ConsultantsSection = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-white font-bold mb-2">Engage Prospects</h3>
+                <h3 className="text-white font-bold mb-2">
+                  {t("consultantsSection.engageProspects")}
+                </h3>
                 <p className="text-white/60 text-sm">
-                  Stunning photography, videos and drone shots
+                  {t("consultantsSection.engageProspectsDesc")}
                 </p>
               </div>
 
@@ -226,9 +234,11 @@ const ConsultantsSection = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-white font-bold mb-2">More Opportunity</h3>
+                <h3 className="text-white font-bold mb-2">
+                  {t("consultantsSection.moreOpportunity")}
+                </h3>
                 <p className="text-white/60 text-sm">
-                  Find a tenant or buyer, faster than before
+                  {t("consultantsSection.moreOpportunityDesc")}
                 </p>
               </div>
             </div>
@@ -238,13 +248,12 @@ const ConsultantsSection = () => {
               onClick={() => navigate("/listing")}
               className="bg-[#06a84e] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#058a41] transition-colors mb-8"
             >
-              Explore Marketing Solutions
+              {t("consultantsSection.exploreMarketing")}
             </button>
 
             {/* Disclaimer */}
             <p className="text-white/40 text-xs">
-              *Based on internal analysis comparing properties advertised on our
-              platform to properties listed only on other sites.
+              {t("consultantsSection.disclaimer")}
             </p>
           </div>
 
