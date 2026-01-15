@@ -1,86 +1,158 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FOOTER_CONTACT_INFO, FOOTER_LINKS, SOCIALS } from "../constant/data";
 import PropTypes from "prop-types";
 import logo from "../assets/logo.png";
+import { MdLocationOn, MdPhone, MdEmail } from "react-icons/md";
 
 const Footer = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Handle navigation to sections
+  const handleLinkClick = (link) => {
+    if (link === "About Us") {
+      if (location.pathname === "/") {
+        // Already on home page, just scroll to about section
+        const aboutSection = document.getElementById("about");
+        if (aboutSection) {
+          aboutSection.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        // Navigate to home page first, then scroll to about
+        navigate("/");
+        setTimeout(() => {
+          const aboutSection = document.getElementById("about");
+          if (aboutSection) {
+            aboutSection.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
+      }
+    }
+  };
+
+  // Helper to get icon based on label
+  const getIcon = (label) => {
+    if (label.toLowerCase().includes("address"))
+      return (
+        <MdLocationOn className="text-[#06a84e] text-xl flex-shrink-0 mt-0.5" />
+      );
+    if (
+      label.toLowerCase().includes("number") ||
+      label.toLowerCase().includes("phone")
+    )
+      return <MdPhone className="text-[#06a84e] text-xl flex-shrink-0" />;
+    if (label.toLowerCase().includes("email"))
+      return <MdEmail className="text-[#06a84e] text-xl flex-shrink-0" />;
+    return null;
+  };
+
   return (
     <footer className="max-padd-container mb-4 overflow-x-hidden">
-      <div className="bg-primary rounded-tr-3xl rounded-tl-3xl pt-8 sm:pt-12 xl:pt-20 pb-8 px-4 sm:px-6 lg:px-12">
-        <h3 className="h3 text-xl sm:text-2xl md:text-3xl">Explore real estate opportunities with us?</h3>
-        <p className="text-sm sm:text-base">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Magni,
-          ducimus iste?
-        </p>
-        <hr className="my-6 sm:my-8 bg-slate-900/30 h-[2px]" />
-        {/* container */}
-        <div
-          className="flex justify-between flex-wrap gap-6 sm:gap-2"
-        >
-          <div className="max-w-full sm:max-w-sm w-full sm:w-auto">
-            <Link to={"/"} className="flex items-center gap-x-2">
-              <img src={logo} alt="HB International" className="h-10 sm:h-12 object-contain" />
-            </Link>
-            <p className="py-4 text-sm sm:text-base">
-              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nulla
-              recusandae voluptatibus excepturi nostrum cum delectus repellat?
+      {/* Main Footer */}
+      <div className="bg-[#1e2a38] rounded-tr-3xl rounded-tl-3xl pt-10 sm:pt-14 xl:pt-16 pb-10 px-6 sm:px-10 lg:px-16">
+        {/* Top Section */}
+        <div className="flex flex-col lg:flex-row justify-between gap-8 mb-10">
+          <div className="max-w-lg">
+            <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+              Explore real estate opportunities with us
+            </h3>
+            <p className="text-white/60 text-sm leading-relaxed">
+              Through technology-driven marketing methods, a continuously
+              evolving team structure, and a global investment network, we aim
+              to be an institution that offers investors the most accurate
+              opportunities.
             </p>
-            <div className="flex items-center pl-3 sm:pl-6 h-[3rem] sm:h-[3.3rem] bg-white w-full max-w-full sm:max-w-[366px] rounded-full ring-1 ring-slate-500/5">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="bg-transparent border-none outline-none flex-1 min-w-0 text-sm sm:text-base"
-              />
-              <button className="btn-secondary rounded-full relative right-[0.2rem] sm:right-[0.33rem] text-xs sm:text-base !px-3 sm:!px-7 whitespace-nowrap">
-                Subscribe
-              </button>
-            </div>
           </div>
-          <div className="flex justify-between flex-wrap gap-8">
-            {FOOTER_LINKS.map((col) => (
-              <FooterColumn key={col.title} title={col.title}>
-                <ul className="flex flex-col gap-4 regular-14 text-gray-20">
-                  {col.links.map((link) => (
-                    <Link to="/" key={link}>
-                      {link}
-                    </Link>
-                  ))}
-                </ul>
-              </FooterColumn>
+
+          {/* Social Icons */}
+          <div className="flex items-start gap-4">
+            {SOCIALS.links.map((link) => (
+              <Link
+                to="/"
+                key={link.id}
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-[#06a84e] transition-colors"
+              >
+                {link.icon}
+              </Link>
             ))}
-            <div className="flex flex-col gap-5">
-              <FooterColumn title={FOOTER_CONTACT_INFO.title}>
-                {FOOTER_CONTACT_INFO.links.map((link) => (
-                  <Link
-                    to="/"
-                    key={link.label}
-                    className="flex gap-4 md:flex-col lg:flex-row"
-                  >
-                    <p>{link.label}:</p>
-                    <p className="bold-15">{link.value}</p>
-                  </Link>
+          </div>
+        </div>
+
+        <hr className="border-white/10 mb-10" />
+
+        {/* Bottom Section - Grid Layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* Logo & Description */}
+          <div>
+            <Link to={"/"} className="inline-block mb-4">
+              <img
+                src={logo}
+                alt="HB International"
+                className="h-12 object-contain brightness-0 invert"
+              />
+            </Link>
+            <p className="text-white/50 text-sm leading-relaxed">
+              The vision of HB Gayrimenkul INTERNATIONAL is to be a leading
+              brand that elevates real estate consultancy to a new level in
+              Türkiye and international markets.
+            </p>
+          </div>
+
+          {/* Footer Links */}
+          {FOOTER_LINKS.map((col) => (
+            <div key={col.title}>
+              <h4 className="text-white font-semibold mb-5">{col.title}</h4>
+              <ul className="flex flex-col gap-3">
+                {col.links.map((link) => (
+                  <li key={link}>
+                    {link === "About Us" ? (
+                      <button
+                        onClick={() => handleLinkClick(link)}
+                        className="text-white/50 text-sm hover:text-[#06a84e] transition-colors cursor-pointer"
+                      >
+                        {link}
+                      </button>
+                    ) : (
+                      <Link
+                        to="/"
+                        className="text-white/50 text-sm hover:text-[#06a84e] transition-colors"
+                      >
+                        {link}
+                      </Link>
+                    )}
+                  </li>
                 ))}
-              </FooterColumn>
+              </ul>
             </div>
-            <div className="flex ">
-              <FooterColumn title={SOCIALS.title}>
-                <ul className="flex gap-4">
-                  {SOCIALS.links.map((link) => (
-                    <Link to="/" key={link.id} className="text-xl">
-                      {link.icon}
-                    </Link>
-                  ))}
-                </ul>
-              </FooterColumn>
-            </div>
+          ))}
+
+          {/* Contact Info */}
+          <div>
+            <h4 className="text-white font-semibold mb-5">
+              {FOOTER_CONTACT_INFO.title}
+            </h4>
+            <ul className="flex flex-col gap-4">
+              {FOOTER_CONTACT_INFO.links.map((link) => (
+                <li key={link.label} className="flex gap-3 items-start">
+                  {getIcon(link.label)}
+                  <div>
+                    <p className="text-white/40 text-xs mb-1">{link.label}</p>
+                    <p className="text-white text-sm">{link.value}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
-      {/* copyrights */}
-      <p className="text-white bg-tertiary medium-14 py-2 px-4 sm:px-8 rounded-b-3xl flexBetween text-xs sm:text-sm">
-        <span>2024 HB International Gayrimenkul</span>
-        <span>All rights reserved</span>
-      </p>
+
+      {/* Copyright */}
+      <div className="bg-[#151f2b] py-4 px-6 sm:px-10 rounded-b-3xl flex flex-col sm:flex-row justify-between items-center gap-2">
+        <span className="text-white/50 text-sm">
+          © 2025 HB International Gayrimenkul
+        </span>
+        <span className="text-white/50 text-sm">All rights reserved</span>
+      </div>
     </footer>
   );
 };
@@ -90,7 +162,7 @@ export default Footer;
 const FooterColumn = ({ title, children }) => {
   return (
     <div className="flex flex-col gap-5">
-      <h4 className="bold-18 whitespace-nowrap">{title}</h4>
+      <h4 className="font-semibold text-white whitespace-nowrap">{title}</h4>
       {children}
     </div>
   );

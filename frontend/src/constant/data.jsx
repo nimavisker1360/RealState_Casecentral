@@ -13,7 +13,6 @@ import {
   FaFacebook,
   FaInstagram,
   FaTwitter,
-  FaLinkedin,
   FaYoutube,
 } from "react-icons/fa6";
 
@@ -55,7 +54,7 @@ export const PROPERTIES = [
     title: "Sunrise Sanctuary Solace Retreat",
     image: img3,
     category: "House",
-    address: "Sakura Street 15",
+    address: "Koza Mh.1638 SK.Aşelya 5F Dükkan NoŞ32 Esenyurt İstanbul",
     country: "Japan",
     city: "Kyoto",
     area: 420,
@@ -200,14 +199,13 @@ export const FOOTER_LINKS = [
       "Latest Items",
       "Hot Offers",
       "Popular descriptionigns",
-      "FAQ",
-      "Privacy Policy",
+     
+     
     ],
   },
   {
     title: "Our Community",
     links: [
-      "Terms and Conditions",
       "Special Offers",
       "Customer Reviews",
     ],
@@ -217,8 +215,9 @@ export const FOOTER_LINKS = [
 export const FOOTER_CONTACT_INFO = {
   title: "Contact Us",
   links: [
-    { label: "Contact Number", value: "123-456-7890" },
-    { label: "Email Address", value: "info@casacentral.com" },
+    { label: "Address", value: "Koza Mh. 1638 SK. Aşelya 5F Dükkan No:32, Esenyurt, İstanbul" },
+    { label: "Contact Number", value: "+90 212 830 81 30" },
+    { label: "Email Address", value: "hbrealstate2019@gmail.com" },
   ],
 };
 
@@ -229,6 +228,6 @@ export const SOCIALS = {
     { icon: <FaInstagram />, id: "instagram" },
     { icon: <FaTwitter />, id: "twitter" },
     { icon: <FaYoutube />, id: "youtube" },
-    { icon: <FaLinkedin />, id: "linkedin" },
+   
   ],
 };

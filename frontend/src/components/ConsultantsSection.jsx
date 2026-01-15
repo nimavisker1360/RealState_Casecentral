@@ -133,28 +133,79 @@ const ConsultantsSection = () => {
         </div>
       </div>
 
-      {/* Discover Section */}
-      <div className="mt-16 pt-10 border-t border-gray-100">
-        <h3 className="text-xl font-semibold text-gray-900 mb-6">Discover how we can help</h3>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => navigate("/listing?type=sale")}
-            className="px-6 py-2.5 bg-white border border-gray-300 rounded-full text-gray-700 font-medium hover:border-gray-900 hover:bg-gray-50 transition-colors"
-          >
-            Buying
-          </button>
-          <button
-            onClick={() => navigate("/listing?type=rent")}
-            className="px-6 py-2.5 bg-white border border-gray-300 rounded-full text-gray-700 font-medium hover:border-gray-900 hover:bg-gray-50 transition-colors"
-          >
-            Renting
-          </button>
-          <button
-            onClick={() => navigate("/consultants")}
-            className="px-6 py-2.5 bg-white border border-gray-300 rounded-full text-gray-700 font-medium hover:border-gray-900 hover:bg-gray-50 transition-colors"
-          >
-            Selling
-          </button>
+      {/* Listings Lease or Sell Faster Section */}
+      <div className="mt-16 relative overflow-hidden rounded-2xl bg-[#1e2a38]">
+        <div className="flex flex-col lg:flex-row">
+          {/* Left Content */}
+          <div className="flex-1 p-8 lg:p-12 xl:p-16">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-10">
+              Our Listings Lease or Sell 14% Faster*
+            </h2>
+
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
+              {/* Right Audience */}
+              <div>
+                <div className="w-10 h-10 mb-4 text-white/80">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-10 h-10">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-white font-bold mb-2">Right Audience</h3>
+                <p className="text-white/60 text-sm">
+                  96% of the Fortune 1000 search on our platform
+                </p>
+              </div>
+
+              {/* Engage Prospects */}
+              <div>
+                <div className="w-10 h-10 mb-4 text-white/80">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-10 h-10">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h3 className="text-white font-bold mb-2">Engage Prospects</h3>
+                <p className="text-white/60 text-sm">
+                  Stunning photography, videos and drone shots
+                </p>
+              </div>
+
+              {/* More Opportunity */}
+              <div>
+                <div className="w-10 h-10 mb-4 text-white/80">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-10 h-10">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <h3 className="text-white font-bold mb-2">More Opportunity</h3>
+                <p className="text-white/60 text-sm">
+                  Find a tenant or buyer, faster than before
+                </p>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <button
+              onClick={() => navigate("/listing")}
+              className="bg-[#06a84e] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#058a41] transition-colors mb-8"
+            >
+              Explore Marketing Solutions
+            </button>
+
+            {/* Disclaimer */}
+            <p className="text-white/40 text-xs">
+              *Based on internal analysis comparing properties advertised on our platform to properties listed only on other sites.
+            </p>
+          </div>
+
+          {/* Right Image */}
+          <div className="lg:w-[45%] h-[300px] lg:h-auto">
+            <img
+              src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60"
+              alt="Modern building at night"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </div>
     </section>
