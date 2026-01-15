@@ -390,6 +390,26 @@ export const toggleConsultantAvailability = async (id, token) => {
   }
 };
 
+// Reorder consultants (admin)
+export const reorderConsultants = async (orderedIds, token) => {
+  try {
+    const response = await api.put(
+      `/consultant/reorder`,
+      { orderedIds },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error reordering consultants:", error);
+    toast.error("Danışman sırası değiştirilirken bir hata oluştu");
+    throw error;
+  }
+};
+
 // ============ USER PROFILE API FUNCTIONS ============
 
 // Get user profile

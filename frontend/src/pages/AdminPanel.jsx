@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useCallback } from "react";
+import { useState, useContext, useEffect, useCallback, useMemo } from "react";
 import {
   Container,
   Stepper,
@@ -42,6 +42,7 @@ import {
   removeBooking,
   getAllContactMessages,
   deleteContactMessage,
+  reorderConsultants,
 } from "../utils/api";
 import { toast } from "react-toastify";
 import {
@@ -61,9 +62,62 @@ import {
   MdOutlineCloudUpload,
   MdClose,
   MdMessage,
+  MdDragIndicator,
 } from "react-icons/md";
 import { FaWhatsapp, FaStar } from "react-icons/fa6";
 import { useRef } from "react";
+
+// DnD Kit imports
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+// Sortable Table Row Component
+const SortableTableRow = ({ consultant, children }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: consultant.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.8 : 1,
+    backgroundColor: isDragging ? "#f0f0f0" : undefined,
+  };
+
+  return (
+    <Table.Tr ref={setNodeRef} style={style}>
+      <Table.Td>
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+        >
+          <MdDragIndicator size={20} className="text-gray-400" />
+        </div>
+      </Table.Td>
+      {children}
+    </Table.Tr>
+  );
+};
 
 const AdminPanel = () => {
   const [active, setActive] = useState(0);
@@ -107,6 +161,56 @@ const AdminPanel = () => {
   const [consultantToDelete, setConsultantToDelete] = useState(null);
   const [consultantLoading, setConsultantLoading] = useState(false);
 
+  // Ordered consultants state for drag-and-drop
+  const [orderedConsultants, setOrderedConsultants] = useState([]);
+
+  // Update ordered consultants when consultants data changes
+  useEffect(() => {
+    if (consultants && consultants.length > 0) {
+      setOrderedConsultants(consultants);
+    }
+  }, [consultants]);
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Consultant IDs for sortable context
+  const consultantIds = useMemo(
+    () => orderedConsultants.map((c) => c.id),
+    [orderedConsultants]
+  );
+
+  // Handle drag end for consultants reordering
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setOrderedConsultants((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+
+        // Save the new order to backend
+        const orderedIds = newItems.map((c) => c.id);
+        reorderConsultants(orderedIds, token)
+          .then(() => {
+            toast.success("Danışman sırası güncellendi");
+          })
+          .catch((error) => {
+            console.error("Error saving order:", error);
+            // Revert on error
+            setOrderedConsultants(items);
+          });
+
+        return newItems;
+      });
+    }
+  };
 
   // Contact Messages state
   const [contactMessages, setContactMessages] = useState([]);
@@ -884,116 +988,131 @@ const AdminPanel = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table striped highlightOnHover>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Consultant</Table.Th>
-                      <Table.Th>Uzmanlık</Table.Th>
-                      <Table.Th>Contact</Table.Th>
-                      <Table.Th>İstatistik</Table.Th>
-                      <Table.Th>Durum</Table.Th>
-                      <Table.Th>İşlemler</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {consultants.map((consultant) => (
-                      <Table.Tr key={consultant.id}>
-                        <Table.Td>
-                          <div className="flex items-center gap-3">
-                            <Avatar
-                              src={consultant.image}
-                              alt={consultant.name}
-                              radius="xl"
-                              size="lg"
-                            />
-                            <div>
-                              <Text size="sm" fw={600}>
-                                {consultant.name}
-                              </Text>
-                              <Text size="xs" color="dimmed">
-                                {consultant.title}
-                              </Text>
-                              <Text size="xs" color="dimmed">
-                                {consultant.experience} deneyim
-                              </Text>
-                            </div>
-                          </div>
-                        </Table.Td>
-                        <Table.Td>
-                          <div>
-                            <Text size="sm" fw={500}>
-                              {consultant.specialty}
-                            </Text>
-                            <Text size="xs" color="dimmed">
-                              {consultant.languages?.join(", ")}
-                            </Text>
-                          </div>
-                        </Table.Td>
-                        <Table.Td>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1">
-                              <MdPhone size={14} className="text-gray-400" />
-                              <Text size="xs">{consultant.phone}</Text>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MdEmail size={14} className="text-gray-400" />
-                              <Text size="xs">{consultant.email}</Text>
-                            </div>
-                          </div>
-                        </Table.Td>
-                        <Table.Td>
-                          <div className="flex items-center gap-3">
-                            <div className="text-center">
-                              <div className="flex items-center gap-1">
-                                <FaStar className="text-amber-500 text-xs" />
-                                <Text size="sm" fw={600}>
-                                  {consultant.rating}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <Table striped highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th style={{ width: 40 }}></Table.Th>
+                        <Table.Th>Consultant</Table.Th>
+                        <Table.Th>Uzmanlık</Table.Th>
+                        <Table.Th>Contact</Table.Th>
+                        <Table.Th>İstatistik</Table.Th>
+                        <Table.Th>Durum</Table.Th>
+                        <Table.Th>İşlemler</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      <SortableContext
+                        items={consultantIds}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {orderedConsultants.map((consultant) => (
+                          <SortableTableRow
+                            key={consultant.id}
+                            consultant={consultant}
+                          >
+                            <Table.Td>
+                              <div className="flex items-center gap-3">
+                                <Avatar
+                                  src={consultant.image}
+                                  alt={consultant.name}
+                                  radius="xl"
+                                  size="lg"
+                                />
+                                <div>
+                                  <Text size="sm" fw={600}>
+                                    {consultant.name}
+                                  </Text>
+                                  <Text size="xs" color="dimmed">
+                                    {consultant.title}
+                                  </Text>
+                                  <Text size="xs" color="dimmed">
+                                    {consultant.experience} deneyim
+                                  </Text>
+                                </div>
+                              </div>
+                            </Table.Td>
+                            <Table.Td>
+                              <div>
+                                <Text size="sm" fw={500}>
+                                  {consultant.specialty}
+                                </Text>
+                                <Text size="xs" color="dimmed">
+                                  {consultant.languages?.join(", ")}
                                 </Text>
                               </div>
-                              <Text size="xs" color="dimmed">
-                                {consultant.reviews} yorum
-                              </Text>
-                            </div>
-                          </div>
-                        </Table.Td>
-                        <Table.Td>
-                          <Badge
-                            color={consultant.available ? "green" : "gray"}
-                            variant="light"
-                            className="cursor-pointer"
-                            onClick={() => handleToggleAvailability(consultant)}
-                          >
-                            {consultant.available ? "Müsait" : "Meşgul"}
-                          </Badge>
-                        </Table.Td>
-                        <Table.Td>
-                          <Group gap="xs">
-                            <ActionIcon
-                              variant="light"
-                              color="blue"
-                              size="lg"
-                              onClick={() => handleEditConsultant(consultant)}
-                              title="Düzenle"
-                            >
-                              <MdEdit size={18} />
-                            </ActionIcon>
-                            <ActionIcon
-                              variant="light"
-                              color="red"
-                              size="lg"
-                              onClick={() =>
-                                handleDeleteConsultantClick(consultant)
-                              }
-                              title="Sil"
-                            >
-                              <MdDelete size={18} />
-                            </ActionIcon>
-                          </Group>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
+                            </Table.Td>
+                            <Table.Td>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-1">
+                                  <MdPhone size={14} className="text-gray-400" />
+                                  <Text size="xs">{consultant.phone}</Text>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MdEmail size={14} className="text-gray-400" />
+                                  <Text size="xs">{consultant.email}</Text>
+                                </div>
+                              </div>
+                            </Table.Td>
+                            <Table.Td>
+                              <div className="flex items-center gap-3">
+                                <div className="text-center">
+                                  <div className="flex items-center gap-1">
+                                    <FaStar className="text-amber-500 text-xs" />
+                                    <Text size="sm" fw={600}>
+                                      {consultant.rating}
+                                    </Text>
+                                  </div>
+                                  <Text size="xs" color="dimmed">
+                                    {consultant.reviews} yorum
+                                  </Text>
+                                </div>
+                              </div>
+                            </Table.Td>
+                            <Table.Td>
+                              <Badge
+                                color={consultant.available ? "green" : "gray"}
+                                variant="light"
+                                className="cursor-pointer"
+                                onClick={() => handleToggleAvailability(consultant)}
+                              >
+                                {consultant.available ? "Müsait" : "Meşgul"}
+                              </Badge>
+                            </Table.Td>
+                            <Table.Td>
+                              <Group gap="xs">
+                                <ActionIcon
+                                  variant="light"
+                                  color="blue"
+                                  size="lg"
+                                  onClick={() => handleEditConsultant(consultant)}
+                                  title="Düzenle"
+                                >
+                                  <MdEdit size={18} />
+                                </ActionIcon>
+                                <ActionIcon
+                                  variant="light"
+                                  color="red"
+                                  size="lg"
+                                  onClick={() =>
+                                    handleDeleteConsultantClick(consultant)
+                                  }
+                                  title="Sil"
+                                >
+                                  <MdDelete size={18} />
+                                </ActionIcon>
+                              </Group>
+                            </Table.Td>
+                          </SortableTableRow>
+                        ))}
+                      </SortableContext>
+                    </Table.Tbody>
+                  </Table>
+                </DndContext>
               </div>
             )}
 

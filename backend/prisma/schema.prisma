@@ -90,6 +90,7 @@ model Consultant {
     image String
     bio String
     available Boolean @default(true)
+    order Int @default(0)
     
     residencies Residency[]
 

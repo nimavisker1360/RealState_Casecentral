@@ -5,7 +5,7 @@ import { prisma } from "../config/prismaConfig.js";
 export const getAllConsultants = asyncHandler(async (req, res) => {
   try {
     const consultants = await prisma.consultant.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
     });
     res.status(200).json(consultants);
   } catch (err) {
@@ -160,6 +160,34 @@ export const toggleAvailability = asyncHandler(async (req, res) => {
       consultant: updatedConsultant,
     });
   } catch (err) {
+    throw new Error(err.message);
+  }
+});
+
+// Reorder consultants (admin only)
+export const reorderConsultants = asyncHandler(async (req, res) => {
+  const { orderedIds } = req.body;
+
+  if (!orderedIds || !Array.isArray(orderedIds)) {
+    return res.status(400).json({ message: "orderedIds array is required" });
+  }
+
+  try {
+    // Update order for each consultant
+    const updates = orderedIds.map((id, index) =>
+      prisma.consultant.update({
+        where: { id },
+        data: { order: index },
+      })
+    );
+
+    await Promise.all(updates);
+
+    res.status(200).json({
+      message: "Consultants reordered successfully",
+    });
+  } catch (err) {
+    console.error("Error reordering consultants:", err);
     throw new Error(err.message);
   }
 });
