@@ -808,6 +808,13 @@ const Property = () => {
                   <FaWhatsapp />
                   WhatsApp
                 </a>
+                <button
+                  onClick={() => setContactModalOpen(true)}
+                  className="flexCenter gap-2 bg-white text-tertiary py-3 rounded-xl hover:bg-gray-100 transition-colors font-medium text-sm w-full"
+                >
+                  <FaEnvelope className="text-secondary" />
+                  Email
+                </button>
               </div>
 
               {/* Languages */}
