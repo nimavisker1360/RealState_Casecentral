@@ -520,3 +520,143 @@ export const markMessageAsRead = async (id, token) => {
     throw error;
   }
 };
+
+// ============ BLOG API FUNCTIONS ============
+
+// Get all blogs (public)
+export const getAllBlogs = async () => {
+  try {
+    const response = await api.get("/blog/all", {
+      timeout: 10 * 1000,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    toast.error("Error loading blogs");
+    throw error;
+  }
+};
+
+// Get single blog
+export const getBlog = async (id) => {
+  try {
+    const response = await api.get(`/blog/${id}`, {
+      timeout: 10 * 1000,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching blog:", error);
+    throw error;
+  }
+};
+
+// Get all blogs for admin (including unpublished)
+export const getAllBlogsAdmin = async (token) => {
+  try {
+    const response = await api.get("/blog/admin/all", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    return { totalBlogs: 0, blogs: [] };
+  }
+};
+
+// Create blog (admin)
+export const createBlog = async (data, token) => {
+  try {
+    const response = await api.post(
+      `/blog/create`,
+      { data },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating blog:", error);
+    toast.error("Error creating blog");
+    throw error;
+  }
+};
+
+// Update blog (admin)
+export const updateBlog = async (id, data, token) => {
+  try {
+    const response = await api.put(
+      `/blog/update/${id}`,
+      { data },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating blog:", error);
+    toast.error("Error updating blog");
+    throw error;
+  }
+};
+
+// Delete blog (admin)
+export const deleteBlog = async (id, token) => {
+  try {
+    const response = await api.delete(`/blog/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    toast.error("Error deleting blog");
+    throw error;
+  }
+};
+
+// Toggle blog publish status (admin)
+export const toggleBlogPublish = async (id, token) => {
+  try {
+    const response = await api.patch(
+      `/blog/toggle/${id}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling blog status:", error);
+    toast.error("Error updating blog status");
+    throw error;
+  }
+};
+
+// Reorder blogs (admin)
+export const reorderBlogs = async (orderedIds, token) => {
+  try {
+    const response = await api.put(
+      `/blog/reorder`,
+      { orderedIds },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error reordering blogs:", error);
+    toast.error("Error reordering blogs");
+    throw error;
+  }
+};

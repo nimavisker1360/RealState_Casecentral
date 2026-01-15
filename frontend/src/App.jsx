@@ -5,6 +5,7 @@ import AddProperty from "./pages/AddProperty";
 import AdminPanel from "./pages/AdminPanel";
 import Consultants from "./pages/Consultants";
 import TodayProperties from "./pages/TodayProperties";
+import BlogPost from "./pages/BlogPost";
 import { QueryClient, QueryClientProvider } from "react-query"
 import { ToastContainer } from "react-toastify";
 import { ReactQueryDevtools } from 'react-query/devtools';
@@ -55,6 +56,7 @@ export default function App() {
                   <Route path="/favourites" element={<Favourites />} />
                   <Route path="/consultants" element={<Consultants />} />
                   <Route path="/today" element={<TodayProperties />} />
+                  <Route path="/blog/:blogId" element={<BlogPost />} />
                 </Route>
               </Routes>
             </Suspense>

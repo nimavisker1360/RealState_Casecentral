@@ -111,3 +111,17 @@ model ContactMessage {
     
     createdAt DateTime @default(now())
 }
+
+model Blog {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    title String
+    category String
+    content String
+    summary String?
+    image String?
+    published Boolean @default(true)
+    order Int @default(0)
+    
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

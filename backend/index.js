@@ -7,6 +7,7 @@ import { userRoute } from "./routes/userRoute.js";
 import { residencyRoute } from "./routes/residencyRoute.js";
 import { consultantRoute } from "./routes/consultantRoute.js";
 import { emailRoute } from "./routes/emailRoute.js";
+import { blogRoute } from "./routes/blogRoute.js";
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ app.use("/api/user", userRoute);
 app.use("/api/residency", residencyRoute);
 app.use("/api/consultant", consultantRoute);
 app.use("/api/email", emailRoute);
+app.use("/api/blog", blogRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

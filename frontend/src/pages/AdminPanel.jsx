@@ -43,6 +43,11 @@ import {
   getAllContactMessages,
   deleteContactMessage,
   reorderConsultants,
+  getAllBlogsAdmin,
+  createBlog,
+  updateBlog,
+  deleteBlog,
+  toggleBlogPublish,
 } from "../utils/api";
 import { toast } from "react-toastify";
 import {
@@ -63,6 +68,8 @@ import {
   MdClose,
   MdMessage,
   MdDragIndicator,
+  MdArticle,
+  MdAdd,
 } from "react-icons/md";
 import { FaWhatsapp, FaStar } from "react-icons/fa6";
 import { useRef } from "react";
@@ -217,6 +224,26 @@ const AdminPanel = () => {
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [totalMessages, setTotalMessages] = useState(0);
 
+  // Blogs state
+  const [blogs, setBlogs] = useState([]);
+  const [blogsLoading, setBlogsLoading] = useState(true);
+  const [totalBlogs, setTotalBlogs] = useState(0);
+  const [blogModalOpened, setBlogModalOpened] = useState(false);
+  const [editBlogModalOpened, setEditBlogModalOpened] = useState(false);
+  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [deleteBlogModalOpened, setDeleteBlogModalOpened] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState(null);
+  const [blogLoading, setBlogLoading] = useState(false);
+
+  const [blogForm, setBlogForm] = useState({
+    title: "",
+    category: "",
+    content: "",
+    summary: "",
+    image: "",
+    published: true,
+  });
+
   const [consultantForm, setConsultantForm] = useState({
     name: "",
     title: "",
@@ -290,6 +317,48 @@ const AdminPanel = () => {
     setConsultantForm((prev) => ({ ...prev, image: "" }));
   };
 
+  // Cloudinary widget for blog image upload
+  const blogWidgetRef = useRef();
+  const [blogImageUploading, setBlogImageUploading] = useState(false);
+
+  useEffect(() => {
+    blogWidgetRef.current = cloudinaryRef.current?.createUploadWidget(
+      {
+        cloudName: "ducct0j1f",
+        uploadPreset: "auvy3sl6",
+        maxFiles: 1,
+        multiple: false,
+        cropping: true,
+        croppingAspectRatio: 16 / 9,
+        croppingShowDimensions: true,
+        resourceType: "image",
+        clientAllowedFormats: ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg", "heic", "heif", "avif", "ico", "raw"],
+        sources: ["local", "url", "camera"],
+      },
+      (err, result) => {
+        if (result.event === "success") {
+          setBlogForm((prev) => ({
+            ...prev,
+            image: result.info.secure_url,
+          }));
+          setBlogImageUploading(false);
+        }
+        if (result.event === "close") {
+          setBlogImageUploading(false);
+        }
+      }
+    );
+  }, []);
+
+  const openBlogImageUpload = () => {
+    setBlogImageUploading(true);
+    blogWidgetRef.current?.open();
+  };
+
+  const removeBlogImage = () => {
+    setBlogForm((prev) => ({ ...prev, image: "" }));
+  };
+
   const [propertyDetails, setPropertyDetails] = useState({
     title: "",
     description: "",
@@ -352,6 +421,131 @@ const AdminPanel = () => {
       fetchMessages();
     }
   }, [token, isAdmin, fetchMessages]);
+
+  // Fetch all blogs
+  const fetchBlogs = useCallback(async () => {
+    if (!token) return;
+    setBlogsLoading(true);
+    try {
+      const data = await getAllBlogsAdmin(token);
+      setBlogs(data.blogs || []);
+      setTotalBlogs(data.totalBlogs || 0);
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
+    } finally {
+      setBlogsLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token && isAdmin) {
+      fetchBlogs();
+    }
+  }, [token, isAdmin, fetchBlogs]);
+
+  // Blog functions
+  const resetBlogForm = () => {
+    setBlogForm({
+      title: "",
+      category: "",
+      content: "",
+      summary: "",
+      image: "",
+      published: true,
+    });
+  };
+
+  const handleCreateBlog = async () => {
+    if (!token) return;
+    if (!blogForm.title || !blogForm.content || !blogForm.category) {
+      toast.error("Please fill required fields (Title, Category, Content)", {
+        position: "bottom-right",
+      });
+      return;
+    }
+
+    setBlogLoading(true);
+    try {
+      await createBlog(blogForm, token);
+      toast.success("Blog created successfully!", {
+        position: "bottom-right",
+      });
+      setBlogModalOpened(false);
+      resetBlogForm();
+      fetchBlogs();
+    } catch (error) {
+      console.error("Create blog error:", error);
+    } finally {
+      setBlogLoading(false);
+    }
+  };
+
+  const handleEditBlog = (blog) => {
+    setSelectedBlog(blog);
+    setBlogForm({
+      title: blog.title || "",
+      category: blog.category || "",
+      content: blog.content || "",
+      summary: blog.summary || "",
+      image: blog.image || "",
+      published: blog.published !== undefined ? blog.published : true,
+    });
+    setEditBlogModalOpened(true);
+  };
+
+  const handleUpdateBlog = async () => {
+    if (!selectedBlog || !token) return;
+
+    setBlogLoading(true);
+    try {
+      await updateBlog(selectedBlog.id, blogForm, token);
+      toast.success("Blog updated successfully!", {
+        position: "bottom-right",
+      });
+      setEditBlogModalOpened(false);
+      setSelectedBlog(null);
+      resetBlogForm();
+      fetchBlogs();
+    } catch (error) {
+      console.error("Update blog error:", error);
+    } finally {
+      setBlogLoading(false);
+    }
+  };
+
+  const handleDeleteBlogClick = (blog) => {
+    setBlogToDelete(blog);
+    setDeleteBlogModalOpened(true);
+  };
+
+  const confirmDeleteBlog = async () => {
+    if (!blogToDelete || !token) return;
+
+    setBlogLoading(true);
+    try {
+      await deleteBlog(blogToDelete.id, token);
+      toast.success("Blog deleted successfully!", {
+        position: "bottom-right",
+      });
+      setDeleteBlogModalOpened(false);
+      setBlogToDelete(null);
+      fetchBlogs();
+    } catch (error) {
+      console.error("Delete blog error:", error);
+    } finally {
+      setBlogLoading(false);
+    }
+  };
+
+  const handleTogglePublish = async (blog) => {
+    if (!token) return;
+    try {
+      await toggleBlogPublish(blog.id, token);
+      fetchBlogs();
+    } catch (error) {
+      console.error("Toggle publish error:", error);
+    }
+  };
 
   // Handle delete contact message
   const handleDeleteMessage = async (messageId) => {
@@ -730,6 +924,28 @@ const AdminPanel = () => {
                 <Text fw={600}>Mesajlar</Text>
                 <Text size="sm" color="dimmed">
                   {totalMessages} contact message
+                </Text>
+              </div>
+            </Group>
+          </Paper>
+
+          <Paper
+            shadow="sm"
+            p="lg"
+            radius="md"
+            className={`cursor-pointer hover:shadow-md transition-shadow ${
+              activeTab === "blogs" ? "border-2 border-teal-500" : ""
+            }`}
+            onClick={() => setActiveTab("blogs")}
+          >
+            <Group>
+              <div className="bg-teal-100 text-teal-600 p-3 rounded-full">
+                <MdArticle size={24} />
+              </div>
+              <div>
+                <Text fw={600}>Blogs</Text>
+                <Text size="sm" color="dimmed">
+                  {totalBlogs} blog posts
                 </Text>
               </div>
             </Group>
@@ -1282,6 +1498,174 @@ const AdminPanel = () => {
                     ))}
                   </Table.Tbody>
                 </Table>
+              </div>
+            )}
+          </Paper>
+        )}
+
+        {/* Blogs Section */}
+        {activeTab === "blogs" && (
+          <Paper shadow="sm" p="xl" radius="md" className="mb-6">
+            <div className="flexBetween mb-6">
+              <div>
+                <Title
+                  order={3}
+                  className="flex items-center gap-2 text-gray-800"
+                >
+                  <MdArticle className="text-teal-500" />
+                  Blog Management
+                </Title>
+                <Text size="sm" color="dimmed" className="mt-1">
+                  Create, edit or delete blog posts
+                </Text>
+              </div>
+              <Group>
+                <Button
+                  variant="light"
+                  color="teal"
+                  leftSection={<MdRefresh size={18} />}
+                  onClick={() => fetchBlogs()}
+                  loading={blogsLoading}
+                >
+                  Refresh
+                </Button>
+                <Button
+                  color="teal"
+                  leftSection={<MdAdd size={18} />}
+                  onClick={() => setBlogModalOpened(true)}
+                >
+                  Add New Blog
+                </Button>
+              </Group>
+            </div>
+
+            <Divider className="mb-6" />
+
+            {blogsLoading ? (
+              <div className="flexCenter py-12">
+                <Loader color="teal" />
+              </div>
+            ) : blogs.length === 0 ? (
+              <div className="text-center py-12">
+                <MdArticle size={64} className="text-gray-300 mx-auto mb-4" />
+                <Text color="dimmed">No blog posts yet</Text>
+                <Button
+                  color="teal"
+                  className="mt-4"
+                  leftSection={<MdAdd size={18} />}
+                  onClick={() => setBlogModalOpened(true)}
+                >
+                  Create First Blog
+                </Button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table striped highlightOnHover>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Blog</Table.Th>
+                      <Table.Th>Category</Table.Th>
+                      <Table.Th>Status</Table.Th>
+                      <Table.Th>Date</Table.Th>
+                      <Table.Th>Actions</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {blogs.map((blog) => (
+                      <Table.Tr key={blog.id}>
+                        <Table.Td>
+                          <div className="flex items-center gap-3">
+                            {blog.image && (
+                              <img
+                                src={blog.image}
+                                alt={blog.title}
+                                className="w-16 h-12 rounded-lg object-cover"
+                              />
+                            )}
+                            <div>
+                              <Text size="sm" fw={500} lineClamp={1} maw={250}>
+                                {blog.title}
+                              </Text>
+                              {blog.summary && (
+                                <Text size="xs" color="dimmed" lineClamp={1} maw={250}>
+                                  {blog.summary}
+                                </Text>
+                              )}
+                            </div>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge color="teal" variant="light">
+                            {blog.category}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            color={blog.published ? "green" : "gray"}
+                            variant="light"
+                            className="cursor-pointer"
+                            onClick={() => handleTogglePublish(blog)}
+                          >
+                            {blog.published ? "Published" : "Draft"}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="xs" color="dimmed">
+                            {new Date(blog.createdAt).toLocaleDateString("tr-TR")}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Group gap="xs">
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              size="lg"
+                              onClick={() => handleEditBlog(blog)}
+                              title="Edit"
+                            >
+                              <MdEdit size={18} />
+                            </ActionIcon>
+                            <ActionIcon
+                              variant="light"
+                              color="red"
+                              size="lg"
+                              onClick={() => handleDeleteBlogClick(blog)}
+                              title="Delete"
+                            >
+                              <MdDelete size={18} />
+                            </ActionIcon>
+                            <Button
+                              variant="subtle"
+                              size="xs"
+                              onClick={() => navigate(`/blog/${blog.id}`)}
+                            >
+                              View
+                            </Button>
+                          </Group>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </div>
+            )}
+
+            {/* Blogs Summary */}
+            {blogs.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <Text size="sm" color="dimmed">
+                    Total: {blogs.length} blogs
+                  </Text>
+                  <div className="flex gap-4">
+                    <Text size="sm" color="dimmed">
+                      Published: {blogs.filter((b) => b.published).length}
+                    </Text>
+                    <Text size="sm" color="dimmed">
+                      Draft: {blogs.filter((b) => !b.published).length}
+                    </Text>
+                  </div>
+                </div>
               </div>
             )}
           </Paper>
@@ -2000,6 +2384,340 @@ const AdminPanel = () => {
                 loading={consultantLoading}
               >
                 Sil
+              </Button>
+            </Group>
+          </div>
+        </Modal>
+
+        {/* Add Blog Modal */}
+        <Modal
+          opened={blogModalOpened}
+          onClose={() => {
+            setBlogModalOpened(false);
+            resetBlogForm();
+          }}
+          title={
+            <Text fw={600} color="teal">
+              <div className="flex items-center gap-2">
+                <MdAdd />
+                Add New Blog
+              </div>
+            </Text>
+          }
+          size="xl"
+          centered
+        >
+          <div className="space-y-4 py-2">
+            <TextInput
+              label="Title"
+              placeholder="Blog title"
+              required
+              value={blogForm.title}
+              onChange={(e) =>
+                setBlogForm({ ...blogForm, title: e.target.value })
+              }
+            />
+
+            <TextInput
+              label="Category"
+              placeholder="e.g., Real Estate, Investment, Tips"
+              required
+              value={blogForm.category}
+              onChange={(e) =>
+                setBlogForm({ ...blogForm, category: e.target.value })
+              }
+            />
+
+            <Textarea
+              label="Summary"
+              placeholder="Brief summary of the blog post"
+              rows={2}
+              value={blogForm.summary}
+              onChange={(e) =>
+                setBlogForm({ ...blogForm, summary: e.target.value })
+              }
+            />
+
+            <Textarea
+              label="Content"
+              placeholder="Full blog content..."
+              required
+              rows={10}
+              value={blogForm.content}
+              onChange={(e) =>
+                setBlogForm({ ...blogForm, content: e.target.value })
+              }
+            />
+
+            {/* Blog Image Upload */}
+            <div>
+              <Text size="sm" fw={500} mb={4}>
+                Featured Image
+              </Text>
+              {blogForm.image ? (
+                <div className="relative inline-block">
+                  <img
+                    src={blogForm.image}
+                    alt="Blog"
+                    className="w-full max-w-md h-48 rounded-lg object-cover border-2 border-gray-200"
+                  />
+                  <ActionIcon
+                    variant="filled"
+                    color="red"
+                    size="sm"
+                    radius="xl"
+                    className="absolute top-2 right-2"
+                    onClick={removeBlogImage}
+                  >
+                    <MdClose size={14} />
+                  </ActionIcon>
+                </div>
+              ) : (
+                <div
+                  onClick={openBlogImageUpload}
+                  className="w-full max-w-md h-48 rounded-lg border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-teal-500 hover:bg-gray-50 transition-colors"
+                >
+                  <MdOutlineCloudUpload size={40} className="text-gray-400" />
+                  <span className="text-sm text-gray-400 mt-2">Click to upload image</span>
+                </div>
+              )}
+              {blogForm.image && (
+                <Button
+                  variant="subtle"
+                  size="xs"
+                  mt="xs"
+                  onClick={openBlogImageUpload}
+                  loading={blogImageUploading}
+                >
+                  Change Image
+                </Button>
+              )}
+            </div>
+
+            <Switch
+              label="Publish immediately"
+              checked={blogForm.published}
+              onChange={(e) =>
+                setBlogForm({
+                  ...blogForm,
+                  published: e.currentTarget.checked,
+                })
+              }
+            />
+
+            <Group justify="flex-end" mt="xl">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setBlogModalOpened(false);
+                  resetBlogForm();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="teal"
+                onClick={handleCreateBlog}
+                loading={blogLoading}
+              >
+                Create Blog
+              </Button>
+            </Group>
+          </div>
+        </Modal>
+
+        {/* Edit Blog Modal */}
+        <Modal
+          opened={editBlogModalOpened}
+          onClose={() => {
+            setEditBlogModalOpened(false);
+            setSelectedBlog(null);
+            resetBlogForm();
+          }}
+          title={
+            <Text fw={600} color="blue">
+              <div className="flex items-center gap-2">
+                <MdEdit />
+                Edit Blog
+              </div>
+            </Text>
+          }
+          size="xl"
+          centered
+        >
+          <div className="space-y-4 py-2">
+            <TextInput
+              label="Title"
+              placeholder="Blog title"
+              required
+              value={blogForm.title}
+              onChange={(e) =>
+                setBlogForm({ ...blogForm, title: e.target.value })
+              }
+            />
+
+            <TextInput
+              label="Category"
+              placeholder="e.g., Real Estate, Investment, Tips"
+              required
+              value={blogForm.category}
+              onChange={(e) =>
+                setBlogForm({ ...blogForm, category: e.target.value })
+              }
+            />
+
+            <Textarea
+              label="Summary"
+              placeholder="Brief summary of the blog post"
+              rows={2}
+              value={blogForm.summary}
+              onChange={(e) =>
+                setBlogForm({ ...blogForm, summary: e.target.value })
+              }
+            />
+
+            <Textarea
+              label="Content"
+              placeholder="Full blog content..."
+              required
+              rows={10}
+              value={blogForm.content}
+              onChange={(e) =>
+                setBlogForm({ ...blogForm, content: e.target.value })
+              }
+            />
+
+            {/* Blog Image Upload */}
+            <div>
+              <Text size="sm" fw={500} mb={4}>
+                Featured Image
+              </Text>
+              {blogForm.image ? (
+                <div className="relative inline-block">
+                  <img
+                    src={blogForm.image}
+                    alt="Blog"
+                    className="w-full max-w-md h-48 rounded-lg object-cover border-2 border-gray-200"
+                  />
+                  <ActionIcon
+                    variant="filled"
+                    color="red"
+                    size="sm"
+                    radius="xl"
+                    className="absolute top-2 right-2"
+                    onClick={removeBlogImage}
+                  >
+                    <MdClose size={14} />
+                  </ActionIcon>
+                </div>
+              ) : (
+                <div
+                  onClick={openBlogImageUpload}
+                  className="w-full max-w-md h-48 rounded-lg border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-colors"
+                >
+                  <MdOutlineCloudUpload size={40} className="text-gray-400" />
+                  <span className="text-sm text-gray-400 mt-2">Click to upload image</span>
+                </div>
+              )}
+              {blogForm.image && (
+                <Button
+                  variant="subtle"
+                  size="xs"
+                  mt="xs"
+                  onClick={openBlogImageUpload}
+                  loading={blogImageUploading}
+                >
+                  Change Image
+                </Button>
+              )}
+            </div>
+
+            <Switch
+              label="Published"
+              checked={blogForm.published}
+              onChange={(e) =>
+                setBlogForm({
+                  ...blogForm,
+                  published: e.currentTarget.checked,
+                })
+              }
+            />
+
+            <Group justify="flex-end" mt="xl">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setEditBlogModalOpened(false);
+                  setSelectedBlog(null);
+                  resetBlogForm();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="blue"
+                onClick={handleUpdateBlog}
+                loading={blogLoading}
+              >
+                Update Blog
+              </Button>
+            </Group>
+          </div>
+        </Modal>
+
+        {/* Delete Blog Confirmation Modal */}
+        <Modal
+          opened={deleteBlogModalOpened}
+          onClose={() => {
+            setDeleteBlogModalOpened(false);
+            setBlogToDelete(null);
+          }}
+          title={
+            <Text fw={600} color="red">
+              Delete Blog
+            </Text>
+          }
+          centered
+        >
+          <div className="py-4">
+            <Text size="sm" color="dimmed" mb="md">
+              Are you sure you want to delete this blog? This action cannot be undone.
+            </Text>
+            {blogToDelete && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
+                {blogToDelete.image && (
+                  <img
+                    src={blogToDelete.image}
+                    alt={blogToDelete.title}
+                    className="w-20 h-14 rounded-lg object-cover"
+                  />
+                )}
+                <div>
+                  <Text size="sm" fw={500}>
+                    {blogToDelete.title}
+                  </Text>
+                  <Text size="xs" color="dimmed">
+                    {blogToDelete.category}
+                  </Text>
+                </div>
+              </div>
+            )}
+            <Group justify="flex-end" mt="xl">
+              <Button
+                variant="default"
+                onClick={() => {
+                  setDeleteBlogModalOpened(false);
+                  setBlogToDelete(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="red"
+                onClick={confirmDeleteBlog}
+                loading={blogLoading}
+              >
+                Delete
               </Button>
             </Group>
           </div>
