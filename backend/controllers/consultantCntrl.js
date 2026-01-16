@@ -39,7 +39,11 @@ export const createConsultant = asyncHandler(async (req, res) => {
       data: {
         name: data.name,
         title: data.title,
+        title_en: data.title_en || data.title,
+        title_tr: data.title_tr || data.title,
         specialty: data.specialty,
+        specialty_en: data.specialty_en || data.specialty,
+        specialty_tr: data.specialty_tr || data.specialty,
         experience: data.experience,
         languages: data.languages || [],
         rating: data.rating || 5.0,
@@ -51,6 +55,8 @@ export const createConsultant = asyncHandler(async (req, res) => {
         linkedin: data.linkedin || "",
         image: data.image,
         bio: data.bio,
+        bio_en: data.bio_en || data.bio,
+        bio_tr: data.bio_tr || data.bio,
         available: data.available !== undefined ? data.available : true,
       },
     });
@@ -82,25 +88,36 @@ export const updateConsultant = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Consultant not found" });
     }
 
+    // Build update data object, only including defined fields
+    const updateData = {
+      name: data.name,
+      title: data.title,
+      specialty: data.specialty,
+      experience: data.experience,
+      languages: data.languages,
+      rating: data.rating,
+      reviews: data.reviews,
+      phone: data.phone,
+      whatsapp: data.whatsapp,
+      email: data.email,
+      linkedin: data.linkedin,
+      image: data.image,
+      bio: data.bio,
+      available: data.available,
+    };
+
+    // Add bilingual fields only if they are provided
+    if (data.title_en !== undefined) updateData.title_en = data.title_en;
+    if (data.title_tr !== undefined) updateData.title_tr = data.title_tr;
+    if (data.specialty_en !== undefined) updateData.specialty_en = data.specialty_en;
+    if (data.specialty_tr !== undefined) updateData.specialty_tr = data.specialty_tr;
+    if (data.bio_en !== undefined) updateData.bio_en = data.bio_en;
+    if (data.bio_tr !== undefined) updateData.bio_tr = data.bio_tr;
+    if (data.deals !== undefined) updateData.deals = data.deals;
+
     const updatedConsultant = await prisma.consultant.update({
       where: { id },
-      data: {
-        name: data.name,
-        title: data.title,
-        specialty: data.specialty,
-        experience: data.experience,
-        languages: data.languages,
-        rating: data.rating,
-        reviews: data.reviews,
-        deals: data.deals,
-        phone: data.phone,
-        whatsapp: data.whatsapp,
-        email: data.email,
-        linkedin: data.linkedin,
-        image: data.image,
-        bio: data.bio,
-        available: data.available,
-      },
+      data: updateData,
     });
 
     res.status(200).json({

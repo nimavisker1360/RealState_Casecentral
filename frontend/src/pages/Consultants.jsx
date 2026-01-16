@@ -10,10 +10,19 @@ import {
 } from "react-icons/fa6";
 import { MdVerified, MdClose } from "react-icons/md";
 import { Loader } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import useConsultants from "../hooks/useConsultants";
 import ContactModal from "../components/ContactModal";
 
+// Helper function to get localized field
+const getLocalizedField = (consultant, field, language) => {
+  const localizedKey = `${field}_${language}`;
+  return consultant[localizedKey] || consultant[field] || "";
+};
+
 const Consultants = () => {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language === "tr" ? "tr" : "en";
   const [selectedConsultant, setSelectedConsultant] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const { data: consultants, isLoading, isError } = useConsultants();
@@ -54,11 +63,13 @@ const Consultants = () => {
     <section className="max-padd-container my-[99px] overflow-x-hidden">
       {/* Header Section */}
       <div className="text-center mb-16">
-        <span className="medium-18">Our Expert Team</span>
-        <h1 className="h2">Meet Our Property Consultants</h1>
+        <span className="medium-18">{t("consultants.subtitle")}</span>
+        <h1 className="h2">{t("consultants.title")}</h1>
         <p className="text-gray-30 max-w-2xl mx-auto">
-          Our team of experienced real estate professionals is here to guide you
-          through every step of your property journey.
+          {currentLang === "tr" 
+            ? "Deneyimli gayrimenkul uzmanlarımızdan oluşan ekibimiz, mülk yolculuğunuzun her adımında size rehberlik etmek için burada."
+            : "Our team of experienced real estate professionals is here to guide you through every step of your property journey."
+          }
         </p>
       </div>
 
@@ -70,7 +81,9 @@ const Consultants = () => {
           </div>
           <div>
             <h3 className="bold-20 text-tertiary">{consultants?.length || 0}+</h3>
-            <p className="text-gray-30 text-sm">Expert Advisors</p>
+            <p className="text-gray-30 text-sm">
+              {currentLang === "tr" ? "Uzman Danışman" : "Expert Advisors"}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -79,7 +92,9 @@ const Consultants = () => {
           </div>
           <div>
             <h3 className="bold-20 text-tertiary">{averageRating}</h3>
-            <p className="text-gray-30 text-sm">Average Rating</p>
+            <p className="text-gray-30 text-sm">
+              {currentLang === "tr" ? "Ortalama Puan" : "Average Rating"}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -88,7 +103,9 @@ const Consultants = () => {
           </div>
           <div>
             <h3 className="bold-20 text-tertiary">{avgExperience}+</h3>
-            <p className="text-gray-30 text-sm">Years Experience</p>
+            <p className="text-gray-30 text-sm">
+              {currentLang === "tr" ? "Yıllık Deneyim" : "Years Experience"}
+            </p>
           </div>
         </div>
       </div>
@@ -131,7 +148,7 @@ const Consultants = () => {
                           consultant.available ? "bg-white animate-pulse" : "bg-gray-300"
                         }`}
                       ></span>
-                      {consultant.available ? "Available" : "Busy"}
+                      {consultant.available ? t("consultants.available") : t("consultants.busy")}
                     </span>
                   </div>
 
@@ -149,14 +166,18 @@ const Consultants = () => {
                       {consultant.name}
                       <MdVerified className="text-secondary" />
                     </h3>
-                    <p className="text-secondary text-sm font-medium">{consultant.title}</p>
+                    <p className="text-secondary text-sm font-medium">
+                      {getLocalizedField(consultant, "title", currentLang)}
+                    </p>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-5">
                   {/* Specialty */}
-                  <p className="text-gray-30 text-sm mb-4 line-clamp-2">{consultant.specialty}</p>
+                  <p className="text-gray-30 text-sm mb-4 line-clamp-2">
+                    {getLocalizedField(consultant, "specialty", currentLang)}
+                  </p>
 
                   {/* Languages */}
                   <div className="flex items-center gap-2 mb-4">
@@ -170,12 +191,12 @@ const Consultants = () => {
                   <div className="flex items-center justify-between mb-5 py-3 px-4 bg-primary rounded-xl">
                     <div className="text-center">
                       <p className="font-bold text-tertiary">{consultant.experience}</p>
-                      <p className="text-xs text-gray-30">Experience</p>
+                      <p className="text-xs text-gray-30">{t("consultants.experience")}</p>
                     </div>
                     <div className="w-px h-8 bg-gray-200"></div>
                     <div className="text-center">
                       <p className="font-bold text-tertiary">{consultant.reviews || 0}</p>
-                      <p className="text-xs text-gray-30">Reviews</p>
+                      <p className="text-xs text-gray-30">{t("consultants.reviews")}</p>
                     </div>
                   </div>
 
@@ -211,14 +232,21 @@ const Consultants = () => {
         <div className="flex flex-col lg:flex-row">
           {/* Left Content */}
           <div className="flex-1 p-8 sm:p-12 lg:p-16">
-            <span className="medium-18 text-secondary">Need Help Choosing?</span>
-            <h2 className="h2 text-white !mb-4">Get Matched With The Perfect Advisor</h2>
+            <span className="medium-18 text-secondary">
+              {currentLang === "tr" ? "Seçim Yapmakta Zorlanıyor musunuz?" : "Need Help Choosing?"}
+            </span>
+            <h2 className="h2 text-white !mb-4">
+              {currentLang === "tr" ? "Mükemmel Danışmanla Eşleşin" : "Get Matched With The Perfect Advisor"}
+            </h2>
             <p className="text-white/60 mb-8 max-w-md">
-              Tell us about your property needs and we'll connect you with the ideal consultant based on your requirements.
+              {currentLang === "tr" 
+                ? "Mülk ihtiyaçlarınızı bize anlatın, gereksinimlerinize göre ideal danışmanla sizi eşleştirelim."
+                : "Tell us about your property needs and we'll connect you with the ideal consultant based on your requirements."
+              }
             </p>
             <div className="flex flex-wrap gap-4">
               <button className="btn-secondary !bg-secondary !ring-secondary">
-                Request Callback
+                {currentLang === "tr" ? "Geri Arama İste" : "Request Callback"}
               </button>
               <a 
                 href="https://wa.me/1234567890"
@@ -227,14 +255,16 @@ const Consultants = () => {
                 className="inline-flex items-center gap-2 bg-[#25D366] text-white font-medium px-7 py-[10px] rounded-lg hover:bg-[#20bd5a] transition-colors"
               >
                 <FaWhatsapp className="text-lg" />
-                Chat on WhatsApp
+                {currentLang === "tr" ? "WhatsApp'ta Yazışın" : "Chat on WhatsApp"}
               </a>
             </div>
           </div>
           
           {/* Right Side - Contact Info */}
           <div className="lg:w-80 bg-white/5 p-8 sm:p-12 flex flex-col justify-center">
-            <h4 className="text-white font-semibold mb-6">Quick Contact</h4>
+            <h4 className="text-white font-semibold mb-6">
+              {currentLang === "tr" ? "Hızlı İletişim" : "Quick Contact"}
+            </h4>
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-white/70 select-text cursor-default">
                 <div className="w-10 h-10 bg-white/10 rounded-lg flexCenter">
@@ -249,7 +279,7 @@ const Consultants = () => {
                 <div className="w-10 h-10 bg-white/10 rounded-lg flexCenter">
                   <FaEnvelope className="text-secondary" />
                 </div>
-                <span>Send Message</span>
+                <span>{currentLang === "tr" ? "Mesaj Gönder" : "Send Message"}</span>
               </button>
             </div>
           </div>
@@ -293,20 +323,22 @@ const Consultants = () => {
               <h2 className="text-2xl font-bold text-white mb-1">
                 {selectedConsultant.name}
               </h2>
-              <p className="text-secondary font-medium mb-3">{selectedConsultant.title}</p>
+              <p className="text-secondary font-medium mb-3">
+                {getLocalizedField(selectedConsultant, "title", currentLang)}
+              </p>
 
               {/* Rating Badge */}
               <div className="inline-flex items-center gap-2 bg-amber-500/20 px-4 py-2 rounded-full">
                 <FaStar className="text-amber-400" />
                 <span className="font-bold text-amber-400">{selectedConsultant.rating}</span>
-                <span className="text-white/50 text-sm">Rating</span>
+                <span className="text-white/50 text-sm">{t("consultants.rating")}</span>
               </div>
             </div>
 
             {/* Bio Section */}
             <div className="px-6 pb-4">
               <p className="text-white/70 text-sm leading-relaxed text-left">
-                {selectedConsultant.bio}
+                {getLocalizedField(selectedConsultant, "bio", currentLang)}
               </p>
             </div>
 
@@ -314,26 +346,26 @@ const Consultants = () => {
             <div className="grid grid-cols-2 gap-3 px-6 pb-6">
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/10">
                 <p className="text-2xl font-bold text-white">{selectedConsultant.experience}</p>
-                <p className="text-xs text-white/50 uppercase tracking-wider">Experience</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">{t("consultants.experience")}</p>
               </div>
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/10">
                 <p className="text-2xl font-bold text-white">{selectedConsultant.reviews || 0}</p>
-                <p className="text-xs text-white/50 uppercase tracking-wider">Reviews</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">{t("consultants.reviews")}</p>
               </div>
             </div>
 
             {/* Specialty & Languages */}
             <div className="px-6 pb-6 space-y-4">
-              {selectedConsultant.specialty && (
+              {getLocalizedField(selectedConsultant, "specialty", currentLang) && (
                 <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <h4 className="text-xs text-white/50 uppercase tracking-wider mb-2">Specialty</h4>
-                  <p className="text-white/90 text-sm">{selectedConsultant.specialty}</p>
+                  <h4 className="text-xs text-white/50 uppercase tracking-wider mb-2">{t("consultants.specialty")}</h4>
+                  <p className="text-white/90 text-sm">{getLocalizedField(selectedConsultant, "specialty", currentLang)}</p>
                 </div>
               )}
 
               {selectedConsultant.languages?.length > 0 && (
                 <div>
-                  <h4 className="text-xs text-white/50 uppercase tracking-wider mb-3">Languages</h4>
+                  <h4 className="text-xs text-white/50 uppercase tracking-wider mb-3">{t("consultants.languages")}</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedConsultant.languages.map((lang) => (
                       <span
@@ -373,7 +405,7 @@ const Consultants = () => {
                 className="flex items-center justify-center gap-2 bg-gradient-to-r from-secondary/80 to-secondary text-white py-4 rounded-2xl hover:from-secondary hover:to-secondary/80 transition-all font-semibold shadow-lg w-full cursor-pointer"
               >
                 <FaEnvelope />
-                <span>Send Message</span>
+                <span>{currentLang === "tr" ? "Mesaj Gönder" : "Send Message"}</span>
               </button>
             </div>
           </div>

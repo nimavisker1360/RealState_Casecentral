@@ -77,7 +77,11 @@ model Consultant {
     id String @id @default(auto()) @map("_id") @db.ObjectId
     name String
     title String
+    title_en String?
+    title_tr String?
     specialty String
+    specialty_en String?
+    specialty_tr String?
     experience String
     languages String[]
     rating Float @default(5.0)
@@ -89,6 +93,8 @@ model Consultant {
     linkedin String?
     image String
     bio String
+    bio_en String?
+    bio_tr String?
     available Boolean @default(true)
     order Int @default(0)
     

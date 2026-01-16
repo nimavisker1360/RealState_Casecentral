@@ -4,8 +4,15 @@ import useConsultants from "../hooks/useConsultants";
 import { MdArrowForward, MdLocationOn } from "react-icons/md";
 import { Loader } from "@mantine/core";
 
+// Helper function to get localized field
+const getLocalizedField = (consultant, field, language) => {
+  const localizedKey = `${field}_${language}`;
+  return consultant[localizedKey] || consultant[field] || "";
+};
+
 const ConsultantsSection = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language === "tr" ? "tr" : "en";
   const { data: consultants, isLoading, isError } = useConsultants();
   const navigate = useNavigate();
 
@@ -97,12 +104,12 @@ const ConsultantsSection = () => {
 
                 {/* Company/Title */}
                 <p className="text-gray-500 text-sm text-center">
-                  {consultant.title}
+                  {getLocalizedField(consultant, "title", currentLang)}
                 </p>
 
                 {/* License/Specialty */}
                 <p className="text-gray-400 text-xs text-center mb-4">
-                  {consultant.specialty}
+                  {getLocalizedField(consultant, "specialty", currentLang)}
                 </p>
 
                 {/* Stats Row */}

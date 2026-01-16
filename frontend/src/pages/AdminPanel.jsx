@@ -247,7 +247,11 @@ const AdminPanel = () => {
   const [consultantForm, setConsultantForm] = useState({
     name: "",
     title: "",
+    title_en: "",
+    title_tr: "",
     specialty: "",
+    specialty_en: "",
+    specialty_tr: "",
     experience: "",
     languages: [],
     rating: 5.0,
@@ -258,6 +262,8 @@ const AdminPanel = () => {
     linkedin: "",
     image: "",
     bio: "",
+    bio_en: "",
+    bio_tr: "",
     available: true,
   });
 
@@ -618,7 +624,11 @@ const AdminPanel = () => {
     setConsultantForm({
       name: "",
       title: "",
+      title_en: "",
+      title_tr: "",
       specialty: "",
+      specialty_en: "",
+      specialty_tr: "",
       experience: "",
       languages: [],
       rating: 5.0,
@@ -629,6 +639,8 @@ const AdminPanel = () => {
       linkedin: "",
       image: "",
       bio: "",
+      bio_en: "",
+      bio_tr: "",
       available: true,
     });
   };
@@ -671,7 +683,11 @@ const AdminPanel = () => {
     setConsultantForm({
       name: consultant.name || "",
       title: consultant.title || "",
+      title_en: consultant.title_en || "",
+      title_tr: consultant.title_tr || "",
       specialty: consultant.specialty || "",
+      specialty_en: consultant.specialty_en || "",
+      specialty_tr: consultant.specialty_tr || "",
       experience: consultant.experience || "",
       languages: consultant.languages || [],
       rating: consultant.rating || 5.0,
@@ -682,6 +698,8 @@ const AdminPanel = () => {
       linkedin: consultant.linkedin || "",
       image: consultant.image || "",
       bio: consultant.bio || "",
+      bio_en: consultant.bio_en || "",
+      bio_tr: consultant.bio_tr || "",
       available:
         consultant.available !== undefined ? consultant.available : true,
     });
@@ -1861,57 +1879,93 @@ const AdminPanel = () => {
           centered
         >
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
-              <TextInput
-                label="Ad Soyad"
-                placeholder="Consultant name"
-                required
-                value={consultantForm.name}
-                onChange={(e) =>
-                  setConsultantForm({ ...consultantForm, name: e.target.value })
-                }
-              />
-              <TextInput
-                label="Ünvan"
-                placeholder="Örn: Senior Property Advisor"
-                value={consultantForm.title}
-                onChange={(e) =>
-                  setConsultantForm({
-                    ...consultantForm,
-                    title: e.target.value,
-                  })
-                }
-              />
+            <TextInput
+              label="Ad Soyad / Full Name"
+              placeholder="Consultant name"
+              required
+              value={consultantForm.name}
+              onChange={(e) =>
+                setConsultantForm({ ...consultantForm, name: e.target.value })
+              }
+            />
+
+            {/* Title - Bilingual */}
+            <div className="p-3 bg-blue-50 rounded-lg space-y-3">
+              <Text size="sm" fw={600} c="blue">Title (Bilingual)</Text>
+              <div className="grid grid-cols-2 gap-4">
+                <TextInput
+                  label="Title (English)"
+                  placeholder="e.g., Senior Property Advisor"
+                  value={consultantForm.title_en}
+                  onChange={(e) =>
+                    setConsultantForm({
+                      ...consultantForm,
+                      title_en: e.target.value,
+                      title: e.target.value || consultantForm.title_tr,
+                    })
+                  }
+                />
+                <TextInput
+                  label="Ünvan (Türkçe)"
+                  placeholder="Örn: Kıdemli Gayrimenkul Danışmanı"
+                  value={consultantForm.title_tr}
+                  onChange={(e) =>
+                    setConsultantForm({
+                      ...consultantForm,
+                      title_tr: e.target.value,
+                      title: consultantForm.title_en || e.target.value,
+                    })
+                  }
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <TextInput
-                label="Uzmanlık Alanı"
-                placeholder="Örn: Luxury Villas & Apartments"
-                value={consultantForm.specialty}
-                onChange={(e) =>
-                  setConsultantForm({
-                    ...consultantForm,
-                    specialty: e.target.value,
-                  })
-                }
-              />
-              <TextInput
-                label="Deneyim"
-                placeholder="Örn: 10 years"
-                value={consultantForm.experience}
-                onChange={(e) =>
-                  setConsultantForm({
-                    ...consultantForm,
-                    experience: e.target.value,
-                  })
-                }
-              />
+            {/* Specialty - Bilingual */}
+            <div className="p-3 bg-green-50 rounded-lg space-y-3">
+              <Text size="sm" fw={600} c="green">Specialty (Bilingual)</Text>
+              <div className="grid grid-cols-2 gap-4">
+                <TextInput
+                  label="Specialty (English)"
+                  placeholder="e.g., Luxury Villas & Apartments"
+                  value={consultantForm.specialty_en}
+                  onChange={(e) =>
+                    setConsultantForm({
+                      ...consultantForm,
+                      specialty_en: e.target.value,
+                      specialty: e.target.value || consultantForm.specialty_tr,
+                    })
+                  }
+                />
+                <TextInput
+                  label="Uzmanlık Alanı (Türkçe)"
+                  placeholder="Örn: Lüks Villalar ve Daireler"
+                  value={consultantForm.specialty_tr}
+                  onChange={(e) =>
+                    setConsultantForm({
+                      ...consultantForm,
+                      specialty_tr: e.target.value,
+                      specialty: consultantForm.specialty_en || e.target.value,
+                    })
+                  }
+                />
+              </div>
             </div>
+
+            <TextInput
+              label="Deneyim / Experience"
+              placeholder="e.g., 10 years"
+              value={consultantForm.experience}
+              onChange={(e) =>
+                setConsultantForm({
+                  ...consultantForm,
+                  experience: e.target.value,
+                })
+              }
+            />
 
             <MultiSelect
-              label="Diller"
-              placeholder="Konuşulan dilleri seçin"
+              label="Diller / Languages"
+              placeholder="Select languages spoken"
               data={languageOptions}
               value={consultantForm.languages}
               onChange={(value) =>
@@ -1934,7 +1988,7 @@ const AdminPanel = () => {
                 }
               />
               <TextInput
-                label="Telefon"
+                label="Telefon / Phone"
                 placeholder="+90 5XX XXX XXXX"
                 required
                 value={consultantForm.phone}
@@ -1975,7 +2029,7 @@ const AdminPanel = () => {
             {/* Profile Image Upload */}
             <div>
               <Text size="sm" fw={500} mb={4}>
-                Profil Fotoğrafı
+                Profil Fotoğrafı / Profile Photo
               </Text>
               {consultantForm.image ? (
                 <div className="relative inline-block">
@@ -2001,7 +2055,7 @@ const AdminPanel = () => {
                   className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-grape-500 hover:bg-gray-50 transition-colors"
                 >
                   <MdOutlineCloudUpload size={28} className="text-gray-400" />
-                  <span className="text-xs text-gray-400 mt-1">Yükle</span>
+                  <span className="text-xs text-gray-400 mt-1">Upload</span>
                 </div>
               )}
               {consultantForm.image && (
@@ -2012,24 +2066,45 @@ const AdminPanel = () => {
                   onClick={openConsultantImageUpload}
                   loading={imageUploading}
                 >
-                  Değiştir
+                  Change
                 </Button>
               )}
             </div>
 
-            <Textarea
-              label="Biyografi"
-              placeholder="Short description about consultant"
-              rows={3}
-              value={consultantForm.bio}
-              onChange={(e) =>
-                setConsultantForm({ ...consultantForm, bio: e.target.value })
-              }
-            />
+            {/* Biography - Bilingual */}
+            <div className="p-3 bg-purple-50 rounded-lg space-y-3">
+              <Text size="sm" fw={600} c="grape">Biography (Bilingual)</Text>
+              <Textarea
+                label="Biography (English)"
+                placeholder="Short description about consultant in English"
+                rows={3}
+                value={consultantForm.bio_en}
+                onChange={(e) =>
+                  setConsultantForm({ 
+                    ...consultantForm, 
+                    bio_en: e.target.value,
+                    bio: e.target.value || consultantForm.bio_tr,
+                  })
+                }
+              />
+              <Textarea
+                label="Biyografi (Türkçe)"
+                placeholder="Danışman hakkında kısa açıklama"
+                rows={3}
+                value={consultantForm.bio_tr}
+                onChange={(e) =>
+                  setConsultantForm({ 
+                    ...consultantForm, 
+                    bio_tr: e.target.value,
+                    bio: consultantForm.bio_en || e.target.value,
+                  })
+                }
+              />
+            </div>
 
             <div className="grid grid-cols-3 gap-4">
               <NumberInput
-                label="Puan"
+                label="Puan / Rating"
                 placeholder="5.0"
                 min={0}
                 max={5}
@@ -2041,7 +2116,7 @@ const AdminPanel = () => {
                 }
               />
               <NumberInput
-                label="Yorum Sayısı"
+                label="Yorum Sayısı / Reviews"
                 placeholder="0"
                 min={0}
                 value={consultantForm.reviews}
@@ -2052,7 +2127,7 @@ const AdminPanel = () => {
             </div>
 
             <Switch
-              label="Müsait"
+              label="Müsait / Available"
               checked={consultantForm.available}
               onChange={(e) =>
                 setConsultantForm({
@@ -2070,7 +2145,7 @@ const AdminPanel = () => {
                   resetConsultantForm();
                 }}
               >
-                İptal
+                Cancel
               </Button>
               <Button
                 color="grape"
@@ -2103,57 +2178,93 @@ const AdminPanel = () => {
           centered
         >
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
-              <TextInput
-                label="Ad Soyad"
-                placeholder="Consultant name"
-                required
-                value={consultantForm.name}
-                onChange={(e) =>
-                  setConsultantForm({ ...consultantForm, name: e.target.value })
-                }
-              />
-              <TextInput
-                label="Ünvan"
-                placeholder="Örn: Senior Property Advisor"
-                value={consultantForm.title}
-                onChange={(e) =>
-                  setConsultantForm({
-                    ...consultantForm,
-                    title: e.target.value,
-                  })
-                }
-              />
+            <TextInput
+              label="Ad Soyad / Full Name"
+              placeholder="Consultant name"
+              required
+              value={consultantForm.name}
+              onChange={(e) =>
+                setConsultantForm({ ...consultantForm, name: e.target.value })
+              }
+            />
+
+            {/* Title - Bilingual */}
+            <div className="p-3 bg-blue-50 rounded-lg space-y-3">
+              <Text size="sm" fw={600} c="blue">Title (Bilingual)</Text>
+              <div className="grid grid-cols-2 gap-4">
+                <TextInput
+                  label="Title (English)"
+                  placeholder="e.g., Senior Property Advisor"
+                  value={consultantForm.title_en}
+                  onChange={(e) =>
+                    setConsultantForm({
+                      ...consultantForm,
+                      title_en: e.target.value,
+                      title: e.target.value || consultantForm.title_tr,
+                    })
+                  }
+                />
+                <TextInput
+                  label="Ünvan (Türkçe)"
+                  placeholder="Örn: Kıdemli Gayrimenkul Danışmanı"
+                  value={consultantForm.title_tr}
+                  onChange={(e) =>
+                    setConsultantForm({
+                      ...consultantForm,
+                      title_tr: e.target.value,
+                      title: consultantForm.title_en || e.target.value,
+                    })
+                  }
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <TextInput
-                label="Uzmanlık Alanı"
-                placeholder="Örn: Luxury Villas & Apartments"
-                value={consultantForm.specialty}
-                onChange={(e) =>
-                  setConsultantForm({
-                    ...consultantForm,
-                    specialty: e.target.value,
-                  })
-                }
-              />
-              <TextInput
-                label="Deneyim"
-                placeholder="Örn: 10 years"
-                value={consultantForm.experience}
-                onChange={(e) =>
-                  setConsultantForm({
-                    ...consultantForm,
-                    experience: e.target.value,
-                  })
-                }
-              />
+            {/* Specialty - Bilingual */}
+            <div className="p-3 bg-green-50 rounded-lg space-y-3">
+              <Text size="sm" fw={600} c="green">Specialty (Bilingual)</Text>
+              <div className="grid grid-cols-2 gap-4">
+                <TextInput
+                  label="Specialty (English)"
+                  placeholder="e.g., Luxury Villas & Apartments"
+                  value={consultantForm.specialty_en}
+                  onChange={(e) =>
+                    setConsultantForm({
+                      ...consultantForm,
+                      specialty_en: e.target.value,
+                      specialty: e.target.value || consultantForm.specialty_tr,
+                    })
+                  }
+                />
+                <TextInput
+                  label="Uzmanlık Alanı (Türkçe)"
+                  placeholder="Örn: Lüks Villalar ve Daireler"
+                  value={consultantForm.specialty_tr}
+                  onChange={(e) =>
+                    setConsultantForm({
+                      ...consultantForm,
+                      specialty_tr: e.target.value,
+                      specialty: consultantForm.specialty_en || e.target.value,
+                    })
+                  }
+                />
+              </div>
             </div>
+
+            <TextInput
+              label="Deneyim / Experience"
+              placeholder="e.g., 10 years"
+              value={consultantForm.experience}
+              onChange={(e) =>
+                setConsultantForm({
+                  ...consultantForm,
+                  experience: e.target.value,
+                })
+              }
+            />
 
             <MultiSelect
-              label="Diller"
-              placeholder="Konuşulan dilleri seçin"
+              label="Diller / Languages"
+              placeholder="Select languages spoken"
               data={languageOptions}
               value={consultantForm.languages}
               onChange={(value) =>
@@ -2176,7 +2287,7 @@ const AdminPanel = () => {
                 }
               />
               <TextInput
-                label="Telefon"
+                label="Telefon / Phone"
                 placeholder="+90 5XX XXX XXXX"
                 required
                 value={consultantForm.phone}
@@ -2217,7 +2328,7 @@ const AdminPanel = () => {
             {/* Profile Image Upload */}
             <div>
               <Text size="sm" fw={500} mb={4}>
-                Profil Fotoğrafı
+                Profil Fotoğrafı / Profile Photo
               </Text>
               {consultantForm.image ? (
                 <div className="relative inline-block">
@@ -2243,7 +2354,7 @@ const AdminPanel = () => {
                   className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-colors"
                 >
                   <MdOutlineCloudUpload size={28} className="text-gray-400" />
-                  <span className="text-xs text-gray-400 mt-1">Yükle</span>
+                  <span className="text-xs text-gray-400 mt-1">Upload</span>
                 </div>
               )}
               {consultantForm.image && (
@@ -2254,24 +2365,45 @@ const AdminPanel = () => {
                   onClick={openConsultantImageUpload}
                   loading={imageUploading}
                 >
-                  Değiştir
+                  Change
                 </Button>
               )}
             </div>
 
-            <Textarea
-              label="Biyografi"
-              placeholder="Short description about consultant"
-              rows={3}
-              value={consultantForm.bio}
-              onChange={(e) =>
-                setConsultantForm({ ...consultantForm, bio: e.target.value })
-              }
-            />
+            {/* Biography - Bilingual */}
+            <div className="p-3 bg-purple-50 rounded-lg space-y-3">
+              <Text size="sm" fw={600} c="grape">Biography (Bilingual)</Text>
+              <Textarea
+                label="Biography (English)"
+                placeholder="Short description about consultant in English"
+                rows={3}
+                value={consultantForm.bio_en}
+                onChange={(e) =>
+                  setConsultantForm({ 
+                    ...consultantForm, 
+                    bio_en: e.target.value,
+                    bio: e.target.value || consultantForm.bio_tr,
+                  })
+                }
+              />
+              <Textarea
+                label="Biyografi (Türkçe)"
+                placeholder="Danışman hakkında kısa açıklama"
+                rows={3}
+                value={consultantForm.bio_tr}
+                onChange={(e) =>
+                  setConsultantForm({ 
+                    ...consultantForm, 
+                    bio_tr: e.target.value,
+                    bio: consultantForm.bio_en || e.target.value,
+                  })
+                }
+              />
+            </div>
 
             <div className="grid grid-cols-3 gap-4">
               <NumberInput
-                label="Puan"
+                label="Puan / Rating"
                 placeholder="5.0"
                 min={0}
                 max={5}
@@ -2283,7 +2415,7 @@ const AdminPanel = () => {
                 }
               />
               <NumberInput
-                label="Yorum Sayısı"
+                label="Yorum Sayısı / Reviews"
                 placeholder="0"
                 min={0}
                 value={consultantForm.reviews}
@@ -2294,7 +2426,7 @@ const AdminPanel = () => {
             </div>
 
             <Switch
-              label="Müsait"
+              label="Müsait / Available"
               checked={consultantForm.available}
               onChange={(e) =>
                 setConsultantForm({
@@ -2313,7 +2445,7 @@ const AdminPanel = () => {
                   resetConsultantForm();
                 }}
               >
-                İptal
+                Cancel
               </Button>
               <Button
                 color="blue"
