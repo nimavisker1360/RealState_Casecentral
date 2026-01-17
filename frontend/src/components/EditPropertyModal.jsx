@@ -24,11 +24,12 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import {
   MdSell,
-  MdHome,
   MdOutlineCloudUpload,
   MdPerson,
   MdExpandMore,
   MdExpandLess,
+  MdLocationCity,
+  MdPublic,
 } from "react-icons/md";
 import { AiOutlineClose } from "react-icons/ai";
 import { BsHouseDoor, BsTree } from "react-icons/bs";
@@ -443,11 +444,20 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
               {
                 label: (
                   <div className="flex items-center justify-center gap-2 py-1">
-                    <MdHome size={18} />
-                    <span>Kiralık</span>
+                    <MdLocationCity size={18} />
+                    <span>Yurt İçi Proje</span>
                   </div>
                 ),
-                value: "rent",
+                value: "local-project",
+              },
+              {
+                label: (
+                  <div className="flex items-center justify-center gap-2 py-1">
+                    <MdPublic size={18} />
+                    <span>Yurt Dışı Proje</span>
+                  </div>
+                ),
+                value: "international-project",
               },
             ]}
           />
@@ -489,11 +499,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
           />
           <NumberInput
             withAsterisk
-            label={
-              form.values.propertyType === "sale"
-                ? "Fiyat (₺)"
-                : "Aylık Kira (₺)"
-            }
+            label="Fiyat (₺)"
             placeholder="999"
             min={0}
             thousandSeparator="."

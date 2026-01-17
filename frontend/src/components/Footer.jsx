@@ -156,7 +156,8 @@ const Footer = () => {
                     <p className="text-white/40 text-xs mb-1">
                       {index === 0 ? t('contact.mainBranch') : 
                        index === 1 ? t('contact.secondBranch') : 
-                       index === 2 ? t('contact.contactNumber') : 
+                       index === 2 ? t('contact.cyprusBranch') :
+                       index === 3 ? t('contact.contactNumber') : 
                        t('contact.emailAddress')}
                     </p>
                     <p className="text-white text-sm">{link.value}</p>

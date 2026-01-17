@@ -17,7 +17,8 @@ import {
   MdOutlineBathtub,
   MdOutlineGarage,
   MdSell,
-  MdHome,
+  MdLocationCity,
+  MdPublic,
   MdVerified,
   MdCheck,
   MdClose,
@@ -389,26 +390,29 @@ const Property = () => {
             {/* Property Type Badge */}
             <span
               className={`flexCenter gap-x-1 px-3 py-1 rounded-full text-sm font-semibold ${
-                data?.propertyType === "rent"
-                  ? "bg-blue-500 text-white"
-                  : "bg-green-500 text-white"
+                data?.propertyType === "sale"
+                  ? "bg-green-500 text-white"
+                  : "bg-blue-500 text-white"
               }`}
             >
-              {data?.propertyType === "rent" ? (
-                <MdHome size={16} />
-              ) : (
+              {data?.propertyType === "sale" ? (
                 <MdSell size={16} />
+              ) : data?.propertyType === "local-project" ? (
+                <MdLocationCity size={16} />
+              ) : (
+                <MdPublic size={16} />
               )}
-              {data?.propertyType === "rent" ? t('listing.forRent') : t('listing.forSale')}
+              {data?.propertyType === "sale" 
+                ? t('listing.forSale') 
+                : data?.propertyType === "local-project"
+                ? t('nav.localProjects')
+                : t('nav.internationalProjects')}
             </span>
           </div>
           <div className="flexBetween">
             <h4 className="medium-18">{data?.title}</h4>
             <div className="bold-20">
               ₺{data?.price?.toLocaleString()}
-              {data?.propertyType === "rent" && (
-                <span className="text-sm font-normal text-gray-500">/mo</span>
-              )}
             </div>
           </div>
           {/* info */}

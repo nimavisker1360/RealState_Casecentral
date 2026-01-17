@@ -6,8 +6,10 @@ import { useTranslation } from "react-i18next";
 import {
   MdHomeWork,
   MdSell,
-  MdHome,
   MdKeyboardArrowDown,
+  MdBusiness,
+  MdLocationCity,
+  MdPublic,
 } from "react-icons/md";
 import { RiCheckboxMultipleBlankFill } from "react-icons/ri";
 import { MdPermContactCalendar } from "react-icons/md";
@@ -23,13 +25,31 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [saleDropdownOpen, setSaleDropdownOpen] = useState(false);
-  const [rentDropdownOpen, setRentDropdownOpen] = useState(false);
+  const [projectsDropdownOpen, setProjectsDropdownOpen] = useState(false);
 
   // Property categories with translations
   const propertyCategories = [
-    { value: "residential", label: t('categories.residential'), icon: FaHome },
-    { value: "commercial", label: t('categories.commercial'), icon: FaBriefcase },
-    { value: "land", label: t('categories.land'), icon: FaLandmark },
+    { value: "residential", label: t("categories.residential"), icon: FaHome },
+    {
+      value: "commercial",
+      label: t("categories.commercial"),
+      icon: FaBriefcase,
+    },
+    { value: "land", label: t("categories.land"), icon: FaLandmark },
+  ];
+
+  // Project types with translations
+  const projectTypes = [
+    {
+      value: "LocalProject",
+      label: t("nav.localProjects"),
+      icon: MdLocationCity,
+    },
+    {
+      value: "international",
+      label: t("nav.internationalProjects"),
+      icon: MdPublic,
+    },
   ];
 
   const handleAddPropertyClick = () => {
@@ -47,7 +67,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
   const handleCategoryClick = (type, category) => {
     navigate(`/listing?type=${type}&category=${category}`);
     setSaleDropdownOpen(false);
-    setRentDropdownOpen(false);
+    setProjectsDropdownOpen(false);
     closeMenu && closeMenu();
   };
 
@@ -55,14 +75,20 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
     e.preventDefault();
     e.stopPropagation();
     setSaleDropdownOpen(!saleDropdownOpen);
-    setRentDropdownOpen(false);
+    setProjectsDropdownOpen(false);
   };
 
-  const toggleRentDropdown = (e) => {
+  const toggleProjectsDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setRentDropdownOpen(!rentDropdownOpen);
+    setProjectsDropdownOpen(!projectsDropdownOpen);
     setSaleDropdownOpen(false);
+  };
+
+  const handleProjectClick = (projectType) => {
+    navigate(`/listing?projectType=${projectType}`);
+    setProjectsDropdownOpen(false);
+    closeMenu && closeMenu();
   };
 
   return (
@@ -83,7 +109,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
       >
         <div className="flex items-center gap-3">
           <MdHomeWork size={20} />
-          <span>{t('nav.home')}</span>
+          <span>{t("nav.home")}</span>
         </div>
       </NavLink>
 
@@ -101,7 +127,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
       >
         <div className="flex items-center gap-3">
           <RiCheckboxMultipleBlankFill size={20} />
-          <span>{t('nav.listing')}</span>
+          <span>{t("nav.listing")}</span>
         </div>
       </NavLink>
 
@@ -134,7 +160,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
         >
           <div className="flex items-center gap-3 md:gap-1">
             <MdSell size={20} />
-            <span>{t('nav.forSale')}</span>
+            <span>{t("nav.forSale")}</span>
           </div>
           <MdKeyboardArrowDown
             size={20}
@@ -177,61 +203,58 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
         )}
       </div>
 
-      {/* For Rent with Dropdown */}
+      {/* Projects with Dropdown */}
       <div
         className="w-full md:w-auto md:relative md:group"
         onMouseEnter={() =>
-          window.innerWidth >= 768 && setRentDropdownOpen(true)
+          window.innerWidth >= 768 && setProjectsDropdownOpen(true)
         }
         onMouseLeave={() =>
-          window.innerWidth >= 768 && setRentDropdownOpen(false)
+          window.innerWidth >= 768 && setProjectsDropdownOpen(false)
         }
       >
         <div
           className={`flex items-center justify-between w-full px-4 py-4 md:px-3 md:py-1 border-b md:border-b-0 border-gray-300 cursor-pointer hover:bg-blue-50 md:hover:bg-transparent transition-colors ${
-            currentFilter === "rent"
+            searchParams.get("projectType")
               ? "text-blue-600 font-semibold md:bg-blue-500 md:text-white"
               : "text-gray-800 md:bg-blue-100 md:text-blue-700 md:hover:bg-blue-500 md:hover:text-white"
           }`}
           onClick={(e) => {
             // On mobile: toggle dropdown
             if (window.innerWidth < 768) {
-              toggleRentDropdown(e);
+              toggleProjectsDropdown(e);
             } else {
-              // On desktop: navigate
-              closeMenu && closeMenu();
-              navigate("/listing?type=rent");
+              // On desktop: toggle dropdown instead of navigate
+              toggleProjectsDropdown(e);
             }
           }}
         >
           <div className="flex items-center gap-3 md:gap-1">
-            <MdHome size={20} />
-            <span>{t('nav.forRent')}</span>
+            <MdBusiness size={20} />
+            <span>{t("nav.projects")}</span>
           </div>
           <MdKeyboardArrowDown
             size={20}
             className={`transition-transform duration-300 ${
-              rentDropdownOpen ? "rotate-180" : ""
+              projectsDropdownOpen ? "rotate-180" : ""
             }`}
             onClick={(e) => {
-              if (window.innerWidth < 768) {
-                toggleRentDropdown(e);
-              }
+              toggleProjectsDropdown(e);
             }}
           />
         </div>
 
-        {/* Rent Dropdown */}
-        {rentDropdownOpen && (
-          <div className="md:absolute md:top-full md:left-0 md:z-50 bg-blue-50 md:bg-white md:shadow-lg md:border md:border-gray-100">
-            {propertyCategories.map((cat) => {
-              const IconComponent = cat.icon;
+        {/* Projects Dropdown */}
+        {projectsDropdownOpen && (
+          <div className="md:absolute md:top-full md:left-0 md:z-50 bg-blue-50 md:bg-white md:shadow-lg md:border md:border-gray-100 md:min-w-[200px]">
+            {projectTypes.map((project) => {
+              const IconComponent = project.icon;
               const isActive =
-                currentFilter === "rent" && currentCategory === cat.value;
+                searchParams.get("projectType") === project.value;
               return (
                 <div
-                  key={cat.value}
-                  onClick={() => handleCategoryClick("rent", cat.value)}
+                  key={project.value}
+                  onClick={() => handleProjectClick(project.value)}
                   className={`flex items-center gap-3 px-8 md:px-4 py-3 md:py-2 cursor-pointer transition-colors border-b md:border-b-0 border-gray-300 last:border-b-0 ${
                     isActive
                       ? "bg-blue-100 text-blue-700 font-medium md:bg-blue-500 md:text-white"
@@ -239,8 +262,8 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
                   }`}
                 >
                   <IconComponent size={18} />
-                  <span className="text-sm md:text-sm font-medium">
-                    {cat.label}
+                  <span className="text-sm md:text-sm font-medium whitespace-nowrap">
+                    {project.label}
                   </span>
                 </div>
               );
@@ -256,7 +279,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
       >
         <div className="flex items-center gap-3">
           <MdPermContactCalendar size={20} />
-          <span>{t('nav.contact')}</span>
+          <span>{t("nav.contact")}</span>
         </div>
       </button>
 
@@ -268,7 +291,7 @@ const Navbar = ({ containerStyles, onContactClick, closeMenu }) => {
         >
           <div className="flex items-center gap-3">
             <MdAddHome size={20} />
-            <span>{t('nav.addProperty')}</span>
+            <span>{t("nav.addProperty")}</span>
           </div>
         </div>
       )}

@@ -221,6 +221,10 @@ export const FOOTER_CONTACT_INFO = {
       label: "Second Branch Address",
       value: "Koza Mh. 1638 SK. Aşelya 5F Dükkan No:32, Esenyurt, İstanbul",
     },
+    {
+      label: "Cyprus Branch Address",
+      value: "Ecevit Sok. Karalım Sitesi No:10/1, Göneyli, Lefkoşa",
+    },
     { label: "Contact Number", value: "+90 212 830 81 30" },
     { label: "Email Address", value: "hbrealstate2019@gmail.com" },
   ],

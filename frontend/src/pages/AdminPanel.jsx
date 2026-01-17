@@ -296,7 +296,21 @@ const AdminPanel = () => {
         croppingAspectRatio: 1,
         croppingShowDimensions: true,
         resourceType: "image",
-        clientAllowedFormats: ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg", "heic", "heif", "avif", "ico", "raw"],
+        clientAllowedFormats: [
+          "jpg",
+          "jpeg",
+          "png",
+          "gif",
+          "webp",
+          "bmp",
+          "tiff",
+          "svg",
+          "heic",
+          "heif",
+          "avif",
+          "ico",
+          "raw",
+        ],
         sources: ["local", "url", "camera"],
       },
       (err, result) => {
@@ -338,7 +352,21 @@ const AdminPanel = () => {
         croppingAspectRatio: 16 / 9,
         croppingShowDimensions: true,
         resourceType: "image",
-        clientAllowedFormats: ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg", "heic", "heif", "avif", "ico", "raw"],
+        clientAllowedFormats: [
+          "jpg",
+          "jpeg",
+          "png",
+          "gif",
+          "webp",
+          "bmp",
+          "tiff",
+          "svg",
+          "heic",
+          "heif",
+          "avif",
+          "ico",
+          "raw",
+        ],
         sources: ["local", "url", "camera"],
       },
       (err, result) => {
@@ -405,7 +433,6 @@ const AdminPanel = () => {
       fetchBookings();
     }
   }, [token, isAdmin, fetchBookings]);
-
 
   // Fetch all contact messages
   const fetchMessages = useCallback(async () => {
@@ -669,7 +696,8 @@ const AdminPanel = () => {
       refetchConsultants();
     } catch (error) {
       console.error("Create consultant error:", error);
-      const errorMessage = error.response?.data?.message || "Failed to add consultant";
+      const errorMessage =
+        error.response?.data?.message || "Failed to add consultant";
       toast.error(errorMessage, {
         position: "bottom-right",
       });
@@ -721,7 +749,8 @@ const AdminPanel = () => {
       refetchConsultants();
     } catch (error) {
       console.error("Update consultant error:", error);
-      const errorMessage = error.response?.data?.message || "Failed to update consultant";
+      const errorMessage =
+        error.response?.data?.message || "Failed to update consultant";
       toast.error(errorMessage, {
         position: "bottom-right",
       });
@@ -1071,8 +1100,10 @@ const AdminPanel = () => {
                             variant="light"
                           >
                             {property.propertyType === "sale"
-                              ? "For Sale"
-                              : "For Rent"}
+                              ? "Satılık"
+                              : property.propertyType === "local-project"
+                              ? "Yurt İçi Proje"
+                              : "Yurt Dışı Proje"}
                           </Badge>
                         </Table.Td>
                         <Table.Td>
@@ -1145,17 +1176,26 @@ const AdminPanel = () => {
                   </Text>
                   <div className="flex gap-4">
                     <Text size="sm" color="dimmed">
-                      For Sale:{" "}
+                      Satılık:{" "}
                       {
                         properties.filter((p) => p.propertyType === "sale")
                           .length
                       }
                     </Text>
                     <Text size="sm" color="dimmed">
-                      For Rent:{" "}
+                      Yurt İçi Proje:{" "}
                       {
-                        properties.filter((p) => p.propertyType === "rent")
-                          .length
+                        properties.filter(
+                          (p) => p.propertyType === "local-project"
+                        ).length
+                      }
+                    </Text>
+                    <Text size="sm" color="dimmed">
+                      Yurt Dışı Proje:{" "}
+                      {
+                        properties.filter(
+                          (p) => p.propertyType === "international-project"
+                        ).length
                       }
                     </Text>
                   </div>
@@ -1283,11 +1323,17 @@ const AdminPanel = () => {
                             <Table.Td>
                               <div className="space-y-1">
                                 <div className="flex items-center gap-1">
-                                  <MdPhone size={14} className="text-gray-400" />
+                                  <MdPhone
+                                    size={14}
+                                    className="text-gray-400"
+                                  />
                                   <Text size="xs">{consultant.phone}</Text>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <MdEmail size={14} className="text-gray-400" />
+                                  <MdEmail
+                                    size={14}
+                                    className="text-gray-400"
+                                  />
                                   <Text size="xs">{consultant.email}</Text>
                                 </div>
                               </div>
@@ -1312,7 +1358,9 @@ const AdminPanel = () => {
                                 color={consultant.available ? "green" : "gray"}
                                 variant="light"
                                 className="cursor-pointer"
-                                onClick={() => handleToggleAvailability(consultant)}
+                                onClick={() =>
+                                  handleToggleAvailability(consultant)
+                                }
                               >
                                 {consultant.available ? "Müsait" : "Meşgul"}
                               </Badge>
@@ -1323,7 +1371,9 @@ const AdminPanel = () => {
                                   variant="light"
                                   color="blue"
                                   size="lg"
-                                  onClick={() => handleEditConsultant(consultant)}
+                                  onClick={() =>
+                                    handleEditConsultant(consultant)
+                                  }
                                   title="Düzenle"
                                 >
                                   <MdEdit size={18} />
@@ -1462,7 +1512,12 @@ const AdminPanel = () => {
                         <Table.Td>
                           {m.propertyTitle ? (
                             <div className="max-w-[200px]">
-                              <Text size="xs" fw={500} lineClamp={2} className="text-green-600">
+                              <Text
+                                size="xs"
+                                fw={500}
+                                lineClamp={2}
+                                className="text-green-600"
+                              >
                                 {m.propertyTitle}
                               </Text>
                               {m.propertyId && (
@@ -1470,7 +1525,9 @@ const AdminPanel = () => {
                                   variant="subtle"
                                   size="xs"
                                   compact
-                                  onClick={() => navigate(`/listing/${m.propertyId}`)}
+                                  onClick={() =>
+                                    navigate(`/listing/${m.propertyId}`)
+                                  }
                                   className="mt-1"
                                 >
                                   مشاهده ملک
@@ -1605,7 +1662,12 @@ const AdminPanel = () => {
                                 {blog.title}
                               </Text>
                               {blog.summary && (
-                                <Text size="xs" color="dimmed" lineClamp={1} maw={250}>
+                                <Text
+                                  size="xs"
+                                  color="dimmed"
+                                  lineClamp={1}
+                                  maw={250}
+                                >
                                   {blog.summary}
                                 </Text>
                               )}
@@ -1629,7 +1691,9 @@ const AdminPanel = () => {
                         </Table.Td>
                         <Table.Td>
                           <Text size="xs" color="dimmed">
-                            {new Date(blog.createdAt).toLocaleDateString("tr-TR")}
+                            {new Date(blog.createdAt).toLocaleDateString(
+                              "tr-TR"
+                            )}
                           </Text>
                         </Table.Td>
                         <Table.Td>
@@ -1891,7 +1955,9 @@ const AdminPanel = () => {
 
             {/* Title - Bilingual */}
             <div className="p-3 bg-blue-50 rounded-lg space-y-3">
-              <Text size="sm" fw={600} c="blue">Title (Bilingual)</Text>
+              <Text size="sm" fw={600} c="blue">
+                Title (Bilingual)
+              </Text>
               <div className="grid grid-cols-2 gap-4">
                 <TextInput
                   label="Title (English)"
@@ -1922,7 +1988,9 @@ const AdminPanel = () => {
 
             {/* Specialty - Bilingual */}
             <div className="p-3 bg-green-50 rounded-lg space-y-3">
-              <Text size="sm" fw={600} c="green">Specialty (Bilingual)</Text>
+              <Text size="sm" fw={600} c="green">
+                Specialty (Bilingual)
+              </Text>
               <div className="grid grid-cols-2 gap-4">
                 <TextInput
                   label="Specialty (English)"
@@ -2073,15 +2141,17 @@ const AdminPanel = () => {
 
             {/* Biography - Bilingual */}
             <div className="p-3 bg-purple-50 rounded-lg space-y-3">
-              <Text size="sm" fw={600} c="grape">Biography (Bilingual)</Text>
+              <Text size="sm" fw={600} c="grape">
+                Biography (Bilingual)
+              </Text>
               <Textarea
                 label="Biography (English)"
                 placeholder="Short description about consultant in English"
                 rows={3}
                 value={consultantForm.bio_en}
                 onChange={(e) =>
-                  setConsultantForm({ 
-                    ...consultantForm, 
+                  setConsultantForm({
+                    ...consultantForm,
                     bio_en: e.target.value,
                     bio: e.target.value || consultantForm.bio_tr,
                   })
@@ -2093,8 +2163,8 @@ const AdminPanel = () => {
                 rows={3}
                 value={consultantForm.bio_tr}
                 onChange={(e) =>
-                  setConsultantForm({ 
-                    ...consultantForm, 
+                  setConsultantForm({
+                    ...consultantForm,
                     bio_tr: e.target.value,
                     bio: consultantForm.bio_en || e.target.value,
                   })
@@ -2190,7 +2260,9 @@ const AdminPanel = () => {
 
             {/* Title - Bilingual */}
             <div className="p-3 bg-blue-50 rounded-lg space-y-3">
-              <Text size="sm" fw={600} c="blue">Title (Bilingual)</Text>
+              <Text size="sm" fw={600} c="blue">
+                Title (Bilingual)
+              </Text>
               <div className="grid grid-cols-2 gap-4">
                 <TextInput
                   label="Title (English)"
@@ -2221,7 +2293,9 @@ const AdminPanel = () => {
 
             {/* Specialty - Bilingual */}
             <div className="p-3 bg-green-50 rounded-lg space-y-3">
-              <Text size="sm" fw={600} c="green">Specialty (Bilingual)</Text>
+              <Text size="sm" fw={600} c="green">
+                Specialty (Bilingual)
+              </Text>
               <div className="grid grid-cols-2 gap-4">
                 <TextInput
                   label="Specialty (English)"
@@ -2372,15 +2446,17 @@ const AdminPanel = () => {
 
             {/* Biography - Bilingual */}
             <div className="p-3 bg-purple-50 rounded-lg space-y-3">
-              <Text size="sm" fw={600} c="grape">Biography (Bilingual)</Text>
+              <Text size="sm" fw={600} c="grape">
+                Biography (Bilingual)
+              </Text>
               <Textarea
                 label="Biography (English)"
                 placeholder="Short description about consultant in English"
                 rows={3}
                 value={consultantForm.bio_en}
                 onChange={(e) =>
-                  setConsultantForm({ 
-                    ...consultantForm, 
+                  setConsultantForm({
+                    ...consultantForm,
                     bio_en: e.target.value,
                     bio: e.target.value || consultantForm.bio_tr,
                   })
@@ -2392,8 +2468,8 @@ const AdminPanel = () => {
                 rows={3}
                 value={consultantForm.bio_tr}
                 onChange={(e) =>
-                  setConsultantForm({ 
-                    ...consultantForm, 
+                  setConsultantForm({
+                    ...consultantForm,
                     bio_tr: e.target.value,
                     bio: consultantForm.bio_en || e.target.value,
                   })
@@ -2610,7 +2686,9 @@ const AdminPanel = () => {
                   className="w-full max-w-md h-48 rounded-lg border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-teal-500 hover:bg-gray-50 transition-colors"
                 >
                   <MdOutlineCloudUpload size={40} className="text-gray-400" />
-                  <span className="text-sm text-gray-400 mt-2">Click to upload image</span>
+                  <span className="text-sm text-gray-400 mt-2">
+                    Click to upload image
+                  </span>
                 </div>
               )}
               {blogForm.image && (
@@ -2748,7 +2826,9 @@ const AdminPanel = () => {
                   className="w-full max-w-md h-48 rounded-lg border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-colors"
                 >
                   <MdOutlineCloudUpload size={40} className="text-gray-400" />
-                  <span className="text-sm text-gray-400 mt-2">Click to upload image</span>
+                  <span className="text-sm text-gray-400 mt-2">
+                    Click to upload image
+                  </span>
                 </div>
               )}
               {blogForm.image && (
@@ -2813,7 +2893,8 @@ const AdminPanel = () => {
         >
           <div className="py-4">
             <Text size="sm" color="dimmed" mb="md">
-              Are you sure you want to delete this blog? This action cannot be undone.
+              Are you sure you want to delete this blog? This action cannot be
+              undone.
             </Text>
             {blogToDelete && (
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">

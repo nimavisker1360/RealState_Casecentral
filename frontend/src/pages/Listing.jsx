@@ -5,7 +5,7 @@ import useProperties from "../hooks/useProperties";
 import { PuffLoader } from "react-spinners";
 import PropertyCard from "../components/PropertyCard";
 import PropertiesMap from "../components/PropertiesMap";
-import { MdSell, MdHome, MdList, MdSearch } from "react-icons/md";
+import { MdSell, MdList, MdSearch, MdLocationCity, MdPublic } from "react-icons/md";
 import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 
 const Listing = () => {
@@ -23,8 +23,14 @@ const Listing = () => {
 
   // Get filters from URL
   const typeFilter = searchParams.get("type");
+  const projectTypeFilter = searchParams.get("projectType");
   const categoryFilter = searchParams.get("category");
   const searchQuery = searchParams.get("search") || "";
+
+  // Map projectType to type filter (for navbar compatibility)
+  const effectiveTypeFilter = projectTypeFilter 
+    ? (projectTypeFilter === "LocalProject" ? "local-project" : "international-project")
+    : typeFilter;
 
   const [filter, setFilter] = useState(searchQuery);
 
@@ -69,8 +75,8 @@ const Listing = () => {
   // Filter properties by type, category, and search
   const filteredData = data
     .filter((property) => {
-      if (typeFilter) {
-        return property.propertyType === typeFilter;
+      if (effectiveTypeFilter) {
+        return property.propertyType === effectiveTypeFilter;
       }
       return true;
     })
@@ -89,6 +95,8 @@ const Listing = () => {
     );
 
   const handleTypeFilter = (type) => {
+    // Clear projectType when using type filter buttons
+    searchParams.delete("projectType");
     if (type === null) {
       searchParams.delete("type");
       searchParams.delete("category");
@@ -168,7 +176,7 @@ const Listing = () => {
             <button
               onClick={() => handleTypeFilter(null)}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                !typeFilter
+                !effectiveTypeFilter
                   ? "bg-gray-800 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
@@ -179,7 +187,7 @@ const Listing = () => {
             <button
               onClick={() => handleTypeFilter("sale")}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                typeFilter === "sale"
+                effectiveTypeFilter === "sale"
                   ? "bg-green-500 text-white"
                   : "bg-green-50 text-green-700 hover:bg-green-100"
               }`}
@@ -188,26 +196,37 @@ const Listing = () => {
               <span>{t('listing.forSale')}</span>
             </button>
             <button
-              onClick={() => handleTypeFilter("rent")}
+              onClick={() => handleTypeFilter("local-project")}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                typeFilter === "rent"
+                effectiveTypeFilter === "local-project"
                   ? "bg-blue-500 text-white"
                   : "bg-blue-50 text-blue-700 hover:bg-blue-100"
               }`}
             >
-              <MdHome size={16} />
-              <span>{t('listing.forRent')}</span>
+              <MdLocationCity size={16} />
+              <span>{t('nav.localProjects')}</span>
+            </button>
+            <button
+              onClick={() => handleTypeFilter("international-project")}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                effectiveTypeFilter === "international-project"
+                  ? "bg-blue-600 text-white"
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+              }`}
+            >
+              <MdPublic size={16} />
+              <span>{t('nav.internationalProjects')}</span>
             </button>
           </div>
 
-          {/* Category Filter Buttons - Show when type is selected */}
-          {typeFilter && (
+          {/* Category Filter Buttons - Show when type is sale */}
+          {effectiveTypeFilter === "sale" && (
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => handleCategoryFilter(null)}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   !categoryFilter
-                    ? typeFilter === "sale" ? "bg-green-600 text-white" : "bg-blue-600 text-white"
+                    ? "bg-green-600 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -216,17 +235,14 @@ const Listing = () => {
               {propertyCategories.map((cat) => {
                 const IconComponent = cat.icon;
                 const isActive = categoryFilter === cat.value;
-                const isSale = typeFilter === "sale";
                 return (
                   <button
                     key={cat.value}
                     onClick={() => handleCategoryFilter(cat.value)}
                     className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                       isActive
-                        ? isSale ? "bg-green-500 text-white" : "bg-blue-500 text-white"
-                        : isSale 
-                          ? "bg-green-50 text-green-700 hover:bg-green-100" 
-                          : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                        ? "bg-green-500 text-white"
+                        : "bg-green-50 text-green-700 hover:bg-green-100"
                     }`}
                   >
                     <IconComponent size={12} />

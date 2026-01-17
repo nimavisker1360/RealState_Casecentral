@@ -18,7 +18,7 @@ import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { validateString } from "../utils/common";
 import PropTypes from "prop-types";
-import { MdSell, MdHome, MdPerson } from "react-icons/md";
+import { MdSell, MdPerson, MdLocationCity, MdPublic } from "react-icons/md";
 import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 import useConsultants from "../hooks/useConsultants";
 
@@ -203,7 +203,12 @@ const BasicDetails = ({
     })) || [];
 
   return (
-    <Box maw={"90%"} mx="auto" my={"md"} style={{ maxHeight: "70vh", overflowY: "auto" }}>
+    <Box
+      maw={"90%"}
+      mx="auto"
+      my={"md"}
+      style={{ maxHeight: "70vh", overflowY: "auto" }}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -233,11 +238,20 @@ const BasicDetails = ({
               {
                 label: (
                   <div className="flex items-center justify-center gap-2 py-1">
-                    <MdHome size={18} />
-                    <span>Kiralık</span>
+                    <MdLocationCity size={18} />
+                    <span>Yurt İçi Proje</span>
                   </div>
                 ),
-                value: "rent",
+                value: "local-project",
+              },
+              {
+                label: (
+                  <div className="flex items-center justify-center gap-2 py-1">
+                    <MdPublic size={18} />
+                    <span>Yurt Dışı Proje</span>
+                  </div>
+                ),
+                value: "international-project",
               },
             ]}
           />
@@ -282,7 +296,7 @@ const BasicDetails = ({
           <Grid.Col span={6}>
             <NumberInput
               withAsterisk
-              label={propertyType === "sale" ? "Fiyat (₺)" : "Aylık Kira (₺)"}
+              label="Fiyat (₺)"
               placeholder="999"
               min={0}
               thousandSeparator="."
@@ -349,7 +363,11 @@ const BasicDetails = ({
           </Grid.Col>
         </Grid>
 
-        <Divider my="lg" label="Bina ve Daire Bilgileri" labelPosition="center" />
+        <Divider
+          my="lg"
+          label="Bina ve Daire Bilgileri"
+          labelPosition="center"
+        />
 
         <Grid>
           <Grid.Col span={4}>
@@ -476,7 +494,10 @@ const BasicDetails = ({
                 label="Krediye Uygun"
                 checked={mortgageEligible}
                 onChange={(event) =>
-                  form.setFieldValue("mortgageEligible", event.currentTarget.checked)
+                  form.setFieldValue(
+                    "mortgageEligible",
+                    event.currentTarget.checked
+                  )
                 }
               />
             </Grid.Col>

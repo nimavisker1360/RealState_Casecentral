@@ -14,6 +14,7 @@ import PropTypes from "prop-types";
 import UserDetailContext from "../context/UserDetailContext";
 import { getUserProfile, updateUserProfile } from "../utils/api";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 import {
   MdPerson,
   MdEmail,
@@ -26,6 +27,7 @@ import {
 import { FaWhatsapp } from "react-icons/fa6";
 
 const ProfileModal = ({ opened, setOpened }) => {
+  const { t } = useTranslation();
   const { user } = useAuth0();
   const {
     userDetails: { token },
@@ -149,7 +151,7 @@ const ProfileModal = ({ opened, setOpened }) => {
       !formData.phone ||
       !formData.address
     ) {
-      toast.error("Lütfen tüm alanları doldurun", { position: "bottom-right" });
+      toast.error(t("profile.fillAllFields"), { position: "bottom-right" });
       return;
     }
 
@@ -172,7 +174,7 @@ const ProfileModal = ({ opened, setOpened }) => {
           ...prev,
           profile: result.user,
         }));
-        toast.success("Profile updated successfully!", {
+        toast.success(t("profile.profileUpdated"), {
           position: "bottom-right",
         });
         setOpened(false);
@@ -195,7 +197,7 @@ const ProfileModal = ({ opened, setOpened }) => {
         <div className="flex items-center gap-2">
           <MdPerson className="text-secondary" size={24} />
           <Text fw={600} size="lg">
-            Profilim
+            {t("profile.myProfile")}
           </Text>
         </div>
       }
@@ -223,10 +225,10 @@ const ProfileModal = ({ opened, setOpened }) => {
                 </div>
                 <div>
                   <Text size="sm" fw={600} color="green">
-                    Profil Tamamlandı
+                    {t("profile.profileCompleted")}
                   </Text>
                   <Text size="xs" color="dimmed">
-                    Tüm özelliklere erişebilirsiniz
+                    {t("profile.accessAllFeatures")}
                   </Text>
                 </div>
               </>
@@ -237,10 +239,10 @@ const ProfileModal = ({ opened, setOpened }) => {
                 </div>
                 <div>
                   <Text size="sm" fw={600} color="orange">
-                    Profil Tamamlanmadı
+                    {t("profile.profileIncomplete")}
                   </Text>
                   <Text size="xs" color="dimmed">
-                    Rezervasyon yapmak için profilinizi tamamlayın
+                    {t("profile.completeProfileToBook")}
                   </Text>
                 </div>
               </>
@@ -252,7 +254,7 @@ const ProfileModal = ({ opened, setOpened }) => {
           {/* Profile Image */}
           <div className="flexCenter flex-col gap-3">
             <Text size="sm" fw={500}>
-              Profil Fotoğrafı <span className="text-red-500">*</span>
+              {t("profile.profilePhoto")} <span className="text-red-500">*</span>
             </Text>
             {formData.image ? (
               <div className="relative">
@@ -274,7 +276,7 @@ const ProfileModal = ({ opened, setOpened }) => {
                 className="w-28 h-28 rounded-full border-2 border-dashed border-gray-300 flexCenter flex-col cursor-pointer hover:border-secondary hover:bg-gray-50 transition-colors"
               >
                 <MdOutlineCloudUpload size={28} className="text-gray-400" />
-                <span className="text-xs text-gray-400 mt-1">Yükle</span>
+                <span className="text-xs text-gray-400 mt-1">{t("profile.upload")}</span>
               </div>
             )}
             {formData.image && (
@@ -284,7 +286,7 @@ const ProfileModal = ({ opened, setOpened }) => {
                 onClick={openImageUpload}
                 loading={imageUploading}
               >
-                Değiştir
+                {t("profile.change")}
               </Button>
             )}
           </div>
@@ -293,31 +295,31 @@ const ProfileModal = ({ opened, setOpened }) => {
           <TextInput
             label={
               <span>
-                Ad Soyad <span className="text-red-500">*</span>
+                {t("profile.fullName")} <span className="text-red-500">*</span>
               </span>
             }
-            placeholder="Adınızı ve soyadınızı girin"
+            placeholder={t("profile.fullNamePlaceholder")}
             leftSection={<MdPerson size={18} />}
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
 
           <TextInput
-            label="Email"
-            placeholder="Email adresiniz"
+            label={t("profile.email")}
+            placeholder={t("profile.emailPlaceholder")}
             leftSection={<MdEmail size={18} />}
             value={formData.email}
             disabled
-            description="Email adresi değiştirilemez"
+            description={t("profile.emailCannotBeChanged")}
           />
 
           <TextInput
             label={
               <span>
-                WhatsApp <span className="text-red-500">*</span>
+                {t("profile.whatsapp")} <span className="text-red-500">*</span>
               </span>
             }
-            placeholder="+90 5XX XXX XXXX"
+            placeholder={t("profile.whatsappPlaceholder")}
             leftSection={<FaWhatsapp size={18} className="text-green-500" />}
             value={formData.phone}
             onChange={(e) =>
@@ -328,10 +330,10 @@ const ProfileModal = ({ opened, setOpened }) => {
           <TextInput
             label={
               <span>
-                Adres <span className="text-red-500">*</span>
+                {t("profile.address")} <span className="text-red-500">*</span>
               </span>
             }
-            placeholder="Adresinizi girin"
+            placeholder={t("profile.addressPlaceholder")}
             leftSection={<MdLocationOn size={18} />}
             value={formData.address}
             onChange={(e) =>
@@ -344,7 +346,7 @@ const ProfileModal = ({ opened, setOpened }) => {
           {/* Action Buttons */}
           <Group justify="flex-end">
             <Button variant="default" onClick={() => setOpened(false)}>
-              İptal
+              {t("profile.cancel")}
             </Button>
             <Button
               color="green"
@@ -353,7 +355,7 @@ const ProfileModal = ({ opened, setOpened }) => {
               disabled={!isFormComplete}
               leftSection={<MdCheck size={18} />}
             >
-              Kaydet
+              {t("profile.save")}
             </Button>
           </Group>
         </div>

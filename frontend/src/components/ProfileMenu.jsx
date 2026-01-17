@@ -8,8 +8,10 @@ import { getUserProfile } from "../utils/api";
 import { MdDashboard, MdPerson } from "react-icons/md";
 import ProfileModal from "./ProfileModal";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useTranslation } from "react-i18next";
 
 const ProfileMenu = ({ user, logout }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAdmin, loading } = useAdmin();
   const [profileModalOpened, setProfileModalOpened] = useState(false);
@@ -51,12 +53,12 @@ const ProfileMenu = ({ user, logout }) => {
             rightSection={
               !profileComplete && (
                 <Badge size="xs" color="orange" variant="light">
-                  Eksik
+                  {t("profile.incomplete")}
                 </Badge>
               )
             }
           >
-            Profilim
+            {t("profile.myProfile")}
           </Menu.Item>
           <Divider my="xs" />
 
@@ -69,22 +71,22 @@ const ProfileMenu = ({ user, logout }) => {
                 onClick={() => navigate("/admin", { replace: true })}
                 color="green"
               >
-                Yönetim Paneli
+                {t("profile.adminPanel")}
               </Menu.Item>
               <Divider my="xs" />
             </>
           )}
 
-          <Menu.Label>Application</Menu.Label>
+          <Menu.Label>{t("profile.application")}</Menu.Label>
           <Menu.Item
             onClick={() => navigate("./favourites", { replace: true })}
           >
-            Favourites
+            {t("profile.favourites")}
           </Menu.Item>
           <Menu.Item onClick={() => navigate("./bookings", { replace: true })}>
-            Bookings
+            {t("profile.bookings")}
           </Menu.Item>
-          <Menu.Label>Go back</Menu.Label>
+          <Menu.Label>{t("profile.goBack")}</Menu.Label>
           <Menu.Item
             onClick={() => {
               localStorage.clear();
@@ -92,7 +94,7 @@ const ProfileMenu = ({ user, logout }) => {
             }}
             color="red"
           >
-            Logout
+            {t("profile.logout")}
           </Menu.Item>
         </Menu.Dropdown>
       </Menu>
