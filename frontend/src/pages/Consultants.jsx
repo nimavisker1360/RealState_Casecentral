@@ -126,11 +126,11 @@ const Consultants = () => {
                 onClick={() => setSelectedConsultant(consultant)}
               >
                 {/* Image */}
-                <div className="relative h-52 overflow-hidden">
+                <div className="relative h-72 overflow-hidden">
                   <img
                     src={consultant.image || "https://via.placeholder.com/400x400?text=No+Image"}
                     alt={consultant.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                   

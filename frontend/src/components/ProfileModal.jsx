@@ -50,17 +50,35 @@ const ProfileModal = ({ opened, setOpened }) => {
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
 
+  // Helper function to build cropped Cloudinary URL
+  const buildCroppedUrl = (info) => {
+    const { secure_url, coordinates } = info;
+    
+    // If there are crop coordinates, apply them to the URL
+    if (coordinates?.custom?.[0]) {
+      const [x, y, width, height] = coordinates.custom[0];
+      // Insert crop transformation into the URL
+      const urlParts = secure_url.split('/upload/');
+      if (urlParts.length === 2) {
+        return `${urlParts[0]}/upload/c_crop,x_${Math.round(x)},y_${Math.round(y)},w_${Math.round(width)},h_${Math.round(height)}/${urlParts[1]}`;
+      }
+    }
+    return secure_url;
+  };
+
   useEffect(() => {
     cloudinaryRef.current = window.cloudinary;
     widgetRef.current = cloudinaryRef.current?.createUploadWidget(
       {
-        cloudName: "ducct0j1f",
-        uploadPreset: "auvy3sl6",
+        cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "ducct0j1f",
+        uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "auvy3sl6",
         maxFiles: 1,
         multiple: false,
         cropping: true,
         croppingAspectRatio: 1,
         croppingShowDimensions: true,
+        croppingCoordinatesMode: "custom",
+        showSkipCropButton: false,
         resourceType: "image",
         clientAllowedFormats: [
           "jpg",
@@ -81,7 +99,8 @@ const ProfileModal = ({ opened, setOpened }) => {
       },
       (err, result) => {
         if (result.event === "success") {
-          setFormData((prev) => ({ ...prev, image: result.info.secure_url }));
+          const croppedUrl = buildCroppedUrl(result.info);
+          setFormData((prev) => ({ ...prev, image: croppedUrl }));
           setImageUploading(false);
         }
         if (result.event === "close") {

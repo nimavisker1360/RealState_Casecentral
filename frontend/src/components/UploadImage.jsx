@@ -34,8 +34,8 @@ const UploadImage = ({
     cloudinaryRef.current = window.cloudinary;
     widgetRef.current = cloudinaryRef.current.createUploadWidget(
       {
-        cloudName: "ducct0j1f",
-        uploadPreset: "auvy3sl6",
+        cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "ducct0j1f",
+        uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "auvy3sl6",
         maxFiles: 30,
         multiple: true,
         resourceType: "image",

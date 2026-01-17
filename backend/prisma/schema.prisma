@@ -62,6 +62,7 @@ model Residency {
     // Property Features
     interiorFeatures String[] // İç Özellikler
     exteriorFeatures String[] // Dış Özellikler
+    muhitFeatures String[] // Muhit (Neighborhood)
     
     // Land/Arsa Features
     imarDurumu String? // İmar Durumu (Zoning Status)

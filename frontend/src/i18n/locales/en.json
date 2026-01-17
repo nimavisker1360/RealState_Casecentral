@@ -71,6 +71,9 @@
   "properties": {
     "title": "Featured Properties",
     "subtitle": "Discover Our Latest Listings",
+    "futureHomeAwaits": "Your Future Home Awaits",
+    "findDreamHere": "Find Your Dream Here",
+    "viewMore": "View More",
     "viewAll": "View All Properties",
     "noProperties": "No properties found",
     "bedrooms": "Bedrooms",
@@ -345,9 +348,30 @@
     "bookFirstWarning": "Please book this property first to send a message",
     "interiorFeatures": "Interior Features",
     "exteriorFeatures": "Exterior Features",
+    "muhitFeatures": "Neighborhood",
     "contactConsultant": "Contact Property Consultant",
     "specialty": "Specialty",
     "languages": "Languages",
     "deals": "deals"
+  },
+  "muhit": {
+    "Alışveriş Merkezi": "Shopping Center",
+    "Belediye": "Municipality",
+    "Cami": "Mosque",
+    "Denize Sıfır": "Seafront",
+    "Eczane": "Pharmacy",
+    "Eğlence Merkezi": "Entertainment Center",
+    "Göle Sıfır": "Lakefront",
+    "Hastane": "Hospital",
+    "Havra": "Synagogue",
+    "İtfaiye": "Fire Station",
+    "Kilise": "Church",
+    "Lise": "High School",
+    "Park": "Park",
+    "Plaj": "Beach",
+    "Polis Merkezi": "Police Station",
+    "Semt Pazarı": "Local Market",
+    "Spor Salonu": "Gym",
+    "Şehir Merkezi": "City Center"
   }
 }

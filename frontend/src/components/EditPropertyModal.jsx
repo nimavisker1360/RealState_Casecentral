@@ -23,6 +23,22 @@ import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   MdSell,
   MdOutlineCloudUpload,
   MdPerson,
@@ -30,10 +46,66 @@ import {
   MdExpandLess,
   MdLocationCity,
   MdPublic,
+  MdDragIndicator,
 } from "react-icons/md";
 import { AiOutlineClose } from "react-icons/ai";
 import { BsHouseDoor, BsTree, BsLightningCharge, BsGeoAlt, BsGrid, BsEye } from "react-icons/bs";
 import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
+
+// Sortable Image Component
+const SortableImage = ({ url, index, onRemove }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: url });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative h-24 rounded-lg overflow-hidden group ${isDragging ? 'shadow-xl' : ''}`}
+    >
+      <img
+        src={url}
+        alt={`property-${index + 1}`}
+        className="h-full w-full object-cover"
+      />
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-1 left-1 bg-black/50 text-white rounded p-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <MdDragIndicator size={14} />
+      </div>
+      {/* Remove Button */}
+      <button
+        type="button"
+        onClick={() => onRemove(index)}
+        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <AiOutlineClose size={12} />
+      </button>
+      {/* Main Image Badge */}
+      {index === 0 && (
+        <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-[10px] px-1 py-0.5 rounded">
+          Ana
+        </span>
+      )}
+    </div>
+  );
+};
 
 // Property categories
 const propertyCategories = [
@@ -143,77 +215,89 @@ const MANZARA_FEATURES = [
   "Göl",
 ];
 
-// All possible interior features
-const ALL_INTERIOR_FEATURES = [
-  "ADSL",
-  "Smart Home",
-  "Burglar Alarm",
-  "Fire Alarm",
-  "Aluminum Joinery",
-  "American Door",
-  "Built-in Oven",
-  "White Goods",
-  "Dishwasher",
-  "Dryer Machine",
-  "Washing Machine",
-  "Laundry Room",
-  "Steel Door",
-  "Shower Cabin",
-  "Fiber Internet",
-  "Oven",
-  "Dressing Room",
-  "Built-in Wardrobe",
-  "Intercom System",
-  "Crown Molding",
-  "Pantry",
-  "Air Conditioning",
-  "Laminate Flooring",
-  "Furniture",
-  "Built-in Kitchen",
-  "Laminate Kitchen",
-  "Kitchen Natural Gas",
-  "Parquet Flooring",
-  "PVC Joinery",
-  "Ceramic Flooring",
-  "Stovetop",
-  "Spot Lighting",
-  "Jacuzzi",
-  "Bathtub",
-  "Terrace",
-  "Wi-Fi",
-  "Fireplace",
+// Muhit (Neighborhood) features
+const MUHIT_FEATURES = [
+  "Alışveriş Merkezi",
+  "Belediye",
+  "Cami",
+  "Denize Sıfır",
+  "Eczane",
+  "Eğlence Merkezi",
+  "Göle Sıfır",
+  "Hastane",
+  "Havra",
+  "İtfaiye",
+  "Kilise",
+  "Lise",
+  "Park",
+  "Plaj",
+  "Polis Merkezi",
+  "Semt Pazarı",
+  "Spor Salonu",
+  "Şehir Merkezi",
 ];
 
-// All possible exterior features
+// All possible interior features (Turkish)
+const ALL_INTERIOR_FEATURES = [
+  "ADSL",
+  "Akıllı Ev",
+  "Alarm (Hırsız)",
+  "Alarm (Yangın)",
+  "Alüminyum Doğrama",
+  "Amerikan Kapı",
+  "Ankastre Fırın",
+  "Beyaz Eşya",
+  "Bulaşık Makinesi",
+  "Kurutma Makinesi",
+  "Çamaşır Makinesi",
+  "Çamaşır Odası",
+  "Çelik Kapı",
+  "Duşakabin",
+  "Fiber İnternet",
+  "Fırın",
+  "Giyinme Odası",
+  "Gömme Dolap",
+  "Görüntülü Diafon",
+  "Kartonpiyer",
+  "Kiler",
+  "Klima",
+  "Laminat Zemin",
+  "Mobilya",
+  "Ankastre Mutfak",
+  "Laminat Mutfak",
+  "Mutfak Doğalgazı",
+  "Parke Zemin",
+  "PVC Doğrama",
+  "Seramik Zemin",
+  "Set Üstü Ocak",
+  "Spot Aydınlatma",
+  "Jakuzi",
+  "Küvet",
+  "Teras",
+  "Wi-Fi",
+  "Şömine",
+];
+
+// All possible exterior features (Turkish)
 const ALL_EXTERIOR_FEATURES = [
-  "24/7 Security",
-  "Doorman",
-  "EV Charging Station",
-  "Steam Room",
-  "Children's Playground",
-  "Turkish Bath (Hamam)",
-  "Booster Pump",
-  "Thermal Insulation",
-  "Generator",
-  "Cable TV",
-  "Security Camera",
-  "Nursery/Daycare",
-  "Private Pool",
+  "24 Saat Güvenlik",
+  "Apartman Görevlisi",
+  "Araç Şarj İstasyonu",
+  "Çocuk Oyun Parkı",
+  "Hamam",
+  "Hidrofor",
+  "Jeneratör",
+  "Kablo TV",
+  "Kamera Sistemi",
+  "Müstakil Havuzlu",
   "Sauna",
-  "Sound Insulation",
-  "Siding",
-  "Sports Area",
-  "Water Tank",
-  "Satellite",
-  "Fire Escape",
-  "Indoor Swimming Pool",
-  "Outdoor Swimming Pool",
-  "Tennis Court",
-  "Fitness Center",
-  "Concierge",
-  "Garden",
-  "BBQ Area",
-  "Parking Garage",
+  "Ses Yalıtımı",
+  "Spor Alanı",
+  "Su Deposu",
+  "Tenis Kortu",
+  "Yangın Merdiveni",
+  "Yüzme Havuzu (Açık)",
+  "Yüzme Havuzu (Kapalı)",
 ];
 import { toast } from "react-toastify";
 import { useMutation } from "react-query";
@@ -235,8 +319,10 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
   const [selectedConsultantId, setSelectedConsultantId] = useState("");
   const [interiorFeatures, setInteriorFeatures] = useState([]);
   const [exteriorFeatures, setExteriorFeatures] = useState([]);
+  const [muhitFeatures, setMuhitFeatures] = useState([]);
   const [interiorOpened, { toggle: toggleInterior }] = useDisclosure(false);
   const [exteriorOpened, { toggle: toggleExterior }] = useDisclosure(false);
+  const [muhitOpened, { toggle: toggleMuhit }] = useDisclosure(false);
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
 
@@ -322,6 +408,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       setSelectedConsultantId(property.consultantId || "");
       setInteriorFeatures(property.interiorFeatures || []);
       setExteriorFeatures(property.exteriorFeatures || []);
+      setMuhitFeatures(property.muhitFeatures || []);
       
       // Turkish real estate fields
       setListingNo(property.listingNo || "");
@@ -359,8 +446,8 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
     cloudinaryRef.current = window.cloudinary;
     widgetRef.current = cloudinaryRef.current?.createUploadWidget(
       {
-        cloudName: "ducct0j1f",
-        uploadPreset: "auvy3sl6",
+        cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "ducct0j1f",
+        uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "auvy3sl6",
         maxFiles: 30,
         multiple: true,
         resourceType: "image",
@@ -391,6 +478,31 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
 
   const removeImage = (indexToRemove) => {
     setImageURLs((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end - reorder images
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setImageURLs((items) => {
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   const { mutate, isLoading } = useMutation({
@@ -440,6 +552,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       consultantId: selectedConsultantId || null,
       interiorFeatures: interiorFeatures,
       exteriorFeatures: exteriorFeatures,
+      muhitFeatures: muhitFeatures,
       // Turkish real estate fields
       listingNo,
       listingDate,
@@ -1079,9 +1192,59 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
           </Collapse>
         </div>
 
+        {/* Muhit Features */}
+        <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={toggleMuhit}
+            className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <BsGeoAlt className="text-purple-600" size={18} />
+              <Text fw={500} size="sm">
+                Muhit
+              </Text>
+              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">
+                {muhitFeatures.length} seçili
+              </span>
+            </div>
+            {muhitOpened ? (
+              <MdExpandLess size={20} />
+            ) : (
+              <MdExpandMore size={20} />
+            )}
+          </button>
+          <Collapse in={muhitOpened}>
+            <ScrollArea h={200} className="p-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {MUHIT_FEATURES.map((feature) => (
+                  <Checkbox
+                    key={feature}
+                    label={feature}
+                    size="xs"
+                    checked={muhitFeatures.includes(feature)}
+                    onChange={(e) => {
+                      if (e.currentTarget.checked) {
+                        setMuhitFeatures([...muhitFeatures, feature]);
+                      } else {
+                        setMuhitFeatures(
+                          muhitFeatures.filter((f) => f !== feature)
+                        );
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
+          </Collapse>
+        </div>
+
         {/* Images */}
         <Text size="sm" fw={500} mt="lg" mb="xs">
           Görseller <span className="text-red-500">*</span>
+          {imageURLs.length > 0 && (
+            <span className="text-gray-400 font-normal ml-2">(Sürükleyerek sıralayabilirsiniz)</span>
+          )}
         </Text>
         <div className="border border-gray-200 rounded-lg p-4">
           {imageURLs.length === 0 ? (
@@ -1093,44 +1256,36 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
               <span className="text-sm text-gray-500">Görsel Yükle</span>
             </div>
           ) : (
-            <div
-              className="grid gap-3"
-              style={{
-                gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-              }}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
             >
-              {imageURLs.map((url, index) => (
+              <SortableContext items={imageURLs} strategy={rectSortingStrategy}>
                 <div
-                  key={index}
-                  className="relative h-24 rounded-lg overflow-hidden group"
+                  className="grid gap-3"
+                  style={{
+                    gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+                  }}
                 >
-                  <img
-                    src={url}
-                    alt={`property-${index + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  {imageURLs.map((url, index) => (
+                    <SortableImage
+                      key={url}
+                      url={url}
+                      index={index}
+                      onRemove={removeImage}
+                    />
+                  ))}
+                  <div
+                    onClick={() => widgetRef.current?.open()}
+                    className="flexCenter flex-col h-24 border-dashed border-2 rounded-lg cursor-pointer hover:bg-gray-50"
                   >
-                    <AiOutlineClose size={12} />
-                  </button>
-                  {index === 0 && (
-                    <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-[10px] px-1 py-0.5 rounded">
-                      Ana
-                    </span>
-                  )}
+                    <MdOutlineCloudUpload size={20} color="grey" />
+                    <span className="text-xs text-gray-500">Ekle</span>
+                  </div>
                 </div>
-              ))}
-              <div
-                onClick={() => widgetRef.current?.open()}
-                className="flexCenter flex-col h-24 border-dashed border-2 rounded-lg cursor-pointer hover:bg-gray-50"
-              >
-                <MdOutlineCloudUpload size={20} color="grey" />
-                <span className="text-xs text-gray-500">Ekle</span>
-              </div>
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
         </div>
 

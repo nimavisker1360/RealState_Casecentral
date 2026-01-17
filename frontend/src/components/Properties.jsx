@@ -2,8 +2,10 @@ import PropertyGridCard from "./PropertyGridCard";
 import { Link } from "react-router-dom";
 import useProperties from "../hooks/useProperties";
 import { PuffLoader } from "react-spinners";
+import { useTranslation } from "react-i18next";
 
 const Properties = () => {
+  const { t } = useTranslation();
   const { data, isError, isLoading } = useProperties();
 
   if (isError) {
@@ -33,10 +35,10 @@ const Properties = () => {
       {/* Section Header */}
       <div className="text-center mb-12">
         <p className="text-green-600 font-medium text-sm uppercase tracking-wider mb-2">
-          Your Future Home Awaits
+          {t('properties.futureHomeAwaits')}
         </p>
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-          Find Your Dream Here
+          {t('properties.findDreamHere')}
         </h2>
       </div>
 
@@ -53,7 +55,7 @@ const Properties = () => {
           to="/listing"
           className="px-8 py-3 bg-[#3d6b2f] text-white font-medium rounded hover:bg-[#2d5022] transition-colors"
         >
-          View More
+          {t('properties.viewMore')}
         </Link>
       </div>
     </section>

@@ -42,7 +42,7 @@ const PropertyGridCard = ({ property }) => {
             <>Arsa - {property.area?.gross?.toLocaleString() || property.area?.net?.toLocaleString() || 0} m²</>
           ) : (
             <>
-              {property.facilities?.bedrooms === 0 ? "Stüdyo" : `${property.facilities?.bedrooms || 0} Yatak Odası`}
+              {property.rooms || (property.facilities?.bedrooms === 0 ? "Stüdyo" : `${property.facilities?.bedrooms || 0}+1`)}
             </>
           )}
         </p>
@@ -62,6 +62,7 @@ PropertyGridCard.propTypes = {
     price: PropTypes.number,
     propertyType: PropTypes.string,
     category: PropTypes.string,
+    rooms: PropTypes.string,
     area: PropTypes.shape({
       gross: PropTypes.number,
       net: PropTypes.number,

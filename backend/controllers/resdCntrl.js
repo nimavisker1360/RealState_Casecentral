@@ -17,6 +17,9 @@ export const createResidency = asyncHandler(async (req, res) => {
     category,
     userEmail,
     consultantId,
+    interiorFeatures,
+    exteriorFeatures,
+    muhitFeatures,
     // Turkish real estate fields
     listingNo,
     listingDate,
@@ -86,6 +89,9 @@ export const createResidency = asyncHandler(async (req, res) => {
       category: category || "residential",
       userEmail,
       consultantId: consultantId || null,
+      interiorFeatures: interiorFeatures || [],
+      exteriorFeatures: exteriorFeatures || [],
+      muhitFeatures: muhitFeatures || [],
       // Turkish real estate fields
       listingNo: listingNo || null,
       listingDate: listingDate ? new Date(listingDate) : null,
@@ -233,6 +239,7 @@ export const updateResidency = asyncHandler(async (req, res) => {
     consultantId,
     interiorFeatures,
     exteriorFeatures,
+    muhitFeatures,
     // Turkish real estate fields
     listingNo,
     listingDate,
@@ -288,6 +295,7 @@ export const updateResidency = asyncHandler(async (req, res) => {
       consultantId: consultantId || null,
       interiorFeatures: interiorFeatures || [],
       exteriorFeatures: exteriorFeatures || [],
+      muhitFeatures: muhitFeatures || [],
       // Turkish real estate fields
       listingNo: listingNo || null,
       listingDate: listingDate ? new Date(listingDate) : null,

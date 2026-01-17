@@ -34,77 +34,67 @@ import {
 } from "react-icons/fa6";
 import { BsHouseDoor, BsTree, BsLightningCharge, BsGeoAlt, BsGrid, BsEye } from "react-icons/bs";
 
-// All possible interior features
+// All possible interior features (Turkish)
 const ALL_INTERIOR_FEATURES = [
   "ADSL",
-  "Smart Home",
-  "Burglar Alarm",
-  "Fire Alarm",
-  "Aluminum Joinery",
-  "American Door",
-  "Built-in Oven",
-  "White Goods",
-  "Dishwasher",
-  "Dryer Machine",
-  "Washing Machine",
-  "Laundry Room",
-  "Steel Door",
-  "Shower Cabin",
-  "Fiber Internet",
-  "Oven",
-  "Dressing Room",
-  "Built-in Wardrobe",
-  "Intercom System",
-  "Crown Molding",
-  "Pantry",
-  "Air Conditioning",
-  "Laminate Flooring",
-  "Furniture",
-  "Built-in Kitchen",
-  "Laminate Kitchen",
-  "Kitchen Natural Gas",
-  "Parquet Flooring",
-  "PVC Joinery",
-  "Ceramic Flooring",
-  "Stovetop",
-  "Spot Lighting",
-  "Jacuzzi",
-  "Bathtub",
-  "Terrace",
+  "Akıllı Ev",
+  "Alarm (Hırsız)",
+  "Alarm (Yangın)",
+  "Alüminyum Doğrama",
+  "Amerikan Kapı",
+  "Ankastre Fırın",
+  "Beyaz Eşya",
+  "Bulaşık Makinesi",
+  "Kurutma Makinesi",
+  "Çamaşır Makinesi",
+  "Çamaşır Odası",
+  "Çelik Kapı",
+  "Duşakabin",
+  "Fiber İnternet",
+  "Fırın",
+  "Giyinme Odası",
+  "Gömme Dolap",
+  "Görüntülü Diafon",
+  "Kartonpiyer",
+  "Kiler",
+  "Klima",
+  "Laminat Zemin",
+  "Mobilya",
+  "Ankastre Mutfak",
+  "Laminat Mutfak",
+  "Mutfak Doğalgazı",
+  "Parke Zemin",
+  "PVC Doğrama",
+  "Seramik Zemin",
+  "Set Üstü Ocak",
+  "Spot Aydınlatma",
+  "Jakuzi",
+  "Küvet",
+  "Teras",
   "Wi-Fi",
-  "Fireplace",
+  "Şömine",
 ];
 
-// All possible exterior features
+// All possible exterior features (Turkish)
 const ALL_EXTERIOR_FEATURES = [
-  "24/7 Security",
-  "Doorman",
-  "EV Charging Station",
-  "Steam Room",
-  "Children's Playground",
-  "Turkish Bath (Hamam)",
-  "Booster Pump",
-  "Thermal Insulation",
-  "Generator",
-  "Cable TV",
-  "Security Camera",
-  "Nursery/Daycare",
-  "Private Pool",
+  "24 Saat Güvenlik",
+  "Apartman Görevlisi",
+  "Araç Şarj İstasyonu",
+  "Çocuk Oyun Parkı",
+  "Hamam",
+  "Hidrofor",
+  "Jeneratör",
+  "Kablo TV",
+  "Kamera Sistemi",
+  "Müstakil Havuzlu",
   "Sauna",
-  "Sound Insulation",
-  "Siding",
-  "Sports Area",
-  "Water Tank",
-  "Satellite",
-  "Fire Escape",
-  "Indoor Swimming Pool",
-  "Outdoor Swimming Pool",
-  "Tennis Court",
-  "Fitness Center",
-  "Concierge",
-  "Garden",
-  "BBQ Area",
-  "Parking Garage",
+  "Ses Yalıtımı",
+  "Spor Alanı",
+  "Su Deposu",
+  "Tenis Kortu",
+  "Yangın Merdiveni",
+  "Yüzme Havuzu (Açık)",
+  "Yüzme Havuzu (Kapalı)",
 ];
 
 // Altyapı (Infrastructure) features
@@ -147,6 +137,28 @@ const MANZARA_FEATURES = [
   "Doğa",
   "Boğaz",
   "Göl",
+];
+
+// Muhit (Neighborhood) features
+const MUHIT_FEATURES = [
+  "Alışveriş Merkezi",
+  "Belediye",
+  "Cami",
+  "Denize Sıfır",
+  "Eczane",
+  "Eğlence Merkezi",
+  "Göle Sıfır",
+  "Hastane",
+  "Havra",
+  "İtfaiye",
+  "Kilise",
+  "Lise",
+  "Park",
+  "Plaj",
+  "Polis Merkezi",
+  "Semt Pazarı",
+  "Spor Salonu",
+  "Şehir Merkezi",
 ];
 
 import { CgRuler } from "react-icons/cg";
@@ -805,6 +817,54 @@ const Property = () => {
                         }
                       >
                         {feature}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            )}
+
+            {/* Muhit Features - Only show when NOT land */}
+            {data?.category !== "land" && (
+            <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                <div className="w-8 h-8 bg-purple-500/10 rounded-lg flexCenter">
+                  <BsGeoAlt className="text-purple-600" />
+                </div>
+                <h4 className="font-semibold text-tertiary">
+                  {t('propertyDetails.muhitFeatures')}
+                </h4>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {MUHIT_FEATURES.map((feature, index) => {
+                  const hasFeature = data?.muhitFeatures?.includes(feature);
+                  return (
+                    <div
+                      key={index}
+                      className={`flex items-center gap-2 text-sm ${
+                        !hasFeature ? "opacity-50" : ""
+                      }`}
+                    >
+                      {hasFeature ? (
+                        <MdCheck
+                          className="text-green-500 flex-shrink-0"
+                          size={18}
+                        />
+                      ) : (
+                        <MdClose
+                          className="text-red-400 flex-shrink-0"
+                          size={18}
+                        />
+                      )}
+                      <span
+                        className={
+                          hasFeature
+                            ? "text-gray-700 font-medium"
+                            : "text-gray-400"
+                        }
+                      >
+                        {t(`muhit.${feature}`, feature)}
                       </span>
                     </div>
                   );

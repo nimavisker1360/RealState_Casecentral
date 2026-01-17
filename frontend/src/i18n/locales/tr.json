@@ -71,6 +71,9 @@
   "properties": {
     "title": "Öne Çıkan Mülkler",
     "subtitle": "En Son İlanlarımızı Keşfedin",
+    "futureHomeAwaits": "Geleceğinizin Evi Sizi Bekliyor",
+    "findDreamHere": "Hayalinizdeki Evi Burada Bulun",
+    "viewMore": "Daha Fazla Görüntüle",
     "viewAll": "Tüm Mülkleri Görüntüle",
     "noProperties": "Mülk bulunamadı",
     "bedrooms": "Yatak Odası",
@@ -345,9 +348,30 @@
     "bookFirstWarning": "Mesaj göndermek için önce bu mülk için randevu alın",
     "interiorFeatures": "İç Özellikler",
     "exteriorFeatures": "Dış Özellikler",
+    "muhitFeatures": "Muhit",
     "contactConsultant": "Danışmanla İletişime Geçin",
     "specialty": "Uzmanlık",
     "languages": "Diller",
     "deals": "işlem"
+  },
+  "muhit": {
+    "Alışveriş Merkezi": "Alışveriş Merkezi",
+    "Belediye": "Belediye",
+    "Cami": "Cami",
+    "Denize Sıfır": "Denize Sıfır",
+    "Eczane": "Eczane",
+    "Eğlence Merkezi": "Eğlence Merkezi",
+    "Göle Sıfır": "Göle Sıfır",
+    "Hastane": "Hastane",
+    "Havra": "Havra",
+    "İtfaiye": "İtfaiye",
+    "Kilise": "Kilise",
+    "Lise": "Lise",
+    "Park": "Park",
+    "Plaj": "Plaj",
+    "Polis Merkezi": "Polis Merkezi",
+    "Semt Pazarı": "Semt Pazarı",
+    "Spor Salonu": "Spor Salonu",
+    "Şehir Merkezi": "Şehir Merkezi"
   }
 }
