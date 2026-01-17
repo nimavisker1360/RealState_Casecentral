@@ -3,6 +3,7 @@ import { Modal, Button, Text, Divider, Alert } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { useMutation } from "react-query";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import UserDetailContext from "../context/UserDetailContext";
 import { bookVisit, getUserProfile } from "../utils/api";
 import { toast } from "react-toastify";
@@ -11,6 +12,7 @@ import { MdWarning, MdPerson } from "react-icons/md";
 import ProfileModal from "./ProfileModal";
 
 const BookingModal = ({ opened, setOpened, email, propertyId }) => {
+  const { t } = useTranslation();
   const [value, setValue] = useState(null);
   const [profileComplete, setProfileComplete] = useState(null);
   const [checkingProfile, setCheckingProfile] = useState(true);
@@ -41,7 +43,7 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
   }, [opened, email, token]);
 
   const handleBookingSuccess = () => {
-    toast.success("Ziyaret başarıyla rezerve edildi!", {
+    toast.success(t("booking.bookingConfirmed"), {
       position: "bottom-right",
     });
     setUserDetails((prev) => ({
@@ -78,7 +80,7 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
       <Modal
         opened={opened}
         onClose={() => setOpened(false)}
-        title="Ziyaret Tarihi Seçin"
+        title={t("booking.selectDate")}
         centered
       >
         {checkingProfile ? (
@@ -90,20 +92,19 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
           <div className="py-4">
             <Alert
               icon={<MdWarning size={24} />}
-              title="Profil Tamamlanmadı"
+              title={t("booking.profileIncompleteTitle")}
               color="orange"
               variant="light"
               className="mb-4"
             >
               <Text size="sm">
-                Rezervasyon yapabilmek için önce profilinizi tamamlamanız gerekmektedir.
-                Lütfen aşağıdaki bilgileri doldurun:
+                {t("booking.profileIncompleteMessage")}
               </Text>
               <ul className="list-disc list-inside mt-2 text-sm">
-                <li>Profil fotoğrafı</li>
-                <li>Ad Soyad</li>
-                <li>WhatsApp numarası</li>
-                <li>Adres</li>
+                <li>{t("booking.profilePhoto")}</li>
+                <li>{t("booking.fullName")}</li>
+                <li>{t("booking.whatsappNumber")}</li>
+                <li>{t("booking.address")}</li>
               </ul>
             </Alert>
 
@@ -119,7 +120,7 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
                 }}
                 fullWidth
               >
-                Profilimi Tamamla
+                {t("booking.completeProfile")}
               </Button>
               <Button
                 variant="subtle"
@@ -127,7 +128,7 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
                 onClick={() => setOpened(false)}
                 fullWidth
               >
-                Daha Sonra
+                {t("booking.later")}
               </Button>
             </div>
           </div>
@@ -141,7 +142,7 @@ const BookingModal = ({ opened, setOpened, email, propertyId }) => {
               loading={isLoading}
               fullWidth
             >
-              Ziyareti Rezerve Et
+              {t("booking.bookVisit")}
             </Button>
           </div>
         )}

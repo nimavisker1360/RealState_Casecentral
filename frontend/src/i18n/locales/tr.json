@@ -207,13 +207,22 @@
   },
   "booking": {
     "title": "Ziyaret Randevusu Al",
-    "selectDate": "Tarih Seçin",
+    "selectDate": "Ziyaret Tarihi Seçin",
     "selectTime": "Saat Seçin",
     "yourBookings": "Randevularınız",
     "noBookings": "Henüz randevunuz bulunmamaktadır",
-    "bookingConfirmed": "Randevu başarıyla onaylandı!",
+    "bookingConfirmed": "Ziyaret başarıyla rezerve edildi!",
     "cancelBooking": "Randevuyu İptal Et",
-    "bookingCancelled": "Randevu iptal edildi"
+    "bookingCancelled": "Randevu iptal edildi",
+    "profileIncompleteTitle": "Profil Tamamlanmadı",
+    "profileIncompleteMessage": "Rezervasyon yapabilmek için önce profilinizi tamamlamanız gerekmektedir. Lütfen aşağıdaki bilgileri doldurun:",
+    "profilePhoto": "Profil fotoğrafı",
+    "fullName": "Ad Soyad",
+    "whatsappNumber": "WhatsApp numarası",
+    "address": "Adres",
+    "completeProfile": "Profilimi Tamamla",
+    "later": "Daha Sonra",
+    "bookVisit": "Ziyareti Rezerve Et"
   },
   "favorites": {
     "title": "Favorileriniz",
@@ -317,6 +326,7 @@
     "dues": "Aidat (TL)",
     "mortgageEligible": "Krediye Uygun",
     "deedStatus": "Tapu Durumu",
+    "imarDurumu": "İmar Durumu",
     "yes": "Evet",
     "no": "Hayır",
     "available": "Var",

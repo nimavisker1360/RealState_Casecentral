@@ -36,6 +36,12 @@ export const createResidency = asyncHandler(async (req, res) => {
     dues,
     mortgageEligible,
     deedStatus,
+    // Land/Arsa features
+    imarDurumu,
+    altyapiFeatures,
+    konumFeatures,
+    genelOzellikler,
+    manzaraFeatures,
   } = req.body.data;
 
   console.log("========================================");
@@ -100,6 +106,12 @@ export const createResidency = asyncHandler(async (req, res) => {
       dues: dues || null,
       mortgageEligible: mortgageEligible || false,
       deedStatus: deedStatus || null,
+      // Land/Arsa features
+      imarDurumu: imarDurumu || null,
+      altyapiFeatures: altyapiFeatures || [],
+      konumFeatures: konumFeatures || [],
+      genelOzellikler: genelOzellikler || [],
+      manzaraFeatures: manzaraFeatures || [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -240,6 +252,12 @@ export const updateResidency = asyncHandler(async (req, res) => {
     dues,
     mortgageEligible,
     deedStatus,
+    // Land/Arsa features
+    imarDurumu,
+    altyapiFeatures,
+    konumFeatures,
+    genelOzellikler,
+    manzaraFeatures,
   } = req.body.data;
 
   console.log("========================================");
@@ -290,6 +308,12 @@ export const updateResidency = asyncHandler(async (req, res) => {
       dues: dues || null,
       mortgageEligible: mortgageEligible || false,
       deedStatus: deedStatus || null,
+      // Land/Arsa features
+      imarDurumu: imarDurumu || null,
+      altyapiFeatures: altyapiFeatures || [],
+      konumFeatures: konumFeatures || [],
+      genelOzellikler: genelOzellikler || [],
+      manzaraFeatures: manzaraFeatures || [],
       updatedAt: new Date(),
     };
 

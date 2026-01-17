@@ -13,12 +13,17 @@ import {
   Switch,
   Divider,
   Paper,
+  Checkbox,
+  Collapse,
+  ScrollArea,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { validateString } from "../utils/common";
 import PropTypes from "prop-types";
-import { MdSell, MdPerson, MdLocationCity, MdPublic } from "react-icons/md";
+import { MdSell, MdPerson, MdLocationCity, MdPublic, MdExpandMore, MdExpandLess } from "react-icons/md";
+import { BsLightningCharge, BsGeoAlt, BsGrid, BsEye } from "react-icons/bs";
 import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 import useConsultants from "../hooks/useConsultants";
 
@@ -63,12 +68,17 @@ const usageStatusOptions = [
   { value: "mulk-sahibi", label: "Mülk Sahibi" },
 ];
 
-// Deed status options
-const deedStatusOptions = [
-  { value: "kat-mulkiyetli", label: "Kat Mülkiyetli" },
-  { value: "kat-irtifakli", label: "Kat İrtifaklı" },
-  { value: "hisseli-tapu", label: "Hisseli Tapu" },
-  { value: "kooperatif", label: "Kooperatif" },
+
+// İmar Durumu (Zoning Status) options
+const imarDurumuOptions = [
+  { value: "villa", label: "Villa" },
+  { value: "konut", label: "Konut" },
+  { value: "ticari", label: "Ticari" },
+  { value: "arsa", label: "Arsa" },
+  { value: "karma", label: "Karma" },
+  { value: "sanayi", label: "Sanayi" },
+  { value: "turizm", label: "Turizm" },
+  { value: "tarimsal", label: "Tarımsal" },
 ];
 
 // Room options
@@ -85,6 +95,48 @@ const roomOptions = [
   { value: "5+2", label: "5+2" },
   { value: "6+1", label: "6+1" },
   { value: "6+2", label: "6+2" },
+];
+
+// Altyapı (Infrastructure) features
+const ALTYAPI_FEATURES = [
+  "Elektrik",
+  "Sanayi Elektriği",
+  "Su",
+  "Telefon",
+  "Doğalgaz",
+  "Kanalizasyon",
+  "Arıtma",
+  "Sondaj & Kuyu",
+  "Zemin Etüdü",
+  "Yolu Açılmış",
+  "Yolu Açılmamış",
+  "Yolu Yok",
+];
+
+// Konum (Location) features
+const KONUM_FEATURES = [
+  "Ana Yola Yakın",
+  "Denize Sıfır",
+  "Denize Yakın",
+  "Havaalanına Yakın",
+  "Toplu Ulaşıma Yakın",
+];
+
+// Genel Özellikler (General Features)
+const GENEL_OZELLIKLER = [
+  "İfrazlı",
+  "Parselli",
+  "Projeli",
+  "Köşe Parsel",
+];
+
+// Manzara (View) features
+const MANZARA_FEATURES = [
+  "Şehir",
+  "Deniz",
+  "Doğa",
+  "Boğaz",
+  "Göl",
 ];
 
 const BasicDetails = ({
@@ -123,6 +175,12 @@ const BasicDetails = ({
       dues: propertyDetails.dues || 0,
       mortgageEligible: propertyDetails.mortgageEligible || false,
       deedStatus: propertyDetails.deedStatus || "",
+      imarDurumu: propertyDetails.imarDurumu || "",
+      // Land/Arsa features
+      altyapiFeatures: propertyDetails.altyapiFeatures || [],
+      konumFeatures: propertyDetails.konumFeatures || [],
+      genelOzellikler: propertyDetails.genelOzellikler || [],
+      manzaraFeatures: propertyDetails.manzaraFeatures || [],
     },
     validate: {
       title: (value) => validateString(value),
@@ -157,6 +215,11 @@ const BasicDetails = ({
     dues,
     mortgageEligible,
     deedStatus,
+    imarDurumu,
+    altyapiFeatures,
+    konumFeatures,
+    genelOzellikler,
+    manzaraFeatures,
   } = form.values;
   const handleSubmit = () => {
     const { hasErrors } = form.validate();
@@ -188,6 +251,11 @@ const BasicDetails = ({
         dues,
         mortgageEligible,
         deedStatus,
+        imarDurumu,
+        altyapiFeatures,
+        konumFeatures,
+        genelOzellikler,
+        manzaraFeatures,
       }));
       nextStep();
     }
@@ -373,16 +441,20 @@ const BasicDetails = ({
           <Grid.Col span={4}>
             <NumberInput
               label="m² (Brüt)"
-              placeholder="125"
+              placeholder="4500"
               min={0}
+              thousandSeparator="."
+              decimalSeparator=","
               {...form.getInputProps("areaGross")}
             />
           </Grid.Col>
           <Grid.Col span={4}>
             <NumberInput
               label="m² (Net)"
-              placeholder="85"
+              placeholder="4000"
               min={0}
+              thousandSeparator="."
+              decimalSeparator=","
               {...form.getInputProps("areaNet")}
             />
           </Grid.Col>
@@ -527,7 +599,7 @@ const BasicDetails = ({
         </Grid>
 
         <Grid mt="sm">
-          <Grid.Col span={6}>
+          <Grid.Col span={4}>
             <Select
               label="Kullanım Durumu"
               placeholder="Seçin"
@@ -537,17 +609,139 @@ const BasicDetails = ({
               clearable
             />
           </Grid.Col>
-          <Grid.Col span={6}>
-            <Select
+          <Grid.Col span={4}>
+            <TextInput
               label="Tapu Durumu"
+              placeholder="Tapu durumunu yazın"
+              {...form.getInputProps("deedStatus")}
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <Select
+              label="İmar Durumu"
               placeholder="Seçin"
-              data={deedStatusOptions}
-              value={deedStatus}
-              onChange={(value) => form.setFieldValue("deedStatus", value)}
+              data={imarDurumuOptions}
+              value={imarDurumu}
+              onChange={(value) => form.setFieldValue("imarDurumu", value)}
               clearable
             />
           </Grid.Col>
         </Grid>
+
+        {/* Arsa/Land Features Section */}
+        <Divider my="lg" label="Arsa Özellikleri" labelPosition="center" />
+
+        {/* Altyapı (Infrastructure) */}
+        <Paper p="md" withBorder mb="md" className="bg-amber-50">
+          <div className="flex items-center gap-2 mb-3">
+            <BsLightningCharge className="text-amber-600" size={18} />
+            <Text fw={600} c="dark">Altyapı</Text>
+            <span className="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full ml-auto">
+              {altyapiFeatures.length} seçili
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {ALTYAPI_FEATURES.map((feature) => (
+              <Checkbox
+                key={feature}
+                label={feature}
+                size="xs"
+                checked={altyapiFeatures.includes(feature)}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    form.setFieldValue("altyapiFeatures", [...altyapiFeatures, feature]);
+                  } else {
+                    form.setFieldValue("altyapiFeatures", altyapiFeatures.filter((f) => f !== feature));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </Paper>
+
+        {/* Konum (Location) */}
+        <Paper p="md" withBorder mb="md" className="bg-blue-50">
+          <div className="flex items-center gap-2 mb-3">
+            <BsGeoAlt className="text-blue-600" size={18} />
+            <Text fw={600} c="dark">Konum</Text>
+            <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full ml-auto">
+              {konumFeatures.length} seçili
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+            {KONUM_FEATURES.map((feature) => (
+              <Checkbox
+                key={feature}
+                label={feature}
+                size="xs"
+                checked={konumFeatures.includes(feature)}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    form.setFieldValue("konumFeatures", [...konumFeatures, feature]);
+                  } else {
+                    form.setFieldValue("konumFeatures", konumFeatures.filter((f) => f !== feature));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </Paper>
+
+        {/* Genel Özellikler (General Features) */}
+        <Paper p="md" withBorder mb="md" className="bg-green-50">
+          <div className="flex items-center gap-2 mb-3">
+            <BsGrid className="text-green-600" size={18} />
+            <Text fw={600} c="dark">Genel Özellikler</Text>
+            <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full ml-auto">
+              {genelOzellikler.length} seçili
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {GENEL_OZELLIKLER.map((feature) => (
+              <Checkbox
+                key={feature}
+                label={feature}
+                size="xs"
+                checked={genelOzellikler.includes(feature)}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    form.setFieldValue("genelOzellikler", [...genelOzellikler, feature]);
+                  } else {
+                    form.setFieldValue("genelOzellikler", genelOzellikler.filter((f) => f !== feature));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </Paper>
+
+        {/* Manzara (View) */}
+        <Paper p="md" withBorder mb="md" className="bg-purple-50">
+          <div className="flex items-center gap-2 mb-3">
+            <BsEye className="text-purple-600" size={18} />
+            <Text fw={600} c="dark">Manzara</Text>
+            <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full ml-auto">
+              {manzaraFeatures.length} seçili
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            {MANZARA_FEATURES.map((feature) => (
+              <Checkbox
+                key={feature}
+                label={feature}
+                size="xs"
+                checked={manzaraFeatures.includes(feature)}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    form.setFieldValue("manzaraFeatures", [...manzaraFeatures, feature]);
+                  } else {
+                    form.setFieldValue("manzaraFeatures", manzaraFeatures.filter((f) => f !== feature));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </Paper>
 
         <Group position="center" mt="xl">
           <Button variant="default" onClick={prevStep}>

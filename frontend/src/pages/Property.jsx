@@ -32,7 +32,7 @@ import {
   FaEnvelope,
   FaStar,
 } from "react-icons/fa6";
-import { BsHouseDoor, BsTree } from "react-icons/bs";
+import { BsHouseDoor, BsTree, BsLightningCharge, BsGeoAlt, BsGrid, BsEye } from "react-icons/bs";
 
 // All possible interior features
 const ALL_INTERIOR_FEATURES = [
@@ -106,6 +106,49 @@ const ALL_EXTERIOR_FEATURES = [
   "BBQ Area",
   "Parking Garage",
 ];
+
+// Altyapı (Infrastructure) features
+const ALTYAPI_FEATURES = [
+  "Elektrik",
+  "Sanayi Elektriği",
+  "Su",
+  "Telefon",
+  "Doğalgaz",
+  "Kanalizasyon",
+  "Arıtma",
+  "Sondaj & Kuyu",
+  "Zemin Etüdü",
+  "Yolu Açılmış",
+  "Yolu Açılmamış",
+  "Yolu Yok",
+];
+
+// Konum (Location) features
+const KONUM_FEATURES = [
+  "Ana Yola Yakın",
+  "Denize Sıfır",
+  "Denize Yakın",
+  "Havaalanına Yakın",
+  "Toplu Ulaşıma Yakın",
+];
+
+// Genel Özellikler (General Features)
+const GENEL_OZELLIKLER = [
+  "İfrazlı",
+  "Parselli",
+  "Projeli",
+  "Köşe Parsel",
+];
+
+// Manzara (View) features
+const MANZARA_FEATURES = [
+  "Şehir",
+  "Deniz",
+  "Doğa",
+  "Boğaz",
+  "Göl",
+];
+
 import { CgRuler } from "react-icons/cg";
 import HeartBtn from "../components/HeartBtn";
 
@@ -427,7 +470,7 @@ const Property = () => {
               <MdOutlineGarage /> {data?.facilities?.parkings}
             </div>
             <div className="flexCenter gap-x-2 font-[500] text-sm sm:text-base">
-              <CgRuler /> {data?.area?.gross || data?.area?.net || 0} m²
+              <CgRuler /> {(data?.area?.gross || data?.area?.net || 0).toLocaleString()} m²
             </div>
           </div>
           <p className="pt-2 mb-4">{data?.description}</p>
@@ -476,13 +519,13 @@ const Property = () => {
                 {data?.area?.gross > 0 && (
                   <tr className="border-b border-gray-200">
                     <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.grossArea')}</td>
-                    <td className="px-4 py-3 text-gray-900">{data.area.gross}</td>
+                    <td className="px-4 py-3 text-gray-900">{data.area.gross.toLocaleString()}</td>
                   </tr>
                 )}
                 {data?.area?.net > 0 && (
                   <tr className="border-b border-gray-200">
                     <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.netArea')}</td>
-                    <td className="px-4 py-3 text-gray-900">{data.area.net}</td>
+                    <td className="px-4 py-3 text-gray-900">{data.area.net.toLocaleString()}</td>
                   </tr>
                 )}
                 {data?.rooms && (
@@ -566,9 +609,15 @@ const Property = () => {
                   <td className="px-4 py-3 text-gray-900">{data?.mortgageEligible ? t('propertyDetails.yes') : t('propertyDetails.no')}</td>
                 </tr>
                 {data?.deedStatus && (
-                  <tr>
+                  <tr className="border-b border-gray-200">
                     <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.deedStatus')}</td>
                     <td className="px-4 py-3 text-gray-900 capitalize">{data.deedStatus.replace(/-/g, " ")}</td>
+                  </tr>
+                )}
+                {data?.imarDurumu && (
+                  <tr>
+                    <td className="px-4 py-3 font-medium text-gray-700 border-r border-gray-200">{t('propertyDetails.imarDurumu')}</td>
+                    <td className="px-4 py-3 text-gray-900 capitalize">{data.imarDurumu.replace(/-/g, " ")}</td>
                   </tr>
                 )}
               </tbody>
@@ -668,7 +717,8 @@ const Property = () => {
 
           {/* Property Features Section */}
           <div className="mt-8 space-y-6">
-            {/* Interior Features */}
+            {/* Interior Features - Only show when NOT land */}
+            {data?.category !== "land" && (
             <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                 <div className="w-8 h-8 bg-green-500/10 rounded-lg flexCenter">
@@ -713,8 +763,10 @@ const Property = () => {
                 })}
               </div>
             </div>
+            )}
 
-            {/* Exterior Features */}
+            {/* Exterior Features - Only show when NOT land */}
+            {data?.category !== "land" && (
             <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                 <div className="w-8 h-8 bg-blue-500/10 rounded-lg flexCenter">
@@ -759,6 +811,140 @@ const Property = () => {
                 })}
               </div>
             </div>
+            )}
+
+            {/* Arsa/Land Features - Only show when category is land */}
+            {data?.category === "land" && (
+              <>
+                {/* Altyapı */}
+                <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-amber-500/10 rounded-lg flexCenter">
+                      <BsLightningCharge className="text-amber-600" />
+                    </div>
+                    <h4 className="font-semibold text-tertiary">Altyapı</h4>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {ALTYAPI_FEATURES.map((feature, index) => {
+                      const hasFeature = data?.altyapiFeatures?.includes(feature);
+                      return (
+                        <div
+                          key={index}
+                          className={`flex items-center gap-2 text-sm ${
+                            !hasFeature ? "opacity-50" : ""
+                          }`}
+                        >
+                          {hasFeature ? (
+                            <MdCheck className="text-green-500 flex-shrink-0" size={18} />
+                          ) : (
+                            <MdClose className="text-red-400 flex-shrink-0" size={18} />
+                          )}
+                          <span className={hasFeature ? "text-gray-700 font-medium" : "text-gray-400"}>
+                            {feature}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Konum */}
+                <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-blue-500/10 rounded-lg flexCenter">
+                      <BsGeoAlt className="text-blue-600" />
+                    </div>
+                    <h4 className="font-semibold text-tertiary">Konum</h4>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {KONUM_FEATURES.map((feature, index) => {
+                      const hasFeature = data?.konumFeatures?.includes(feature);
+                      return (
+                        <div
+                          key={index}
+                          className={`flex items-center gap-2 text-sm ${
+                            !hasFeature ? "opacity-50" : ""
+                          }`}
+                        >
+                          {hasFeature ? (
+                            <MdCheck className="text-green-500 flex-shrink-0" size={18} />
+                          ) : (
+                            <MdClose className="text-red-400 flex-shrink-0" size={18} />
+                          )}
+                          <span className={hasFeature ? "text-gray-700 font-medium" : "text-gray-400"}>
+                            {feature}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Genel Özellikler */}
+                <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-green-500/10 rounded-lg flexCenter">
+                      <BsGrid className="text-green-600" />
+                    </div>
+                    <h4 className="font-semibold text-tertiary">Genel Özellikler</h4>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {GENEL_OZELLIKLER.map((feature, index) => {
+                      const hasFeature = data?.genelOzellikler?.includes(feature);
+                      return (
+                        <div
+                          key={index}
+                          className={`flex items-center gap-2 text-sm ${
+                            !hasFeature ? "opacity-50" : ""
+                          }`}
+                        >
+                          {hasFeature ? (
+                            <MdCheck className="text-green-500 flex-shrink-0" size={18} />
+                          ) : (
+                            <MdClose className="text-red-400 flex-shrink-0" size={18} />
+                          )}
+                          <span className={hasFeature ? "text-gray-700 font-medium" : "text-gray-400"}>
+                            {feature}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Manzara */}
+                <div className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-purple-500/10 rounded-lg flexCenter">
+                      <BsEye className="text-purple-600" />
+                    </div>
+                    <h4 className="font-semibold text-tertiary">Manzara</h4>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    {MANZARA_FEATURES.map((feature, index) => {
+                      const hasFeature = data?.manzaraFeatures?.includes(feature);
+                      return (
+                        <div
+                          key={index}
+                          className={`flex items-center gap-2 text-sm ${
+                            !hasFeature ? "opacity-50" : ""
+                          }`}
+                        >
+                          {hasFeature ? (
+                            <MdCheck className="text-green-500 flex-shrink-0" size={18} />
+                          ) : (
+                            <MdClose className="text-red-400 flex-shrink-0" size={18} />
+                          )}
+                          <span className={hasFeature ? "text-gray-700 font-medium" : "text-gray-400"}>
+                            {feature}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Consultant Contact Section */}

@@ -63,6 +63,13 @@ model Residency {
     interiorFeatures String[] // İç Özellikler
     exteriorFeatures String[] // Dış Özellikler
     
+    // Land/Arsa Features
+    imarDurumu String? // İmar Durumu (Zoning Status)
+    altyapiFeatures String[] // Altyapı (Infrastructure)
+    konumFeatures String[] // Konum (Location)
+    genelOzellikler String[] // Genel Özellikler (General Features)
+    manzaraFeatures String[] // Manzara (View)
+    
     userEmail String?
     owner User? @relation("Owner",fields: [userEmail],references: [email])
     

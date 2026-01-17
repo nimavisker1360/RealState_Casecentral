@@ -36,10 +36,15 @@ const PropertyGridCard = ({ property }) => {
           ₺{property.price.toLocaleString()}
         </p>
 
-        {/* Beds Info */}
+        {/* Property Info */}
         <p className="text-sm text-gray-500">
-          {property.facilities?.bedrooms === 0 ? "Studio" : "Studio"} -{" "}
-          {property.facilities?.bedrooms || 2} Beds
+          {property.category === "land" ? (
+            <>Arsa - {property.area?.gross?.toLocaleString() || property.area?.net?.toLocaleString() || 0} m²</>
+          ) : (
+            <>
+              {property.facilities?.bedrooms === 0 ? "Stüdyo" : `${property.facilities?.bedrooms || 0} Yatak Odası`}
+            </>
+          )}
         </p>
       </div>
     </div>
@@ -56,6 +61,11 @@ PropertyGridCard.propTypes = {
     country: PropTypes.string,
     price: PropTypes.number,
     propertyType: PropTypes.string,
+    category: PropTypes.string,
+    area: PropTypes.shape({
+      gross: PropTypes.number,
+      net: PropTypes.number,
+    }),
     facilities: PropTypes.shape({
       bedrooms: PropTypes.number,
       bathrooms: PropTypes.number,

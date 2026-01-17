@@ -133,18 +133,26 @@ const PropertyCard = ({ property, onCardClick }) => {
 
           {/* Facilities */}
           <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <MdOutlineBed className="w-4 h-4" />
-              <span>{property.facilities?.bedrooms || 0} Beds</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MdOutlineBathtub className="w-4 h-4" />
-              <span>{property.facilities?.bathrooms || 0} Baths</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MdOutlineGarage className="w-4 h-4" />
-              <span>{property.facilities?.parkings || 0} Garage</span>
-            </div>
+            {property.category === "land" ? (
+              <div className="flex items-center gap-1">
+                <span>Arsa - {property.area?.gross?.toLocaleString() || property.area?.net?.toLocaleString() || 0} m²</span>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-1">
+                  <MdOutlineBed className="w-4 h-4" />
+                  <span>{property.facilities?.bedrooms || 0} Yatak</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MdOutlineBathtub className="w-4 h-4" />
+                  <span>{property.facilities?.bathrooms || 0} Banyo</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MdOutlineGarage className="w-4 h-4" />
+                  <span>{property.facilities?.parkings || 0} Garaj</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Description */}

@@ -24,24 +24,17 @@ const Facilities = ({
       parkings: propertyDetails.facilities.parkings,
       bathrooms: propertyDetails.facilities.bathrooms,
     },
-    validate: {
-      bedrooms: (value) =>
-        value < 1 ? "Must have at least one bedroom" : null,
-      bathrooms: (value) =>
-        value < 1 ? "Must have at least one bathroom" : null,
-    },
+    // All fields are optional - no validation required
   });
   const { bedrooms, parkings, bathrooms } = form.values;
 
   const handleSubmit = () => {
-    const { hasErrors } = form.validate();
-    if (!hasErrors) {
-      setPropertyDetails((prev) => ({
-        ...prev,
-        facilities: { bedrooms, parkings, bathrooms },
-      }));
-      mutate();
-    }
+    // All fields are optional, submit directly
+    setPropertyDetails((prev) => ({
+      ...prev,
+      facilities: { bedrooms, parkings, bathrooms },
+    }));
+    mutate();
   };
 
   //   Upload
@@ -130,13 +123,11 @@ const Facilities = ({
         }}
       >
         <NumberInput
-          withAsterisk
           label="Yatak Odası Sayısı"
           min={0}
           {...form.getInputProps("bedrooms")}
         />
         <NumberInput
-          withAsterisk
           label="Banyo Sayısı"
           min={0}
           {...form.getInputProps("bathrooms")}

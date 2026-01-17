@@ -207,13 +207,22 @@
   },
   "booking": {
     "title": "Book a Visit",
-    "selectDate": "Select Date",
+    "selectDate": "Select Visit Date",
     "selectTime": "Select Time",
     "yourBookings": "Your Bookings",
     "noBookings": "You have no bookings yet",
-    "bookingConfirmed": "Booking confirmed successfully!",
+    "bookingConfirmed": "Visit booked successfully!",
     "cancelBooking": "Cancel Booking",
-    "bookingCancelled": "Booking cancelled"
+    "bookingCancelled": "Booking cancelled",
+    "profileIncompleteTitle": "Profile Incomplete",
+    "profileIncompleteMessage": "To make a reservation, you must first complete your profile. Please fill in the following information:",
+    "profilePhoto": "Profile photo",
+    "fullName": "Full Name",
+    "whatsappNumber": "WhatsApp number",
+    "address": "Address",
+    "completeProfile": "Complete My Profile",
+    "later": "Later",
+    "bookVisit": "Book the Visit"
   },
   "favorites": {
     "title": "Your Favourites",
@@ -317,6 +326,7 @@
     "dues": "Monthly Dues",
     "mortgageEligible": "Mortgage Eligible",
     "deedStatus": "Deed Status",
+    "imarDurumu": "Zoning Status",
     "yes": "Yes",
     "no": "No",
     "available": "Available",

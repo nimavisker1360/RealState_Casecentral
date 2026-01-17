@@ -32,7 +32,7 @@ import {
   MdPublic,
 } from "react-icons/md";
 import { AiOutlineClose } from "react-icons/ai";
-import { BsHouseDoor, BsTree } from "react-icons/bs";
+import { BsHouseDoor, BsTree, BsLightningCharge, BsGeoAlt, BsGrid, BsEye } from "react-icons/bs";
 import { FaLandmark, FaHome, FaBriefcase } from "react-icons/fa";
 
 // Property categories
@@ -73,11 +73,17 @@ const usageStatusOptions = [
   { value: "mulk-sahibi", label: "Mülk Sahibi" },
 ];
 
-const deedStatusOptions = [
-  { value: "kat-mulkiyetli", label: "Kat Mülkiyetli" },
-  { value: "kat-irtifakli", label: "Kat İrtifaklı" },
-  { value: "hisseli-tapu", label: "Hisseli Tapu" },
-  { value: "kooperatif", label: "Kooperatif" },
+
+// İmar Durumu (Zoning Status) options
+const imarDurumuOptions = [
+  { value: "villa", label: "Villa" },
+  { value: "konut", label: "Konut" },
+  { value: "ticari", label: "Ticari" },
+  { value: "arsa", label: "Arsa" },
+  { value: "karma", label: "Karma" },
+  { value: "sanayi", label: "Sanayi" },
+  { value: "turizm", label: "Turizm" },
+  { value: "tarimsal", label: "Tarımsal" },
 ];
 
 const roomOptions = [
@@ -93,6 +99,48 @@ const roomOptions = [
   { value: "5+2", label: "5+2" },
   { value: "6+1", label: "6+1" },
   { value: "6+2", label: "6+2" },
+];
+
+// Altyapı (Infrastructure) features
+const ALTYAPI_FEATURES = [
+  "Elektrik",
+  "Sanayi Elektriği",
+  "Su",
+  "Telefon",
+  "Doğalgaz",
+  "Kanalizasyon",
+  "Arıtma",
+  "Sondaj & Kuyu",
+  "Zemin Etüdü",
+  "Yolu Açılmış",
+  "Yolu Açılmamış",
+  "Yolu Yok",
+];
+
+// Konum (Location) features
+const KONUM_FEATURES = [
+  "Ana Yola Yakın",
+  "Denize Sıfır",
+  "Denize Yakın",
+  "Havaalanına Yakın",
+  "Toplu Ulaşıma Yakın",
+];
+
+// Genel Özellikler (General Features)
+const GENEL_OZELLIKLER = [
+  "İfrazlı",
+  "Parselli",
+  "Projeli",
+  "Köşe Parsel",
+];
+
+// Manzara (View) features
+const MANZARA_FEATURES = [
+  "Şehir",
+  "Deniz",
+  "Doğa",
+  "Boğaz",
+  "Göl",
 ];
 
 // All possible interior features
@@ -212,6 +260,13 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
   const [dues, setDues] = useState(0);
   const [mortgageEligible, setMortgageEligible] = useState(false);
   const [deedStatus, setDeedStatus] = useState("");
+  const [imarDurumu, setImarDurumu] = useState("");
+  
+  // Land/Arsa features
+  const [altyapiFeatures, setAltyapiFeatures] = useState([]);
+  const [konumFeatures, setKonumFeatures] = useState([]);
+  const [genelOzellikler, setGenelOzellikler] = useState([]);
+  const [manzaraFeatures, setManzaraFeatures] = useState([]);
 
   const form = useForm({
     initialValues: {
@@ -234,8 +289,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       country: (value) => validateString(value),
       city: (value) => validateString(value),
       address: (value) => validateString(value),
-      bedrooms: (value) => (value < 1 ? "En az 1 yatak odası olmalı" : null),
-      bathrooms: (value) => (value < 1 ? "En az 1 banyo olmalı" : null),
+      // bedrooms and bathrooms are optional
     },
   });
 
@@ -289,6 +343,13 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       setDues(property.dues || 0);
       setMortgageEligible(property.mortgageEligible || false);
       setDeedStatus(property.deedStatus || "");
+      setImarDurumu(property.imarDurumu || "");
+      
+      // Land/Arsa features
+      setAltyapiFeatures(property.altyapiFeatures || []);
+      setKonumFeatures(property.konumFeatures || []);
+      setGenelOzellikler(property.genelOzellikler || []);
+      setManzaraFeatures(property.manzaraFeatures || []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [property]);
@@ -398,6 +459,12 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
       dues,
       mortgageEligible,
       deedStatus,
+      imarDurumu,
+      // Land/Arsa features
+      altyapiFeatures,
+      konumFeatures,
+      genelOzellikler,
+      manzaraFeatures,
     };
 
     mutate(data);
@@ -547,13 +614,11 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
         </Text>
         <div className="grid grid-cols-3 gap-4">
           <NumberInput
-            withAsterisk
             label="Yatak Odası"
             min={0}
             {...form.getInputProps("bedrooms")}
           />
           <NumberInput
-            withAsterisk
             label="Banyo"
             min={0}
             {...form.getInputProps("bathrooms")}
@@ -621,8 +686,10 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
           <Grid.Col span={4}>
             <NumberInput
               label="m² (Brüt)"
-              placeholder="125"
+              placeholder="4500"
               min={0}
+              thousandSeparator="."
+              decimalSeparator=","
               value={areaGross}
               onChange={setAreaGross}
             />
@@ -630,8 +697,10 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
           <Grid.Col span={4}>
             <NumberInput
               label="m² (Net)"
-              placeholder="85"
+              placeholder="4000"
               min={0}
+              thousandSeparator="."
+              decimalSeparator=","
               value={areaNet}
               onChange={setAreaNet}
             />
@@ -771,7 +840,7 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
         </Grid>
 
         <Grid mt="sm">
-          <Grid.Col span={6}>
+          <Grid.Col span={4}>
             <Select
               label="Kullanım Durumu"
               placeholder="Seçin"
@@ -781,17 +850,140 @@ const EditPropertyModal = ({ opened, setOpened, property, onSuccess }) => {
               clearable
             />
           </Grid.Col>
-          <Grid.Col span={6}>
-            <Select
+          <Grid.Col span={4}>
+            <TextInput
               label="Tapu Durumu"
-              placeholder="Seçin"
-              data={deedStatusOptions}
+              placeholder="Tapu durumunu yazın"
               value={deedStatus}
-              onChange={setDeedStatus}
+              onChange={(e) => setDeedStatus(e.target.value)}
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <Select
+              label="İmar Durumu"
+              placeholder="Seçin"
+              data={imarDurumuOptions}
+              value={imarDurumu}
+              onChange={setImarDurumu}
               clearable
             />
           </Grid.Col>
         </Grid>
+
+        {/* Arsa/Land Features Section */}
+        <Divider my="lg" label="Arsa Özellikleri" labelPosition="center" />
+
+        {/* Altyapı (Infrastructure) */}
+        <Paper p="md" withBorder mb="md" className="bg-amber-50">
+          <div className="flex items-center gap-2 mb-3">
+            <BsLightningCharge className="text-amber-600" size={18} />
+            <Text fw={600} c="dark">Altyapı</Text>
+            <span className="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full ml-auto">
+              {altyapiFeatures.length} seçili
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {ALTYAPI_FEATURES.map((feature) => (
+              <Checkbox
+                key={feature}
+                label={feature}
+                size="xs"
+                checked={altyapiFeatures.includes(feature)}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    setAltyapiFeatures([...altyapiFeatures, feature]);
+                  } else {
+                    setAltyapiFeatures(altyapiFeatures.filter((f) => f !== feature));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </Paper>
+
+        {/* Konum (Location) */}
+        <Paper p="md" withBorder mb="md" className="bg-blue-50">
+          <div className="flex items-center gap-2 mb-3">
+            <BsGeoAlt className="text-blue-600" size={18} />
+            <Text fw={600} c="dark">Konum</Text>
+            <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full ml-auto">
+              {konumFeatures.length} seçili
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+            {KONUM_FEATURES.map((feature) => (
+              <Checkbox
+                key={feature}
+                label={feature}
+                size="xs"
+                checked={konumFeatures.includes(feature)}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    setKonumFeatures([...konumFeatures, feature]);
+                  } else {
+                    setKonumFeatures(konumFeatures.filter((f) => f !== feature));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </Paper>
+
+        {/* Genel Özellikler (General Features) */}
+        <Paper p="md" withBorder mb="md" className="bg-green-50">
+          <div className="flex items-center gap-2 mb-3">
+            <BsGrid className="text-green-600" size={18} />
+            <Text fw={600} c="dark">Genel Özellikler</Text>
+            <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full ml-auto">
+              {genelOzellikler.length} seçili
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {GENEL_OZELLIKLER.map((feature) => (
+              <Checkbox
+                key={feature}
+                label={feature}
+                size="xs"
+                checked={genelOzellikler.includes(feature)}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    setGenelOzellikler([...genelOzellikler, feature]);
+                  } else {
+                    setGenelOzellikler(genelOzellikler.filter((f) => f !== feature));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </Paper>
+
+        {/* Manzara (View) */}
+        <Paper p="md" withBorder mb="md" className="bg-purple-50">
+          <div className="flex items-center gap-2 mb-3">
+            <BsEye className="text-purple-600" size={18} />
+            <Text fw={600} c="dark">Manzara</Text>
+            <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full ml-auto">
+              {manzaraFeatures.length} seçili
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            {MANZARA_FEATURES.map((feature) => (
+              <Checkbox
+                key={feature}
+                label={feature}
+                size="xs"
+                checked={manzaraFeatures.includes(feature)}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    setManzaraFeatures([...manzaraFeatures, feature]);
+                  } else {
+                    setManzaraFeatures(manzaraFeatures.filter((f) => f !== feature));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </Paper>
 
         {/* Interior Features */}
         <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
